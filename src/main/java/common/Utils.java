@@ -1,8 +1,9 @@
+package common;
+
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pique.utility.PiqueProperties;
 
 import java.util.*;
 
@@ -30,7 +31,7 @@ public class Utils {
 //        NVDRequestFactory nvdRequestFactory = new NVDRequestFactory();
 //        NVDResponse response;
 //
-//        NVDRequest request = nvdRequestFactory.createNVDRequest(HTTPMethod.GET, Utils.NVD_BASE_URI, apiKey, 0, 1);
+//        NVDRequest request = nvdRequestFactory.createNVDRequest(HTTPMethod.GET, common.Utils.NVD_BASE_URI, apiKey, 0, 1);
 //        response = request.executeRequest();
 //
 //        return response.getCveResponse().getTotalResults();

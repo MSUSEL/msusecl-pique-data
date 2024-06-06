@@ -1,11 +1,11 @@
 package database.dao;
 
+import api.cveData.CveDetails;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import database.MongoConnection;
-import data.cveData.CveDetails;
 import handlers.CveDetailsMarshaller;
 import database.interfaces.IJsonMarshaller;
 import org.bson.Document;
@@ -25,7 +25,7 @@ public class CveDetailsDao implements IDao<CveDetails> {
         CveDetails cve = new CveDetails();
         Document retrievedDoc = vulnerabilities.find(Filters.eq("id", id)).first();
         if (retrievedDoc != null) {
-            cve = cveDetailsMarshaller.unmarshallJson(retrievedDoc.toJson());
+            cve = cveDetailsMarshaller.unmarshalJson(retrievedDoc.toJson());
         } else {
             LOGGER.info("Requested data is not in the collection");
         }
@@ -35,7 +35,7 @@ public class CveDetailsDao implements IDao<CveDetails> {
 
     @Override
     public void insert(CveDetails cve) {
-        String cveDetails = cveDetailsMarshaller.marshallJson(cve);
+        String cveDetails = cveDetailsMarshaller.marshalJson(cve);
         Document filter = new Document("id", cve.getId());
         long documentCount = vulnerabilities.countDocuments(filter);
         System.out.println(documentCount);

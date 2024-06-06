@@ -1,5 +1,6 @@
 package database.dao;
 
+import api.cveData.CVEResponse;
 import com.mongodb.MongoCredential;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -9,11 +10,9 @@ import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.result.UpdateResult;
 import database.MongoConnection;
 import database.NvdMirrorMetadata;
-import data.cveData.CVEResponse;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pique.utility.PiqueProperties;
 
 public class NvdMetaDataDao {
     private final MongoClient client = MongoConnection.getInstance();

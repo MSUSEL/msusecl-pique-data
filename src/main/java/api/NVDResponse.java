@@ -1,7 +1,7 @@
 package api;
 
-import data.cveData.CVEResponse;
 import api.baseClasses.BaseResponse;
+import api.cveData.CVEResponse;
 import lombok.Getter;
 import lombok.Setter;
 

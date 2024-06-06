@@ -1,8 +1,8 @@
 package handlers;
 
+import api.cveData.CVEResponse;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import data.cveData.CVEResponse;
 import database.interfaces.IJsonMarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +11,7 @@ public class NvdCveMarshaller implements IJsonMarshaller<CVEResponse> {
     private static final Logger LOGGER = LoggerFactory.getLogger(NvdCveMarshaller.class);
 
     @Override
-    public CVEResponse unmarshallJson(String json) {
+    public CVEResponse unmarshalJson(String json) {
         try {
             return new Gson().fromJson(json, CVEResponse.class);
         } catch (JsonSyntaxException e) {
@@ -21,7 +21,7 @@ public class NvdCveMarshaller implements IJsonMarshaller<CVEResponse> {
     }
 
     @Override
-    public String marshallJson(CVEResponse cveResponse) {
+    public String marshalJson(CVEResponse cveResponse) {
         String json = new Gson().toJson(cveResponse);
         System.out.println(json);
         return new Gson().toJson(cveResponse);

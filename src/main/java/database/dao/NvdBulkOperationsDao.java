@@ -1,5 +1,6 @@
 package database.dao;
 
+import api.cveData.CveDetails;
 import com.mongodb.MongoBulkWriteException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -7,7 +8,6 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.InsertOneModel;
 import com.mongodb.client.model.WriteModel;
 import database.MongoConnection;
-import data.cveData.CveDetails;
 import handlers.CveDetailsMarshaller;
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -42,7 +42,7 @@ public class NvdBulkOperationsDao implements IDao<List<CveDetails>>{
 
         try {
             for (CveDetails cve : cves) {
-                bulkOperations.add(new InsertOneModel<>(Document.parse(cveDetailsMarshaller.marshallJson(cve))));
+                bulkOperations.add(new InsertOneModel<>(Document.parse(cveDetailsMarshaller.marshalJson(cve))));
             }
             vulnerabilities.bulkWrite(bulkOperations);
         } catch (MongoBulkWriteException e) {

@@ -1,4 +1,4 @@
-package data.cveData;
+package api.cveData;
 
 import lombok.Getter;
 import lombok.Setter;

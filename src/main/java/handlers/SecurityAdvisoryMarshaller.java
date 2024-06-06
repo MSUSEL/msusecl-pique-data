@@ -16,7 +16,7 @@ public class SecurityAdvisoryMarshaller implements IJsonMarshaller<SecurityAdvis
     private static final Logger LOGGER = LoggerFactory.getLogger(SecurityAdvisoryMarshaller.class);
 
     @Override
-    public SecurityAdvisory unmarshallJson(String json) {
+    public SecurityAdvisory unmarshalJson(String json) {
         SecurityAdvisory securityAdvisory = new SecurityAdvisory();
         Cwes cwes = new Cwes();
         try {
@@ -39,7 +39,7 @@ public class SecurityAdvisoryMarshaller implements IJsonMarshaller<SecurityAdvis
     }
 
     @Override
-    public String marshallJson(SecurityAdvisory securityAdvisory) {
+    public String marshalJson(SecurityAdvisory securityAdvisory) {
         return "";
     }
 

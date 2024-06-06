@@ -41,16 +41,21 @@ Instructions for the Data Access layer are located [here.]_
 5. Execute the request and store the handled response in the NVDResponse object
 
 ### Example Code
+
 ```java
 
-    Properties prop = PiqueProperties.getProperties();
-    List<String> apiKey = Arrays.asList("apiKey", helperFunctions.getAuthToken(prop.getProperty("nvd-api-key-path")));
-    NVDRequestFactory nvdRequestFactory = new NVDRequestFactory();
+import common.Utils;
 
-    NVDRequest request = nvdRequestFactory.createNVDRequest(HTTPMethod.GET, Utils.NVD_BASE_URI, apiKey, START_INDEX, RESULTS_PER_PAGE);
-    NVDResponse response = request.executeRequest();
+Properties prop = PiqueProperties.getProperties();
+List<String> apiKey = Arrays.asList("apiKey", helperFunctions.getAuthToken(prop.getProperty("nvd-api-key-path")));
+NVDRequestFactory nvdRequestFactory = new NVDRequestFactory();
 
-    return response.getCveResponse();
+NVDRequest request = nvdRequestFactory.createNVDRequest(HTTPMethod.GET, Utils.NVD_BASE_URI, apiKey, START_INDEX, RESULTS_PER_PAGE);
+NVDResponse response = request.executeRequest();
+
+    return response.
+
+getCveResponse();
 ```
 ### A Note About Rate Limits
 The NVD imposes tiered rate limits on requests. All data is accessible without an api key, but
@@ -81,26 +86,31 @@ be used to validate queries.
 7. Execute the request and store the handled response.
 
 ### Example Code
+
 ```java
-    // Define variables
-    String ghsaId = "GHSA-vh2m-22xx-q94f";
-    JSONObject jsonBody = new JSONObject();
+    import common.Utils;// Define variables
 
-    // Format query as json
-    jsonBody.put("query", GraphQlQueries.GHSA_SECURITY_ADVISORY_QUERY);
-    String query = jsonBody.toString();
+String ghsaId = "GHSA-vh2m-22xx-q94f";
+JSONObject jsonBody = new JSONObject();
 
-    // Insert variable (This is not GraphQL best practice, but suffices for now)
-    String formattedQuery = String.format(query, ghsaId);
+// Format query as json
+    jsonBody.
 
-    // Format authentication and headers
-    String githubToken = helperFunctions.getAuthToken(prop.getProperty("github-token-path"));
-    String authHeader = String.format("Bearer %s", githubToken);
-    List<String> headers = Arrays.asList("Content-Type", "application/json", "Authorization", authHeader);
+put("query",GraphQlQueries.GHSA_SECURITY_ADVISORY_QUERY);
 
-    // Execute request
-    GHSARequest ghsaRequest = new GHSARequest(HTTPMethod.POST, Utils.GHSA_URI, headers, formattedQuery);
-    GHSAResponse ghsaResponse = ghsaRequest.executeRequest();
+String query = jsonBody.toString();
+
+// Insert variable (This is not GraphQL best practice, but suffices for now)
+String formattedQuery = String.format(query, ghsaId);
+
+// Format authentication and headers
+String githubToken = helperFunctions.getAuthToken(prop.getProperty("github-token-path"));
+String authHeader = String.format("Bearer %s", githubToken);
+List<String> headers = Arrays.asList("Content-Type", "application/json", "Authorization", authHeader);
+
+// Execute request
+GHSARequest ghsaRequest = new GHSARequest(HTTPMethod.POST, Utils.GHSA_URI, headers, formattedQuery);
+GHSAResponse ghsaResponse = ghsaRequest.executeRequest();
 ```
 ----------
 

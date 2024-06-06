@@ -3,17 +3,16 @@ package database.nvdMirror;
 import api.NVDRequest;
 import api.NVDRequestFactory;
 import api.NVDResponse;
-import Utils;
-import data.cveData.CveDetails;
-import data.cveData.Vulnerability;
+import api.cveData.CveDetails;
+import api.cveData.Vulnerability;
+import common.Utils;
+
 import database.dao.IDao;
 import database.dao.NvdBulkOperationsDao;
 import database.dao.NvdMetaDataDao;
 import database.interfaces.HTTPMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pique.utility.PiqueProperties;
-import utilities.helperFunctions;
 
 import java.util.*;
 

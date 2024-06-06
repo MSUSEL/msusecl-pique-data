@@ -1,6 +1,7 @@
 package api;
 
 import api.baseClasses.BaseRequest;
+import common.Utils;
 import handlers.JsonResponseHandler;
 import handlers.NvdCveMarshaller;
 import org.apache.http.NameValuePair;
@@ -63,7 +64,7 @@ public class NVDRequest extends BaseRequest {
             int status = response.getStatusLine().getStatusCode();
             if (status >= 200 && status < 300) {
                 String json = handler.handleResponse(response);
-                nvdResponse.setCveResponse(nvdCveMarshaler.unmarshallJson(json));
+                nvdResponse.setCveResponse(nvdCveMarshaler.unmarshalJson(json));
                 nvdResponse.setStatus(status);
             } else {
                 LOGGER.info("Response status: {}", status);
