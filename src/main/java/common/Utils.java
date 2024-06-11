@@ -5,7 +5,13 @@ import org.apache.http.message.BasicHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  *  Utility class for helper methods related to Data Access
@@ -18,25 +24,6 @@ public class Utils {
     public static final String GHSA_URI = "https://api.github.com/graphql";
     public static final int NVD_MAX_PAGE_SIZE = 2000;
 
-
-    /**
-     * Gets the total number of CSVs currently listed in the NVD
-     * This is necessary for requesting all the NVD data
-     * as is required by some PIQUE extensions
-     * @return Integer representing total number of CVEs in NVD
-     */
-//    public static Integer getCSVCount() {
-//        Properties prop = PiqueProperties.getProperties();
-//        List<String> apiKey = Arrays.asList("apiKey", helperFunctions.getAuthToken(prop.getProperty("nvd-api-key-path")));
-//        NVDRequestFactory nvdRequestFactory = new NVDRequestFactory();
-//        NVDResponse response;
-//
-//        NVDRequest request = nvdRequestFactory.createNVDRequest(HTTPMethod.GET, common.Utils.NVD_BASE_URI, apiKey, 0, 1);
-//        response = request.executeRequest();
-//
-//        return response.getCveResponse().getTotalResults();
-//
-//    }
 
     /**
      * Headers need to be formatted into an array of Header Objects.
@@ -62,5 +49,42 @@ public class Utils {
 
         return headers;
     }
+
+    /**
+     * Reads a given file paths contents into a string and returns the results.
+     *
+     * @param filePath - Path of file to be read
+     * @return the text output of the file content.
+     * @throws IOException
+     */
+    public static String readFileContent(Path filePath) throws IOException {
+        StringBuilder contentBuilder = new StringBuilder();
+
+        try (Stream<String> stream = Files.lines( filePath, StandardCharsets.UTF_8)) {
+            stream.forEach(s -> contentBuilder.append(s).append("\n"));
+        }
+        catch (IOException e) {
+            throw e;
+        }
+
+        return contentBuilder.toString();
+    }
+
+    /**
+     * Gets the actual GitHub token from the given filepath
+     *
+     * @param authTokenPath path to github token
+     * @return the token as a String literal
+     */
+    public static String getAuthToken(String authTokenPath) {
+        try {
+            return readFileContent(Paths.get(authTokenPath.substring(1)));
+        } catch (IOException e) {
+            LOGGER.error("Failed to read file", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+
 
 }

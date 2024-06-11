@@ -5,6 +5,7 @@ import api.NVDRequestFactory;
 import api.NVDResponse;
 import api.cveData.CveDetails;
 import api.cveData.Vulnerability;
+import common.DataProperties;
 import common.Utils;
 
 import database.dao.IDao;
@@ -18,9 +19,9 @@ import java.util.*;
 
 public class NVDMirror {
     private static final Logger LOGGER = LoggerFactory.getLogger(NVDMirror.class);
-    private final Properties prop = PiqueProperties.getProperties();
+    private final Properties prop = DataProperties.getProperties();
     private final NVDRequestFactory requestFactory = new NVDRequestFactory();
-    private final List<String> apiKeyHeader = Arrays.asList("apiKey", helperFunctions.getAuthToken(prop.getProperty("nvd-api-key-path")));
+    private final List<String> apiKeyHeader = Arrays.asList("apiKey", Utils.getAuthToken(prop.getProperty("nvd-api-key-path")));
     private final IDao<List<CveDetails>> nvdBulkOperationsDao = new NvdBulkOperationsDao();
     private final NvdMetaDataDao metaDataDao = new NvdMetaDataDao();
 
