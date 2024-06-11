@@ -24,6 +24,9 @@ public class Utils {
     public static final String GHSA_URI = "https://api.github.com/graphql";
     public static final int NVD_MAX_PAGE_SIZE = 2000;
 
+    // constants for log messages
+    public static final String FAILED_TO_READ_FILE = "Failed to read file";
+    public static final String MALFORMED_JSON = "Malformed JSON";
 
     /**
      * Headers need to be formatted into an array of Header Objects.
@@ -64,6 +67,7 @@ public class Utils {
             stream.forEach(s -> contentBuilder.append(s).append("\n"));
         }
         catch (IOException e) {
+            LOGGER.error(FAILED_TO_READ_FILE, e);
             throw e;
         }
 
@@ -80,7 +84,7 @@ public class Utils {
         try {
             return readFileContent(Paths.get(authTokenPath.substring(1)));
         } catch (IOException e) {
-            LOGGER.error("Failed to read file", e);
+            LOGGER.error(FAILED_TO_READ_FILE, e);
             throw new RuntimeException(e);
         }
     }

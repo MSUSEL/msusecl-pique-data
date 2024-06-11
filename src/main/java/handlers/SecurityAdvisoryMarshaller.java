@@ -3,6 +3,7 @@ package handlers;
 import api.ghsaData.CweNode;
 import api.ghsaData.Cwes;
 import api.ghsaData.SecurityAdvisory;
+import common.Utils;
 import database.interfaces.IJsonMarshaller;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -31,7 +32,7 @@ public class SecurityAdvisoryMarshaller implements IJsonMarshaller<SecurityAdvis
                 LOGGER.info("GHSA response was null");
             }
         } catch (JSONException e) {
-            LOGGER.error("Malformed Json", e);
+            LOGGER.error(Utils.MALFORMED_JSON, e);
             throw new RuntimeException(e);
         }
 
@@ -53,7 +54,7 @@ public class SecurityAdvisoryMarshaller implements IJsonMarshaller<SecurityAdvis
                 nodes.add(cweNode);
             }
         } catch (JSONException e) {
-            LOGGER.error("Malformed Json", e);
+            LOGGER.error(Utils.MALFORMED_JSON, e);
             throw new RuntimeException(e);
         }
         return nodes;
