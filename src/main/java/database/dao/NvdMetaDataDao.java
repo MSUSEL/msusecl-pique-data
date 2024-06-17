@@ -1,7 +1,7 @@
 package database.dao;
 
 import api.cveData.CVEResponse;
-import com.mongodb.MongoCredential;
+// import com.mongodb.MongoCredential;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;

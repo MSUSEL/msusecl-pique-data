@@ -57,8 +57,9 @@ public class NVDMirror {
         int cveCount = 1;
 
         for (int startIndex = 0; startIndex < cveCount; startIndex += Utils.NVD_MAX_PAGE_SIZE) {
-            NVDRequest request = requestFactory.createNVDRequest(HTTPMethod.GET, Utils.NVD_BASE_URI, apiKeyHeader,
-                    0, Utils.NVD_MAX_PAGE_SIZE, lastModStartDate, lastModEndDate);
+            NVDRequest request = requestFactory.createNVDRequest(
+                    HTTPMethod.GET, Utils.NVD_BASE_URI, apiKeyHeader, startIndex, Utils.NVD_MAX_PAGE_SIZE, lastModStartDate, lastModEndDate
+            );
             response = request.executeRequest();
             cveCount = response.getCveResponse().getTotalResults();
             ArrayList<Vulnerability> vulnerabilities = response.getCveResponse().getVulnerabilities();
