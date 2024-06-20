@@ -1,10 +1,10 @@
-package handlers;
+package api.handlers;
 
 import api.ghsaData.CweNode;
 import api.ghsaData.Cwes;
 import api.ghsaData.SecurityAdvisory;
 import common.Utils;
-import database.interfaces.IJsonMarshaller;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

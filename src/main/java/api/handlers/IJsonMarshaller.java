@@ -1,4 +1,4 @@
-package database.interfaces;
+package api.handlers;
 
 public interface IJsonMarshaller<T> {
     T unmarshalJson(String json);
