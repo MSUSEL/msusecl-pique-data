@@ -1,9 +1,10 @@
 package api;
 
 import api.baseClasses.BaseRequest;
+import api.handlers.JsonResponseHandler;
+import api.handlers.SecurityAdvisoryMarshaller;
 import common.Utils;
-import handlers.SecurityAdvisoryMarshaller;
-import handlers.JsonResponseHandler;
+
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;

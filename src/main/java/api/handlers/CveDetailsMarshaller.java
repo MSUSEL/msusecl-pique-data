@@ -1,19 +1,19 @@
-package handlers;
+package api.handlers;
 
-import api.cveData.CveDetails;
+import api.cveData.Cve;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import database.interfaces.IJsonMarshaller;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CveDetailsMarshaller implements IJsonMarshaller<CveDetails> {
+public class CveDetailsMarshaller implements IJsonMarshaller<Cve> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CveDetailsMarshaller.class);
 
     @Override
-    public CveDetails unmarshalJson(String json) {
+    public Cve unmarshalJson(String json) {
         try {
-            return new Gson().fromJson(json, CveDetails.class);
+            return new Gson().fromJson(json, Cve.class);
         } catch (JsonSyntaxException e) {
             LOGGER.error("Incorrect JSON syntax - unable to parse to object", e);
             throw new RuntimeException(e);
@@ -21,7 +21,7 @@ public class CveDetailsMarshaller implements IJsonMarshaller<CveDetails> {
     }
 
     @Override
-    public String marshalJson(CveDetails cveDetails) {
+    public String marshalJson(Cve cveDetails) {
         return new Gson().toJson(cveDetails);
     }
 }

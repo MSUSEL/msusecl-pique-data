@@ -6,7 +6,7 @@ import java.io.IOException;
 public class DataProperties {
 
     public static java.util.Properties getProperties() {
-        String propPath = "src/main/resources/properties.properties";
+        String propPath = "src/main/resources/props.properties";
         java.util.Properties props = new java.util.Properties();
         try {
             props = getProperties(propPath);

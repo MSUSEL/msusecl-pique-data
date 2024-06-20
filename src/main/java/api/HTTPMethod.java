@@ -1,4 +1,4 @@
-package database.interfaces;
+package api;
 
 public interface HTTPMethod {
     String GET = "GET";

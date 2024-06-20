@@ -1,14 +1,17 @@
-package database.dao;
+package database.mongo;
 
-import api.cveData.CveDetails;
+import api.cveData.Cve;
+import api.handlers.CveDetailsMarshaller;
+
 import com.mongodb.MongoBulkWriteException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.InsertOneModel;
 import com.mongodb.client.model.WriteModel;
-import database.MongoConnection;
-import handlers.CveDetailsMarshaller;
+
+import database.IDao;
+
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +27,7 @@ import java.util.List;
  * Please use the CveDetailsDao class for inserting into / updating
  * a subset of cves in the NVD.
  */
-public class NvdBulkOperationsDao implements IDao<List<CveDetails>>{
+public class NvdBulkOperationsDao implements IDao<List<Cve>>{
     private final MongoClient client = MongoConnection.getInstance();
     private final MongoDatabase db = client.getDatabase("nvdMirror");
     private final MongoCollection<Document> vulnerabilities = db.getCollection("vulnerabilities");
@@ -32,16 +35,16 @@ public class NvdBulkOperationsDao implements IDao<List<CveDetails>>{
     private static final Logger LOGGER = LoggerFactory.getLogger(NvdBulkOperationsDao.class);
 
     @Override
-    public List<CveDetails> getById(String id) {
+    public List<Cve> getById(String id) {
         return Collections.emptyList();
     }
 
     @Override
-    public void insert(List<CveDetails> cves) {
+    public void insert(List<Cve> cves) {
         List<WriteModel<Document>> bulkOperations = new ArrayList<>();
 
         try {
-            for (CveDetails cve : cves) {
+            for (Cve cve : cves) {
                 bulkOperations.add(new InsertOneModel<>(Document.parse(cveDetailsMarshaller.marshalJson(cve))));
             }
             vulnerabilities.bulkWrite(bulkOperations);
@@ -52,12 +55,12 @@ public class NvdBulkOperationsDao implements IDao<List<CveDetails>>{
     }
 
     @Override
-    public void update(List<CveDetails> cveDetails) {
+    public void update(List<Cve> cveDetails) {
 
     }
 
     @Override
-    public void delete(List<CveDetails> cveDetails) {
+    public void delete(List<Cve> cveDetails) {
 
     }
 }

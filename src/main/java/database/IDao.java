@@ -1,7 +1,7 @@
-package database.dao;
+package database;
 
 /**
- * Adapted from https://www.baeldung.com/java-dao-pattern
+ * Contract to perform CRUD operations
  * @param <T>
  */
 public interface IDao<T> {

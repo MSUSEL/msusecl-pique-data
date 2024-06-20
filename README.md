@@ -4,15 +4,15 @@
 ### Introduction
 PIQUE uses two main external sources of data regarding known vulnerabilities.
 The [National Vulnerability database (NVD)](https://nvd.nist.gov/) maintained
-by The National Institutes of Standards and Technology (NIST) "is the U.S. government
+by The National Institutes of Standards and Technology (NIST), "is the U.S. government
 repository of standards based vulnerability management data represented using the Security
 Content Automation Protocol (SCAP)." (nvd.nist.gov, accessed 5/1/2024). The other is the
 [GitHub Advisory database (GHSA)](https://github.com/github/advisory-database). The NVD is
-accessed via a RESTful api whereas the GHSA offers a GraphQL endpoint and schema. The "data"
-package contains programmatic tools to standardize and streamline consumption of these api's.
+accessed via a RESTful API whereas the GHSA offers a GraphQL endpoint and schema. The "Data"
+library contains programmatic tools to standardize and streamline consumption of these api's.
 These tools include Request and Response objects for both the NVD and GHSA. Handlers, deserialization
 utilities, and POJOs are included as well. Directions follow, but this is designed to be a plug-and-play
-interface for consuming api's with PIQUE.
+interface for consuming API's with PIQUE.
 
 In addition to third-party api consumption, PIQUE is configured to work with a local mirror of
 the entire NVD. This is a best practice suggested by NIST when working with large amounts of NVD data.
@@ -21,7 +21,6 @@ ephemerally using docker and MongoDB. Instructions for both options are included
 
 What follows are the recommended methods of accessing data for use with PIQUE. These opinionated tools
 provide classes necessary for authenticating, configuring, and executing calls to third-party
-api's. They are designed with current needs in mind, but are extensible to allow for consumption
 of new data sources. Additionally, PIQUE offers preconfigured tooling for building a mirror of the
 NVD using MongoDB and docker. Both api consumption utilities, and database access utilities are
 discussed in detail below.
@@ -88,8 +87,9 @@ be used to validate queries.
 ### Example Code
 
 ```java
-    import common.Utils;// Define variables
+import common.Utils;
 
+// Define variables
 String ghsaId = "GHSA-vh2m-22xx-q94f";
 JSONObject jsonBody = new JSONObject();
 
@@ -114,8 +114,8 @@ GHSAResponse ghsaResponse = ghsaRequest.executeRequest();
 ```
 ----------
 
-### database Access
-PIQUE uses the Data Access Object pattern for interacting with databases. This pattern separates the
+### Database Access
+This library uses the Data Access Object pattern for interacting with databases. This pattern separates the
 business logic from the code managing access to databases. Because the implementation of any individual database
 is not tightly coupled to the business logic, any database or datastore can be swapped in without affecting
 the functioning of PIQUE. By default we use MongoDB to store CVE objects as Mongo Documents, but a relational
