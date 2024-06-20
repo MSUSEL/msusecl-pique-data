@@ -5,9 +5,9 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 
-@Getter ()
+@Getter 
 @Setter
-public class CveDetails {
+public class Cve {
     private String id;
     private String sourceIdentifier;
     private String published;

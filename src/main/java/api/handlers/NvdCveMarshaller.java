@@ -1,9 +1,9 @@
-package handlers;
+package api.handlers;
 
 import api.cveData.CVEResponse;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import database.interfaces.IJsonMarshaller;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
