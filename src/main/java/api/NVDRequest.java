@@ -1,9 +1,10 @@
 package api;
 
 import api.baseClasses.BaseRequest;
+import api.handlers.JsonResponseHandler;
+import api.handlers.NvdCveMarshaller;
 import common.Utils;
-import handlers.JsonResponseHandler;
-import handlers.NvdCveMarshaller;
+
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;

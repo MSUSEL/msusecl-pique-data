@@ -1,26 +1,32 @@
 import org.junit.Test;
 
-import database.dao.NvdBulkOperationsDao;
-import database.dao.NvdMetaDataDao;
-import database.interfaces.HTTPMethod;
-import database.nvdMirror.NVDMirror;
+import database.IDatabaseConnection;
+import database.mongo.NVDMirror;
+import database.mongo.NvdBulkOperationsDao;
+import database.mongo.NvdMetaDataDao;
+import database.postgreSQL.PostgresConnectionManager;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import api.GHSARequest;
 import api.GHSAResponse;
 import api.GraphQlQueries;
+import api.HTTPMethod;
 import api.NVDRequest;
 import api.NVDRequestFactory;
 import api.NVDResponse;
-import api.cveData.CveDetails;
+import api.cveData.Cve;
 import api.cveData.Vulnerability;
 import api.ghsaData.CweNode;
 import common.Utils;
 import common.DataProperties;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
+import java.io.IOException;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -64,8 +70,7 @@ public class DataUtilityTest {
     @Test
     public void testSimpleNVDRequest() {
         List<String> apiKeyHeader = Arrays.asList("apiKey", Utils.getAuthToken(prop.getProperty("nvd-api-key-path")));
-        NVDRequestFactory requestFactory = new NVDRequestFactory();
-        NVDRequest nvdRequest = requestFactory.createNVDRequest(HTTPMethod.GET, Utils.NVD_BASE_URI, apiKeyHeader, 0, 1);
+        NVDRequest nvdRequest = NVDRequestFactory.createNVDRequest(HTTPMethod.GET, Utils.NVD_BASE_URI, apiKeyHeader, 0, 1);
         NVDResponse nvdResponse = nvdRequest.executeRequest();
 
         assertEquals(200, nvdResponse.getStatus());
@@ -76,12 +81,11 @@ public class DataUtilityTest {
     public void testDaoInsertMany() {
         NvdBulkOperationsDao nvdBulkOperationsDao = new NvdBulkOperationsDao();
         List<String> apiKey = Arrays.asList("apiKey", Utils.getAuthToken(prop.getProperty("nvd-api-key-path")));
-        NVDRequestFactory nvdRequestFactory = new NVDRequestFactory();
         NVDResponse response;
 
-        NVDRequest request = nvdRequestFactory.createNVDRequest(HTTPMethod.GET, Utils.NVD_BASE_URI, apiKey, 0, 2000);
+        NVDRequest request = NVDRequestFactory.createNVDRequest(HTTPMethod.GET, Utils.NVD_BASE_URI, apiKey, 0, 2000);
         response = request.executeRequest();
-        List<CveDetails> cves = new ArrayList<>();
+        List<Cve> cves = new ArrayList<>();
 
         for (Vulnerability vulnerability : response.getCveResponse().getVulnerabilities()) {
             cves.add(vulnerability.getCve());
@@ -93,10 +97,9 @@ public class DataUtilityTest {
     @Test
     public void testMetaDataInsert() {
         List<String> apiKey = Arrays.asList("apiKey", Utils.getAuthToken(prop.getProperty("nvd-api-key-path")));
-        NVDRequestFactory nvdRequestFactory = new NVDRequestFactory();
         NVDResponse response;
 
-        NVDRequest request = nvdRequestFactory.createNVDRequest(HTTPMethod.GET, Utils.NVD_BASE_URI, apiKey, 0, 1);
+        NVDRequest request = NVDRequestFactory.createNVDRequest(HTTPMethod.GET, Utils.NVD_BASE_URI, apiKey, 0, 1);
         response = request.executeRequest();
 
         NvdMetaDataDao nvdMetaDataDao = new NvdMetaDataDao();
@@ -106,16 +109,37 @@ public class DataUtilityTest {
     @Test
     public void testMetaDataReplace() {
         List<String> apiKey = Arrays.asList("apiKey", Utils.getAuthToken(prop.getProperty("nvd-api-key-path")));
-        NVDRequestFactory nvdRequestFactory = new NVDRequestFactory();
         NVDResponse response;
 
-        NVDRequest request = nvdRequestFactory.createNVDRequest(HTTPMethod.GET, Utils.NVD_BASE_URI, apiKey, 0, 1);
+        NVDRequest request = NVDRequestFactory.createNVDRequest(HTTPMethod.GET, Utils.NVD_BASE_URI, apiKey, 0, 1);
         response = request.executeRequest();
 
         NvdMetaDataDao nvdMetaDataDao = new NvdMetaDataDao();
         nvdMetaDataDao.replace(response.getCveResponse());
     }
+    
+    @Test
+    public void testGetPostgresInsertQuery() {
+        String propPath = "src/main/resources/postgres.properties";
 
+        try {
+            Properties pgProps = DataProperties.getProperties(propPath);
+            String driver = pgProps.getProperty("driver");
+            String hostname = pgProps.getProperty("hostname");
+            String port = pgProps.getProperty("port");
+            String dbname = pgProps.getProperty("dbname");
+            String username = pgProps.getProperty("username");
+            String password = pgProps.getProperty("password");
 
+            IDatabaseConnection<Connection> pgConnection = new PostgresConnectionManager();
+            pgConnection.getConnection(driver, hostname, port, dbname, username, password);
+            
+            assertNotNull(pgConnection);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
 }
 

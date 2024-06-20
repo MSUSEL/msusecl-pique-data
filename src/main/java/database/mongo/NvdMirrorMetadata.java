@@ -1,4 +1,4 @@
-package database;
+package database.mongo;
 
 import lombok.Getter;
 import lombok.Setter;

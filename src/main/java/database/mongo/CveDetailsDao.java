@@ -1,28 +1,31 @@
-package database.dao;
+package database.mongo;
 
-import api.cveData.CveDetails;
+import api.cveData.Cve;
+import api.handlers.CveDetailsMarshaller;
+import api.handlers.IJsonMarshaller;
+
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
-import database.MongoConnection;
-import handlers.CveDetailsMarshaller;
-import database.interfaces.IJsonMarshaller;
+
+import database.IDao;
+
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class CveDetailsDao implements IDao<CveDetails> {
+public class CveDetailsDao implements IDao<Cve> {
     private final MongoClient client = MongoConnection.getInstance();
     private final MongoDatabase db = client.getDatabase("nvdMirror");
     private final MongoCollection<Document> vulnerabilities = db.getCollection("vulnerabilities");
-    private final IJsonMarshaller<CveDetails> cveDetailsMarshaller = new CveDetailsMarshaller();
+    private final IJsonMarshaller<Cve> cveDetailsMarshaller = new CveDetailsMarshaller();
     private static final Logger LOGGER = LoggerFactory.getLogger(CveDetailsDao.class);
 
     @Override
-    public CveDetails getById(String id) {
-        CveDetails cve = new CveDetails();
+    public Cve getById(String id) {
+        Cve cve = new Cve();
         Document retrievedDoc = vulnerabilities.find(Filters.eq("id", id)).first();
         if (retrievedDoc != null) {
             cve = cveDetailsMarshaller.unmarshalJson(retrievedDoc.toJson());
@@ -34,7 +37,7 @@ public class CveDetailsDao implements IDao<CveDetails> {
     }
 
     @Override
-    public void insert(CveDetails cve) {
+    public void insert(Cve cve) {
         String cveDetails = cveDetailsMarshaller.marshalJson(cve);
         Document filter = new Document("id", cve.getId());
         long documentCount = vulnerabilities.countDocuments(filter);
@@ -50,12 +53,12 @@ public class CveDetailsDao implements IDao<CveDetails> {
     }
 
     @Override
-    public void update(CveDetails cveDetails) {
+    public void update(Cve cveDetails) {
 
     }
 
     @Override
-    public void delete(CveDetails cveDetails) {
+    public void delete(Cve cveDetails) {
 
     }
 }
