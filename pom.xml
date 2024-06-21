@@ -26,11 +26,11 @@
             <artifactId>httpclient</artifactId>
             <version>4.5.14</version>
         </dependency>
-        <dependency>
-            <groupId>com.graphql-java-generator</groupId>
-            <artifactId>graphql-maven-plugin</artifactId>
-            <version>2.5</version>
-        </dependency>
+        <!-- <dependency> -->
+        <!--     <groupId>com.graphql-java-generator</groupId> -->
+        <!--     <artifactId>graphql-maven-plugin</artifactId> -->
+        <!--     <version>2.5</version> -->
+        <!-- </dependency> -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
@@ -56,6 +56,11 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>42.7.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-dbcp2</artifactId>
+            <version>2.5.0</version>
         </dependency>
     </dependencies>
 

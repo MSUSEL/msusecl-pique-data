@@ -1,6 +1,5 @@
 import org.junit.Test;
 
-import database.IDatabaseConnection;
 import database.mongo.NVDMirror;
 import database.mongo.NvdBulkOperationsDao;
 import database.mongo.NvdMetaDataDao;
@@ -27,6 +26,7 @@ import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -119,27 +119,9 @@ public class DataUtilityTest {
     }
     
     @Test
-    public void testGetPostgresInsertQuery() {
-        String propPath = "src/main/resources/postgres.properties";
-
-        try {
-            Properties pgProps = DataProperties.getProperties(propPath);
-            String driver = pgProps.getProperty("driver");
-            String hostname = pgProps.getProperty("hostname");
-            String port = pgProps.getProperty("port");
-            String dbname = pgProps.getProperty("dbname");
-            String username = pgProps.getProperty("username");
-            String password = pgProps.getProperty("password");
-
-            IDatabaseConnection<Connection> pgConnection = new PostgresConnectionManager();
-            pgConnection.getConnection(driver, hostname, port, dbname, username, password);
-            
-            assertNotNull(pgConnection);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
+    public void testPostgresConnection() throws IOException, SQLException {
+        Connection conn = PostgresConnectionManager.getConnection();
+        assertNotNull(conn);
     }
 }
 

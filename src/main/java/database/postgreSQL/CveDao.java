@@ -1,24 +1,17 @@
 package database.postgreSQL;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 import api.cveData.Cve;
-import common.ICredentialService;
-import database.AbstractBaseDao;
-import database.IDatabaseConnection;
+import database.IDao;
 
-public class CveDao extends AbstractBaseDao<Cve, Connection> {
+public class CveDao implements IDao {
 
-    protected final Connection dbConnection;
+    private final Connection dbConnection;
 
-    public CveDao(IDatabaseConnection<Connection> dbConnection, ICredentialService credentialService) {
-        this.dbConnection = dbConnection.getConnection(
-                credentialService.getDriver(),
-                credentialService.getHostname(),
-                credentialService.getPort(),
-                credentialService.getDbname(),
-                credentialService.getUsername(),
-                credentialService.getPassword());
+    public CveDao() throws SQLException {
+        dbConnection = PostgresConnectionManager.getConnection();
     }
 
     @Override
@@ -28,21 +21,21 @@ public class CveDao extends AbstractBaseDao<Cve, Connection> {
     }
 
     @Override
-    public void insert(Cve cve) {
+    public void insert(Object t) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'insert'");
     }
 
     @Override
-    public void update(Cve cve) {
+    public void update(Object t) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'update'");
     }
 
     @Override
-    public void delete(Cve cve) {
+    public void delete(Object t) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'delete'");
     }
-    
+
 }
