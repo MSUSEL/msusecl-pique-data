@@ -1,40 +1,48 @@
 package database.postgreSQL;
 
+import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.dbcp2.BasicDataSource;
 
-import database.IDatabaseConnection;
+import common.DataProperties;
 
-public class PostgresConnectionManager implements IDatabaseConnection<Connection> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PostgresConnectionManager.class);
+public class PostgresConnectionManager {
+    private static BasicDataSource connectionPool = new BasicDataSource();
+    private static Properties prop = initializeProperties(); 
 
-    public Connection getConnection(String driver, String hostname, String port, String dbname, String username, String password) {
-        try (Connection connection = DriverManager.getConnection(
-                buildConnectionString(driver, hostname, port, dbname),
-                username,
-                password)) {
-
-            if (connection.isValid(10)) {
-                LOGGER.info("Successfully connected to %s", dbname);
-            } else {
-                LOGGER.info("Failed to connect to %s", dbname);
-                LOGGER.info("driver: %s, hostname: %s, port: %s", driver, hostname, port);
-            }
-
-            return connection;
-
-        } catch (SQLException e) {
-            LOGGER.error("Error connecting to database: " + e.getMessage());
-            throw new RuntimeException(e);
-        } 
+    static {
+        connectionPool.setUrl(
+                buildConnectionString(
+                        prop.getProperty("driver"),
+                        prop.getProperty("hostname"),
+                        prop.getProperty("port"),
+                        prop.getProperty("dbname")));
+        connectionPool.setUsername(prop.getProperty("username"));
+        connectionPool.setPassword(prop.getProperty("password"));
+        connectionPool.setMinIdle(5);
+        connectionPool.setMaxIdle(10);
+        connectionPool.setMaxOpenPreparedStatements(100);
     }
 
-    private String buildConnectionString(String driver, String hostname, String port, String dbname) {
+    public static Connection getConnection() throws SQLException {
+        return connectionPool.getConnection();
+    }
+
+    private PostgresConnectionManager() {}
+
+    private static String buildConnectionString(String driver, String hostname, String port, String dbname) {
         String connStr = String.format("%s://%s:%s/%s", driver, hostname, port, dbname);
         return connStr;
+    }
+
+    private static Properties initializeProperties() {
+        try {
+            return DataProperties.getProperties("src/main/resources/postgres.properties");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

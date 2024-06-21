@@ -18,7 +18,7 @@ public class NvdMetaDataDao {
     private final MongoClient client = MongoConnection.getInstance();
     private final MongoDatabase db = client.getDatabase("nvdMirror");
     private final MongoCollection<Document> vulnerabilities = db.getCollection("vulnerabilities");
-    private static final Logger LOGGER = LoggerFactory.getLogger(NvdMetaDataDao.class);
+    //private static final Logger LOGGER = LoggerFactory.getLogger(NvdMetaDataDao.class);
     private final Document metadataFilter = new Document("_id", "nvd_metadata");
 
     public void insert(CVEResponse cveResponse) {
