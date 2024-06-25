@@ -1,12 +1,13 @@
+import database.mongo.MongoCveDao;
 import org.junit.Test;
 
 import database.IDao;
-import database.mongo.CveDetailsDao;
 import database.mongo.NVDMirror;
 import database.mongo.NvdBulkOperationsDao;
 import database.mongo.NvdMetaDataDao;
-import database.postgreSQL.CveDao;
+import database.postgreSQL.PostgresCveDao;
 import database.postgreSQL.PostgresConnectionManager;
+import presentation.PiqueData;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -41,7 +42,7 @@ public class DataUtilityTest {
     @Test
     public void testDataStoreFullBuild() {
         NVDMirror mirror = new NVDMirror();
-        mirror.getFullDataSet();
+        mirror.getFullDataSetLocal();
     }
 
     @Test
@@ -133,12 +134,24 @@ public class DataUtilityTest {
         // This will definitely break and needs a totally different structure
 
         // Get a CVE that is currently stored in mongo
-        IDao<Cve> mongoDao = new CveDetailsDao();
+        IDao<Cve> mongoDao = new MongoCveDao();
         Cve cve = mongoDao.getById("CVE-1999-0095");
         
         // insert into postgres
-        IDao<Cve> postgresDao = new CveDao();
+        IDao<Cve> postgresDao = new PostgresCveDao();
         postgresDao.insert(cve);
+    }
+
+    @Test
+    public void testInteractiveGetCveById() {
+        Cve result = PiqueData.getCveById(Utils.DB_CONTEXT_LOCAL,"CVE-1999-0095");
+        assertNotNull(result);
+    }
+
+    @Test
+    public void testInteractiveGetCwes() {
+        String[] result = PiqueData.getCwes("local", "CVE-1999-0095");
+        assertEquals("NVD-CWE-Other", result[0]);
     }
 }
 
