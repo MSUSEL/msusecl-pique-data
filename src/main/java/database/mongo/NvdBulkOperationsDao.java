@@ -24,7 +24,7 @@ import java.util.List;
  * CAUTION - This class should only be used to perform operations
  * on the entire NVD Mirror. It does not check for existing CVE
  * Documents in the collection and is thus likely to create duplicate entries.
- * Please use the CveDetailsDao class for inserting into / updating
+ * Please use the MongoCveDao class for inserting into / updating
  * a subset of cves in the NVD.
  */
 public class NvdBulkOperationsDao implements IDao<List<Cve>>{

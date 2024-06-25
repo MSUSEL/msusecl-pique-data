@@ -8,10 +8,13 @@ import java.util.Properties;
 import org.apache.commons.dbcp2.BasicDataSource;
 
 import common.DataProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PostgresConnectionManager {
-    private static BasicDataSource connectionPool = new BasicDataSource();
-    private static Properties prop = initializeProperties(); 
+    private static final BasicDataSource connectionPool = new BasicDataSource();
+    private static final Properties prop = initializeProperties();
+    private static final Logger LOGGER = LoggerFactory.getLogger(PostgresConnectionManager.class);
 
     static {
         connectionPool.setUrl(
@@ -27,8 +30,13 @@ public class PostgresConnectionManager {
         connectionPool.setMaxOpenPreparedStatements(100);
     }
 
-    public static Connection getConnection() throws SQLException {
-        return connectionPool.getConnection();
+    public static Connection getConnection() {
+        try {
+            return connectionPool.getConnection();
+        } catch (SQLException e) {
+            LOGGER.error("Connection to postgres failed. ", e);
+            throw new RuntimeException(e);
+        }
     }
 
     private PostgresConnectionManager() {}
