@@ -22,7 +22,7 @@ public class NVDMirror {
     private final IDao<List<Cve>> nvdBulkOperationsDao = new NvdBulkOperationsDao();
     private final NvdMetaDataDao metaDataDao = new NvdMetaDataDao();
 
-    public void getFullDataSet() {
+    public void getFullDataSetLocal() {
         int cveCount = 1;
 
         for (int startIndex = 0; startIndex < cveCount; startIndex += Utils.NVD_MAX_PAGE_SIZE) {
@@ -49,7 +49,7 @@ public class NVDMirror {
 
     // TODO Test this method!!! This hasn't been run yet
     // ISO-8601 date/time format: [YYYY][“-”][MM][“-”][DD][“T”][HH][“:”][MM][“:”][SS][Z]
-    public void updateNvdMirror(String lastModStartDate, String lastModEndDate) {
+    public void updateLocalNvdMirror(String lastModStartDate, String lastModEndDate) {
         NVDResponse response;
         int cveCount = 1;
 
@@ -69,6 +69,13 @@ public class NVDMirror {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+        }
+    }
+    
+    public void getFullDataSetPersistent() {
+        int cveCount = 1;
+        for (int startIndex = 0; startIndex < cveCount; startIndex += Utils.NVD_MAX_PAGE_SIZE) {
+            // TODO Store full data in postgres
         }
     }
 }

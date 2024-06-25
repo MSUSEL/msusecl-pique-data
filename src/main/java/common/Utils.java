@@ -23,6 +23,8 @@ public class Utils {
     public static final String NVD_BASE_URI = "https://services.nvd.nist.gov/rest/json/cves/2.0";
     public static final String GHSA_URI = "https://api.github.com/graphql";
     public static final int NVD_MAX_PAGE_SIZE = 2000;
+    public static final String DB_CONTEXT_LOCAL = "local";
+    public static final String DB_CONTEXT_PERSISTENT= "persistent";
 
     // constants for log messages
     public static final String FAILED_TO_READ_FILE = "Failed to read file";

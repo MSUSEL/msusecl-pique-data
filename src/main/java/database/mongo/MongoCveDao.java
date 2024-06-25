@@ -16,12 +16,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class CveDetailsDao implements IDao<Cve> {
+public class MongoCveDao implements IDao<Cve> {
     private final MongoClient client = MongoConnection.getInstance();
     private final MongoDatabase db = client.getDatabase("nvdMirror");
     private final MongoCollection<Document> vulnerabilities = db.getCollection("vulnerabilities");
     private final IJsonMarshaller<Cve> cveDetailsMarshaller = new CveDetailsMarshaller();
-    private static final Logger LOGGER = LoggerFactory.getLogger(CveDetailsDao.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MongoCveDao.class);
 
     @Override
     public Cve getById(String id) {
