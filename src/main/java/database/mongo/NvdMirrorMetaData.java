@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class NvdMirrorMetadata {
+public class NvdMirrorMetaData {
     private String id;
     private String totalResults;
     private String format;
