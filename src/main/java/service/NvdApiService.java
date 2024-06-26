@@ -12,8 +12,10 @@ import common.Utils;
 import database.IBulkDao;
 import database.IMetaDataDao;
 import database.mongo.MongoBulkCveDao;
-import database.mongo.NvdMirrorMetaData;
+import database.mongo.MongoMetaDataDao;
+import api.cveData.NvdMirrorMetaData;
 import database.postgreSQL.PostgresBulkCveDao;
+import database.postgreSQL.PostgresMetaDataDao;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,9 +38,9 @@ public class NvdApiService {
         return cveResponseProcessor.extractSingleCve(cveResponse);
     }
 
-    public List<Cve> handleGetPaginatedCves(String dbContext, int startIndex, int resultsPerPage) {
-        // TODO handle bulk download
+    public void handleGetPaginatedCves(String dbContext, int startIndex, int resultsPerPage) {
         IBulkDao<List<Cve>> bulkDao = getBulkDao(dbContext);
+        IMetaDataDao<NvdMirrorMetaData> metadataDao = getMetaDataDao(dbContext);
         int cveCount = startIndex + 1;
 
         for (int i = startIndex; i < cveCount; i += Utils.NVD_MAX_PAGE_SIZE) {
@@ -55,10 +57,14 @@ public class NvdApiService {
             }
             // TODO implement insertMany in postgresBulkDao
             bulkDao.insertMany(cves);
+
+            NvdMirrorMetaData nvdMirrorMetaData = cveResponseProcessor.formatNvdMetaData(cveResponse);
+            metadataDao.updateMetaData(nvdMirrorMetaData);
         }
-        return new ArrayList<>();
     }
 
+    // TODO Future Work: This is too coupled so consider DI for dbContext/DAO.
+    // TODO Possibly use a project-level configuration via the pom file for dbContext?
     private IBulkDao<List<Cve>> getBulkDao(String dbContext) {
         return dbContext.equals(Utils.DB_CONTEXT_LOCAL) ? new MongoBulkCveDao() : new PostgresBulkCveDao();
     }

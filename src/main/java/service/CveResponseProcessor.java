@@ -1,9 +1,7 @@
 package service;
 
-import api.cveData.CVEResponse;
-import api.cveData.Cve;
-import api.cveData.Vulnerability;
-import api.cveData.Weakness;
+import api.cveData.*;
+import common.Utils;
 
 import java.util.ArrayList;
 
@@ -34,5 +32,16 @@ public class CveResponseProcessor {
 
     public ArrayList<Vulnerability> extractVulnerabilities(CVEResponse cveResponse) {
         return cveResponse.getVulnerabilities();
+    }
+
+    public NvdMirrorMetaData formatNvdMetaData(CVEResponse response) {
+        NvdMirrorMetaData metaData = new NvdMirrorMetaData();
+        metaData.setId(Utils.MONGO_NVD_METADATA_ID);
+        metaData.setTotalResults(Integer.toString(response.getTotalResults()));
+        metaData.setFormat(response.getFormat());
+        metaData.setVersion(response.getVersion());
+        metaData.setTimestamp(response.getTimestamp());
+
+        return metaData;
     }
 }
