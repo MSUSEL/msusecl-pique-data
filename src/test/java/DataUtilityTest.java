@@ -1,4 +1,4 @@
-import api.cveData.NvdMirrorMetaData;
+import businessObjects.cveData.NvdMirrorMetaData;
 import database.mongo.MongoCveDao;
 import org.junit.Test;
 
@@ -13,18 +13,18 @@ import presentation.PiqueData;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import api.GHSARequest;
-import api.GHSAResponse;
-import api.GraphQlQueries;
-import api.HTTPMethod;
-import api.NVDRequest;
-import api.NVDRequestFactory;
-import api.NVDResponse;
-import api.cveData.Cve;
-import api.cveData.Vulnerability;
-import api.ghsaData.CweNode;
+import businessObjects.GHSARequest;
+import businessObjects.GHSAResponse;
+import businessObjects.GraphQlQueries;
+import businessObjects.HTTPMethod;
+import businessObjects.NVDRequest;
+import businessObjects.NVDRequestFactory;
+import businessObjects.NVDResponse;
+import businessObjects.cveData.Cve;
+import businessObjects.cveData.Vulnerability;
+import businessObjects.ghsaData.CweNode;
 import common.Utils;
-import common.DataProperties;
+import common.DataUtilityProperties;
 import service.CveResponseProcessor;
 
 import static org.junit.Assert.assertEquals;
@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Properties;
 
 public class DataUtilityTest {
-    private static Properties prop = DataProperties.getProperties();
+    private static Properties prop = DataUtilityProperties.getProperties();
     private static final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
 
     @Test

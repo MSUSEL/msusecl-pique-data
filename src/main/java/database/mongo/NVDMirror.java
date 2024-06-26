@@ -1,17 +1,15 @@
 package database.mongo;
 
-import api.HTTPMethod;
-import api.NVDRequest;
-import api.NVDRequestFactory;
-import api.NVDResponse;
-import api.cveData.CVEResponse;
-import api.cveData.Cve;
-import api.cveData.NvdMirrorMetaData;
-import api.cveData.Vulnerability;
-import common.DataProperties;
+import businessObjects.HTTPMethod;
+import businessObjects.NVDRequest;
+import businessObjects.NVDRequestFactory;
+import businessObjects.NVDResponse;
+import businessObjects.cveData.Cve;
+import businessObjects.cveData.NvdMirrorMetaData;
+import businessObjects.cveData.Vulnerability;
+import common.DataUtilityProperties;
 import common.Utils;
 import database.IBulkDao;
-import database.IDao;
 
 import database.IMetaDataDao;
 import org.slf4j.Logger;
@@ -22,7 +20,7 @@ import java.util.*;
 
 public class NVDMirror {
     private static final Logger LOGGER = LoggerFactory.getLogger(NVDMirror.class);
-    private final Properties prop = DataProperties.getProperties();
+    private final Properties prop = DataUtilityProperties.getProperties();
     private final List<String> apiKeyHeader = Arrays.asList("apiKey", Utils.getAuthToken(prop.getProperty("nvd-api-key-path")));
     private final IBulkDao<List<Cve>> bulkCveDao = new MongoBulkCveDao();
     private final IMetaDataDao<NvdMirrorMetaData> metaDataDao = new MongoMetaDataDao();
@@ -81,13 +79,6 @@ public class NVDMirror {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-        }
-    }
-    
-    public void getFullDataSetPersistent() {
-        int cveCount = 1;
-        for (int startIndex = 0; startIndex < cveCount; startIndex += Utils.NVD_MAX_PAGE_SIZE) {
-            // TODO Store full data in postgres
         }
     }
 }
