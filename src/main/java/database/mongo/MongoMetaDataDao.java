@@ -3,6 +3,7 @@ package database.mongo;
 import api.cveData.CVEResponse;
 
 // import com.mongodb.MongoCredential;
+import api.cveData.NvdMirrorMetaData;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -12,37 +13,40 @@ import com.mongodb.client.result.UpdateResult;
 
 import database.IMetaDataDao;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MongoMetaDataDao implements IMetaDataDao<NvdMirrorMetaData> {
     private final MongoClient client = MongoConnection.getInstance();
     private final MongoDatabase db = client.getDatabase("nvdMirror");
     private final MongoCollection<Document> vulnerabilities = db.getCollection("vulnerabilities");
-    //private static final Logger LOGGER = LoggerFactory.getLogger(NvdMetaDataDao.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MongoMetaDataDao.class);
     private final Document metadataFilter = new Document("_id", "nvd_metadata");
 
-    public void insert(CVEResponse cveResponse) {
-        Document metadata = generateMetadata(cveResponse);
-        long documentCount = vulnerabilities.countDocuments(metadataFilter);
-        if(documentCount == 0) {
-            vulnerabilities.insertOne(metadata);
+//    public void insert(CVEResponse cveResponse) {
+//        Document metadata = generateMetadata(cveResponse);
+//        long documentCount = vulnerabilities.countDocuments(metadataFilter);
+//        if(documentCount == 0) {
+//            vulnerabilities.insertOne(metadata);
+//        }
+//    }
+
+    @Override
+    public NvdMirrorMetaData retrieveMetaData() {
+        return null;
+    }
+
+    @Override
+    public void updateMetaData(NvdMirrorMetaData rawMetaData) {
+        Document metadata = generateMetadata(rawMetaData);
+        ReplaceOptions opts = new ReplaceOptions().upsert(true);
+        UpdateResult updateResult = vulnerabilities.replaceOne(metadataFilter, metadata, opts);
+        if (!updateResult.wasAcknowledged()) {
+           LOGGER.error("Update was not acknowleged. Check DB connection. ");
         }
     }
 
-    @Override
-    public void update(NvdMirrorMetaData metaData) {
-
-    }
-
-    @Override
-    public void update(CVEResponse cveResponse) {
-        Document metadata = generateMetadata(cveResponse);
-        ReplaceOptions opts = new ReplaceOptions().upsert(true);
-        UpdateResult updateResult = vulnerabilities.replaceOne(metadataFilter, metadata, opts);
-
-//        System.out.println("Modified document count: " + updateResult.getModifiedCount());
-//        System.out.println("Upserted id: " + updateResult.getUpsertedId());
-    }
-
+    // TODO fix retrieve method here
     public NvdMirrorMetaData get(Document criteria) {
         NvdMirrorMetaData nvdMirrorMetadata = new NvdMirrorMetaData();
         Document result = vulnerabilities.find(Filters.eq(criteria)).first();
@@ -57,11 +61,12 @@ public class MongoMetaDataDao implements IMetaDataDao<NvdMirrorMetaData> {
         return nvdMirrorMetadata;
     }
 
-    private Document generateMetadata(CVEResponse cveResponse) {
+    private Document generateMetadata(NvdMirrorMetaData metaData) {
         return new Document("_id", "nvd_metadata")
-                .append("totalResults", cveResponse.getTotalResults())
-                .append("format", cveResponse.getFormat())
-                .append("version", cveResponse.getVersion())
-                .append("timestamp", cveResponse.getTimestamp());
+                .append("totalResults", metaData.getTotalResults())
+                .append("format", metaData.getFormat())
+                .append("version", metaData.getVersion())
+                .append("timestamp", metaData.getTimestamp());
     }
+
 }
