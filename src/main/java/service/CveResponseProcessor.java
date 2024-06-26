@@ -4,6 +4,7 @@ import api.cveData.*;
 import common.Utils;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class CveResponseProcessor {
 
@@ -43,5 +44,16 @@ public class CveResponseProcessor {
         metaData.setTimestamp(response.getTimestamp());
 
         return metaData;
+    }
+
+    public List<Cve> extractAllCves(CVEResponse cveResponse) {
+        ArrayList<Vulnerability> vulnerabilities = extractVulnerabilities(cveResponse);
+        List<Cve> cves = new ArrayList<>();
+
+        for (Vulnerability vulnerability : vulnerabilities) {
+            cves.add(vulnerability.getCve());
+        }
+
+        return cves;
     }
 }
