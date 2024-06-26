@@ -3,8 +3,8 @@ import org.junit.Test;
 
 import database.IDao;
 import database.mongo.NVDMirror;
-import database.mongo.NvdBulkOperationsDao;
-import database.mongo.NvdMetaDataDao;
+import database.mongo.MongoBulkCveDao;
+import database.mongo.MongoMetaDataDao;
 import database.postgreSQL.PostgresCveDao;
 import database.postgreSQL.PostgresConnectionManager;
 import presentation.PiqueData;
@@ -83,7 +83,7 @@ public class DataUtilityTest {
 
     @Test
     public void testDaoInsertMany() {
-        NvdBulkOperationsDao nvdBulkOperationsDao = new NvdBulkOperationsDao();
+        MongoBulkCveDao mongoBulkCveDao = new MongoBulkCveDao();
         List<String> apiKey = Arrays.asList("apiKey", Utils.getAuthToken(prop.getProperty("nvd-api-key-path")));
         NVDResponse response;
 
@@ -95,7 +95,7 @@ public class DataUtilityTest {
             cves.add(vulnerability.getCve());
         }
 
-        nvdBulkOperationsDao.insert(cves);
+        mongoBulkCveDao.insertMany(cves);
     }
 
     @Test
@@ -106,8 +106,8 @@ public class DataUtilityTest {
         NVDRequest request = NVDRequestFactory.createNVDRequest(HTTPMethod.GET, Utils.NVD_BASE_URI, apiKey, 0, 1);
         response = request.executeRequest();
 
-        NvdMetaDataDao nvdMetaDataDao = new NvdMetaDataDao();
-        nvdMetaDataDao.insert(response.getCveResponse());
+        MongoMetaDataDao mongoMetaDataDao = new MongoMetaDataDao();
+        mongoMetaDataDao.insert(response.getCveResponse());
     }
 
     @Test
@@ -118,8 +118,8 @@ public class DataUtilityTest {
         NVDRequest request = NVDRequestFactory.createNVDRequest(HTTPMethod.GET, Utils.NVD_BASE_URI, apiKey, 0, 1);
         response = request.executeRequest();
 
-        NvdMetaDataDao nvdMetaDataDao = new NvdMetaDataDao();
-        nvdMetaDataDao.replace(response.getCveResponse());
+        MongoMetaDataDao mongoMetaDataDao = new MongoMetaDataDao();
+        mongoMetaDataDao.update(response.getCveResponse());
     }
     
     @Test
@@ -137,7 +137,7 @@ public class DataUtilityTest {
         IDao<Cve> mongoDao = new MongoCveDao();
         Cve cve = mongoDao.getById("CVE-1999-0095");
         
-        // insert into postgres
+        // insertMany into postgres
         IDao<Cve> postgresDao = new PostgresCveDao();
         postgresDao.insert(cve);
     }

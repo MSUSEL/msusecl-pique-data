@@ -19,8 +19,8 @@ public class NVDMirror {
     private static final Logger LOGGER = LoggerFactory.getLogger(NVDMirror.class);
     private final Properties prop = DataProperties.getProperties();
     private final List<String> apiKeyHeader = Arrays.asList("apiKey", Utils.getAuthToken(prop.getProperty("nvd-api-key-path")));
-    private final IDao<List<Cve>> nvdBulkOperationsDao = new NvdBulkOperationsDao();
-    private final NvdMetaDataDao metaDataDao = new NvdMetaDataDao();
+    private final IDao<List<Cve>> nvdBulkOperationsDao = new MongoBulkCveDao();
+    private final MongoMetaDataDao metaDataDao = new MongoMetaDataDao();
 
     public void getFullDataSetLocal() {
         int cveCount = 1;
@@ -36,7 +36,7 @@ public class NVDMirror {
                 cves.add(vulnerability.getCve());
             }
             nvdBulkOperationsDao.insert(cves);
-            metaDataDao.replace(response.getCveResponse());
+            metaDataDao.update(response.getCveResponse());
 
             try {
                 Thread.sleep(6000);

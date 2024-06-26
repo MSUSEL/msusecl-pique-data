@@ -1,15 +1,13 @@
 package service;
 
 import api.cveData.Cve;
-import api.cveData.Weakness;
 import common.Utils;
 import database.IDao;
 import database.mongo.MongoCveDao;
 import database.postgreSQL.PostgresCveDao;
 
-import java.util.ArrayList;
-
 public class NvdMirrorService {
+    private final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
 
     public Cve handleGetCveById(String dbContext, String cveId) {
         IDao<Cve> dao = resolveDbContext(dbContext);
@@ -18,18 +16,7 @@ public class NvdMirrorService {
 
     public String[] handleGetCwes(String dbContext, String cveId) {
         Cve cve = handleGetCveById(dbContext, cveId);
-        ArrayList<Weakness> cweList = cve.getWeaknesses();
-
-        int size = cweList.size();
-        String[] cwes = new String[size];
-
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < cweList.get(i).getDescription().size(); j++) {
-                cwes[i] = cweList.get(i).getDescription().get(j).getValue();
-            }
-        }
-
-        return cwes;
+        return cveResponseProcessor.extractCwes(cve);
     }
 
     private IDao<Cve> resolveDbContext(String dbContext) {

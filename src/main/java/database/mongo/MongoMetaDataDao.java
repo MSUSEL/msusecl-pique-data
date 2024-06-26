@@ -10,11 +10,10 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.result.UpdateResult;
 
+import database.IMetaDataDao;
 import org.bson.Document;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class NvdMetaDataDao {
+public class MongoMetaDataDao implements IMetaDataDao<NvdMirrorMetaData> {
     private final MongoClient client = MongoConnection.getInstance();
     private final MongoDatabase db = client.getDatabase("nvdMirror");
     private final MongoCollection<Document> vulnerabilities = db.getCollection("vulnerabilities");
@@ -29,7 +28,13 @@ public class NvdMetaDataDao {
         }
     }
 
-    public void replace(CVEResponse cveResponse) {
+    @Override
+    public void update(NvdMirrorMetaData metaData) {
+
+    }
+
+    @Override
+    public void update(CVEResponse cveResponse) {
         Document metadata = generateMetadata(cveResponse);
         ReplaceOptions opts = new ReplaceOptions().upsert(true);
         UpdateResult updateResult = vulnerabilities.replaceOne(metadataFilter, metadata, opts);
@@ -38,8 +43,8 @@ public class NvdMetaDataDao {
 //        System.out.println("Upserted id: " + updateResult.getUpsertedId());
     }
 
-    public NvdMirrorMetadata get(Document criteria) {
-        NvdMirrorMetadata nvdMirrorMetadata = new NvdMirrorMetadata();
+    public NvdMirrorMetaData get(Document criteria) {
+        NvdMirrorMetaData nvdMirrorMetadata = new NvdMirrorMetaData();
         Document result = vulnerabilities.find(Filters.eq(criteria)).first();
         assert result != null;
 
