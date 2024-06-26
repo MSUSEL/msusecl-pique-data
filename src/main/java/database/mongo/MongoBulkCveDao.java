@@ -38,6 +38,7 @@ public class MongoBulkCveDao implements IBulkDao<List<Cve>>{
 //        return Collections.emptyList();
 //    }
 
+    @Override
     public void insertMany(List<Cve> cves) {
         List<WriteModel<Document>> bulkOperations = new ArrayList<>();
 

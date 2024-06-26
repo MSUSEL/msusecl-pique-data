@@ -4,14 +4,19 @@ import api.HTTPMethod;
 import api.NVDRequest;
 import api.NVDRequestFactory;
 import api.NVDResponse;
+import api.cveData.CVEResponse;
 import api.cveData.Cve;
+import api.cveData.NvdMirrorMetaData;
 import api.cveData.Vulnerability;
 import common.DataProperties;
 import common.Utils;
+import database.IBulkDao;
 import database.IDao;
 
+import database.IMetaDataDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import service.CveResponseProcessor;
 
 import java.util.*;
 
@@ -19,11 +24,13 @@ public class NVDMirror {
     private static final Logger LOGGER = LoggerFactory.getLogger(NVDMirror.class);
     private final Properties prop = DataProperties.getProperties();
     private final List<String> apiKeyHeader = Arrays.asList("apiKey", Utils.getAuthToken(prop.getProperty("nvd-api-key-path")));
-    private final IDao<List<Cve>> nvdBulkOperationsDao = new MongoBulkCveDao();
-    private final MongoMetaDataDao metaDataDao = new MongoMetaDataDao();
+    private final IBulkDao<List<Cve>> bulkCveDao = new MongoBulkCveDao();
+    private final IMetaDataDao<NvdMirrorMetaData> metaDataDao = new MongoMetaDataDao();
+    private final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
 
     public void getFullDataSetLocal() {
         int cveCount = 1;
+        NvdMirrorMetaData metaData = new NvdMirrorMetaData();
 
         for (int startIndex = 0; startIndex < cveCount; startIndex += Utils.NVD_MAX_PAGE_SIZE) {
             NVDRequest request = NVDRequestFactory.createNVDRequest(HTTPMethod.GET, Utils.NVD_BASE_URI, apiKeyHeader, startIndex, Utils.NVD_MAX_PAGE_SIZE);
@@ -35,8 +42,12 @@ public class NVDMirror {
             for(Vulnerability vulnerability : vulnerabilities) {
                 cves.add(vulnerability.getCve());
             }
-            nvdBulkOperationsDao.insert(cves);
-            metaDataDao.update(response.getCveResponse());
+
+            bulkCveDao.insertMany(cves);
+
+            if (startIndex == cveCount - 1) {
+                metaData = cveResponseProcessor.formatNvdMetaData(response.getCveResponse());
+            }
 
             try {
                 Thread.sleep(6000);
@@ -45,6 +56,7 @@ public class NVDMirror {
                 throw new RuntimeException(e);
             }
         }
+        metaDataDao.updateMetaData(metaData);
     }
 
     // TODO Test this method!!! This hasn't been run yet

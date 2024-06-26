@@ -1,4 +1,4 @@
-package database.mongo;
+package api.cveData;
 
 import lombok.Getter;
 import lombok.Setter;
