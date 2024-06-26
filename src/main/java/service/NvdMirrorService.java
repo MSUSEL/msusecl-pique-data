@@ -1,16 +1,16 @@
 package service;
 
 import api.cveData.Cve;
-import common.Utils;
+import api.cveData.NvdMirrorMetaData;
 import database.IDao;
-import database.mongo.MongoCveDao;
-import database.postgreSQL.PostgresCveDao;
+import database.IMetaDataDao;
 
 public class NvdMirrorService {
     private final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
+    private final DbContextResolver dbContextResolver = new DbContextResolver();
 
     public Cve handleGetCveById(String dbContext, String cveId) {
-        IDao<Cve> dao = resolveDbContext(dbContext);
+        IDao<Cve> dao = dbContextResolver.getCveDao(dbContext);
         return dao.getById(cveId);
     }
 
@@ -19,7 +19,8 @@ public class NvdMirrorService {
         return cveResponseProcessor.extractCwes(cve);
     }
 
-    private IDao<Cve> resolveDbContext(String dbContext) {
-        return dbContext.equals(Utils.DB_CONTEXT_LOCAL) ? new MongoCveDao() : new PostgresCveDao();
+    public NvdMirrorMetaData handleGetCurrentMetaData(String dbContext) {
+        IMetaDataDao<NvdMirrorMetaData> dao = dbContextResolver.getMetaDataDao(dbContext);
+        return dao.retrieveMetaData();
     }
 }
