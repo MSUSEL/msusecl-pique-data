@@ -1,16 +1,16 @@
 package service;
 
-import api.HTTPMethod;
-import api.NVDRequest;
-import api.NVDRequestFactory;
-import api.NVDResponse;
-import api.cveData.CVEResponse;
-import api.cveData.Cve;
-import common.DataProperties;
+import businessObjects.HTTPMethod;
+import businessObjects.NVDRequest;
+import businessObjects.NVDRequestFactory;
+import businessObjects.NVDResponse;
+import businessObjects.cveData.CVEResponse;
+import businessObjects.cveData.Cve;
+import common.DataUtilityProperties;
 import common.Utils;
 import database.IBulkDao;
 import database.IMetaDataDao;
-import api.cveData.NvdMirrorMetaData;
+import businessObjects.cveData.NvdMirrorMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Properties;
 
 public class NvdApiService {
-    private final Properties prop = DataProperties.getProperties();
+    private final Properties prop = DataUtilityProperties.getProperties();
     private final List<String> apiKey = Arrays.asList("apiKey", Utils.getAuthToken(prop.getProperty("nvd-api-key-path")));
     private final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
     private final DbContextResolver dbContextResolver = new DbContextResolver();

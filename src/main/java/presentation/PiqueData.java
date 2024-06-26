@@ -1,10 +1,8 @@
 package presentation;
 
-import api.cveData.Cve;
-import database.IDao;
+import businessObjects.cveData.Cve;
 import service.NvdApiService;
 import service.NvdMirrorService;
-
 
 public class PiqueData {
     private static final NvdMirrorService nvdMirrorService = new NvdMirrorService();

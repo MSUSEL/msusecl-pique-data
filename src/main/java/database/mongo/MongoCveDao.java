@@ -1,8 +1,8 @@
 package database.mongo;
 
-import api.cveData.Cve;
-import api.handlers.CveDetailsMarshaller;
-import api.handlers.IJsonMarshaller;
+import businessObjects.cveData.Cve;
+import handlers.CveDetailsMarshaller;
+import handlers.IJsonMarshaller;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;

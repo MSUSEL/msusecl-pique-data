@@ -8,9 +8,9 @@ import java.sql.SQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import api.cveData.Cve;
-import api.handlers.CveDetailsMarshaller;
-import api.handlers.IJsonMarshaller;
+import businessObjects.cveData.Cve;
+import handlers.CveDetailsMarshaller;
+import handlers.IJsonMarshaller;
 import database.IDao;
 
 public class PostgresCveDao implements IDao<Cve> {

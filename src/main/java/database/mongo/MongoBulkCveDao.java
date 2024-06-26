@@ -1,7 +1,7 @@
 package database.mongo;
 
-import api.cveData.Cve;
-import api.handlers.CveDetailsMarshaller;
+import businessObjects.cveData.Cve;
+import handlers.CveDetailsMarshaller;
 
 import com.mongodb.MongoBulkWriteException;
 import com.mongodb.client.MongoClient;

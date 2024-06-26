@@ -9,12 +9,12 @@ repository of standards based vulnerability management data represented using th
 Content Automation Protocol (SCAP)." (nvd.nist.gov, accessed 5/1/2024). The other is the
 [GitHub Advisory database (GHSA)](https://github.com/github/advisory-database). The NVD is
 accessed via a RESTful API whereas the GHSA offers a GraphQL endpoint and schema. The "Data"
-library contains programmatic tools to standardize and streamline consumption of these api's.
+library contains programmatic tools to standardize and streamline consumption of these businessObjects's.
 These tools include Request and Response objects for both the NVD and GHSA. Handlers, deserialization
 utilities, and POJOs are included as well. Directions follow, but this is designed to be a plug-and-play
 interface for consuming API's with PIQUE.
 
-In addition to third-party api consumption, PIQUE is configured to work with a local mirror of
+In addition to third-party businessObjects consumption, PIQUE is configured to work with a local mirror of
 the entire NVD. This is a best practice suggested by NIST when working with large amounts of NVD data.
 At MSU, this mirror is persistent and hosted on an on-prem server, but this mirror can be instantiated
 ephemerally using docker and MongoDB. Instructions for both options are included in !!!!!!XXXXXXXX SETUP DIRECTIONS !XXXXXXXXX!!!!!!!!!!!!!!!!
@@ -22,17 +22,17 @@ ephemerally using docker and MongoDB. Instructions for both options are included
 What follows are the recommended methods of accessing data for use with PIQUE. These opinionated tools
 provide classes necessary for authenticating, configuring, and executing calls to third-party
 of new data sources. Additionally, PIQUE offers preconfigured tooling for building a mirror of the
-NVD using MongoDB and docker. Both api consumption utilities, and database access utilities are
+NVD using MongoDB and docker. Both businessObjects consumption utilities, and database access utilities are
 discussed in detail below.
 
 ----------
 
-### Consume The NVD CVE 2.0 api
+### Consume The NVD CVE 2.0 businessObjects
 _Before proceeding, recall that the local mirror will be more performant for almost every use case.
 Instructions for the Data Access layer are located [here.]_
 
 ### Steps
-1. Generate an NVD api Key [here.](https://nvd.nist.gov/developers/request-an-api-key)
+1. Generate an NVD businessObjects Key [here.](https://nvd.nist.gov/developers/request-an-api-key)
    * Place that key in the \<project root directory>/input/nvd_key.txt (All on one line and without spaces)
 2. Instantiate pique-properties file
 3. Instantiate NVDRequestFactory
@@ -46,7 +46,7 @@ Instructions for the Data Access layer are located [here.]_
 import common.Utils;
 
 Properties prop = PiqueProperties.getProperties();
-List<String> apiKey = Arrays.asList("apiKey", helperFunctions.getAuthToken(prop.getProperty("nvd-api-key-path")));
+List<String> apiKey = Arrays.asList("apiKey", helperFunctions.getAuthToken(prop.getProperty("nvd-businessObjects-key-path")));
 NVDRequestFactory nvdRequestFactory = new NVDRequestFactory();
 
 NVDRequest request = nvdRequestFactory.createNVDRequest(HTTPMethod.GET, Utils.NVD_BASE_URI, apiKey, START_INDEX, RESULTS_PER_PAGE);
@@ -57,7 +57,7 @@ NVDResponse response = request.executeRequest();
 getCveResponse();
 ```
 ### A Note About Rate Limits
-The NVD imposes tiered rate limits on requests. All data is accessible without an api key, but
+The NVD imposes tiered rate limits on requests. All data is accessible without an businessObjects key, but
 rate limits are dramatically higher for requests made with a key. The NVD also encourages paginated
 responses for large requests. The results per page parameter defines the maximum page size. This page
 size is limited to a maximum of 2000 by NIST. For large requests, it is recommended to sleep your program
