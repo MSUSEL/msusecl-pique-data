@@ -1,6 +1,6 @@
 package presentation;
 
-import api.cveData.NvdMirrorMetaData;
+import businessObjects.cveData.NvdMirrorMetaData;
 import common.Utils;
 import service.NvdApiService;
 import service.NvdMirrorService;

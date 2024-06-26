@@ -1,11 +1,7 @@
 package database.postgreSQL;
 
-import api.cveData.CVEResponse;
-import api.cveData.Cve;
 import database.IMetaDataDao;
-import api.cveData.NvdMirrorMetaData;
-
-import java.util.List;
+import businessObjects.cveData.NvdMirrorMetaData;
 
 public class PostgresMetaDataDao implements IMetaDataDao<NvdMirrorMetaData> {
 

@@ -1,7 +1,7 @@
 package service;
 
-import api.cveData.Cve;
-import api.cveData.NvdMirrorMetaData;
+import businessObjects.cveData.Cve;
+import businessObjects.cveData.NvdMirrorMetaData;
 import database.IDao;
 import database.IMetaDataDao;
 
