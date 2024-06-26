@@ -1,6 +1,6 @@
 package database.postgreSQL;
 
-import api.cveData.Cve;
+import businessObjects.cveData.Cve;
 import database.IBulkDao;
 
 import java.util.List;

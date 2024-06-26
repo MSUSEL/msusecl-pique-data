@@ -7,7 +7,7 @@ import java.util.Properties;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 
-import common.DataProperties;
+import common.DataUtilityProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +47,7 @@ public class PostgresConnectionManager {
 
     private static Properties initializeProperties() {
         try {
-            return DataProperties.getProperties("src/main/resources/postgres.properties");
+            return DataUtilityProperties.getProperties("src/main/resources/postgres.properties");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

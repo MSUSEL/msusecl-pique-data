@@ -1,9 +1,7 @@
 package database.mongo;
 
-import api.cveData.CVEResponse;
-
 // import com.mongodb.MongoCredential;
-import api.cveData.NvdMirrorMetaData;
+import businessObjects.cveData.NvdMirrorMetaData;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
