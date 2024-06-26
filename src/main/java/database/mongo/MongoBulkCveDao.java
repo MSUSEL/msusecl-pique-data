@@ -10,14 +10,13 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.InsertOneModel;
 import com.mongodb.client.model.WriteModel;
 
-import database.IDao;
+import database.IBulkDao;
 
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -27,20 +26,19 @@ import java.util.List;
  * Please use the MongoCveDao class for inserting into / updating
  * a subset of cves in the NVD.
  */
-public class NvdBulkOperationsDao implements IDao<List<Cve>>{
+public class MongoBulkCveDao implements IBulkDao<List<Cve>>{
     private final MongoClient client = MongoConnection.getInstance();
     private final MongoDatabase db = client.getDatabase("nvdMirror");
     private final MongoCollection<Document> vulnerabilities = db.getCollection("vulnerabilities");
     private final CveDetailsMarshaller cveDetailsMarshaller = new CveDetailsMarshaller();
-    private static final Logger LOGGER = LoggerFactory.getLogger(NvdBulkOperationsDao.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MongoBulkCveDao.class);
 
-    @Override
-    public List<Cve> getById(String id) {
-        return Collections.emptyList();
-    }
+//    @Override
+//    public List<Cve> getById(String id) {
+//        return Collections.emptyList();
+//    }
 
-    @Override
-    public void insert(List<Cve> cves) {
+    public void insertMany(List<Cve> cves) {
         List<WriteModel<Document>> bulkOperations = new ArrayList<>();
 
         try {
@@ -54,13 +52,13 @@ public class NvdBulkOperationsDao implements IDao<List<Cve>>{
         }
     }
 
-    @Override
-    public void update(List<Cve> cveDetails) {
-
-    }
-
-    @Override
-    public void delete(List<Cve> cveDetails) {
-
-    }
+//    @Override
+//    public void update(List<Cve> cveDetails) {
+//
+//    }
+//
+//    @Override
+//    public void delete(List<Cve> cveDetails) {
+//
+//    }
 }
