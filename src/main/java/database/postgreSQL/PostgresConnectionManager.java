@@ -42,8 +42,7 @@ public class PostgresConnectionManager {
     private PostgresConnectionManager() {}
 
     private static String buildConnectionString(String driver, String hostname, String port, String dbname) {
-        String connStr = String.format("%s://%s:%s/%s", driver, hostname, port, dbname);
-        return connStr;
+        return String.format("%s://%s:%s/%s", driver, hostname, port, dbname);
     }
 
     private static Properties initializeProperties() {

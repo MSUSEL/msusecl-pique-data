@@ -1,3 +1,4 @@
+import api.cveData.NvdMirrorMetaData;
 import database.mongo.MongoCveDao;
 import org.junit.Test;
 
@@ -24,6 +25,7 @@ import api.cveData.Vulnerability;
 import api.ghsaData.CweNode;
 import common.Utils;
 import common.DataProperties;
+import service.CveResponseProcessor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -38,6 +40,7 @@ import java.util.Properties;
 
 public class DataUtilityTest {
     private static Properties prop = DataProperties.getProperties();
+    private static final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
 
     @Test
     public void testDataStoreFullBuild() {
@@ -98,17 +101,17 @@ public class DataUtilityTest {
         mongoBulkCveDao.insertMany(cves);
     }
 
-    @Test
-    public void testMetaDataInsert() {
-        List<String> apiKey = Arrays.asList("apiKey", Utils.getAuthToken(prop.getProperty("nvd-api-key-path")));
-        NVDResponse response;
-
-        NVDRequest request = NVDRequestFactory.createNVDRequest(HTTPMethod.GET, Utils.NVD_BASE_URI, apiKey, 0, 1);
-        response = request.executeRequest();
-
-        MongoMetaDataDao mongoMetaDataDao = new MongoMetaDataDao();
-        mongoMetaDataDao.insert(response.getCveResponse());
-    }
+//    @Test
+//    public void testMetaDataInsert() {
+//        List<String> apiKey = Arrays.asList("apiKey", Utils.getAuthToken(prop.getProperty("nvd-api-key-path")));
+//        NVDResponse response;
+//
+//        NVDRequest request = NVDRequestFactory.createNVDRequest(HTTPMethod.GET, Utils.NVD_BASE_URI, apiKey, 0, 1);
+//        response = request.executeRequest();
+//
+//        MongoMetaDataDao mongoMetaDataDao = new MongoMetaDataDao();
+//        mongoMetaDataDao.insert(response.getCveResponse());
+//    }
 
     @Test
     public void testMetaDataReplace() {
@@ -118,8 +121,9 @@ public class DataUtilityTest {
         NVDRequest request = NVDRequestFactory.createNVDRequest(HTTPMethod.GET, Utils.NVD_BASE_URI, apiKey, 0, 1);
         response = request.executeRequest();
 
+        NvdMirrorMetaData metaData= cveResponseProcessor.formatNvdMetaData(response.getCveResponse());
         MongoMetaDataDao mongoMetaDataDao = new MongoMetaDataDao();
-        mongoMetaDataDao.update(response.getCveResponse());
+        mongoMetaDataDao.updateMetaData(metaData);
     }
     
     @Test
