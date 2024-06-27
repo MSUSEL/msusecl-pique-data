@@ -24,7 +24,7 @@ public class MongoCveDao implements IDao<Cve> {
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoCveDao.class);
 
     @Override
-    public Cve getById(String id) {
+    public Cve fetchById(String id) {
         Cve cve = new Cve();
         Document retrievedDoc = vulnerabilities.find(Filters.eq("id", id)).first();
         if (retrievedDoc != null) {

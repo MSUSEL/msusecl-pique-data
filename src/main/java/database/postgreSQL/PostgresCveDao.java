@@ -25,7 +25,7 @@ public class PostgresCveDao implements IDao<Cve> {
     }
 
     @Override
-    public Cve getById(String id) {
+    public Cve fetchById(String id) {
         try {
             String sql = "SELECT details FROM nvd_mirror.cve WHERE cve_id = ?;";
             PreparedStatement statement = conn.prepareStatement(sql);

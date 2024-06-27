@@ -38,8 +38,8 @@ public class NvdApiService {
 
     // TODO This method could probably also handle updating the mirror - Create NvdMirrorManager?
     public void handleGetPaginatedCves(String dbContext, int startIndex, int resultsPerPage) {
-        IBulkDao<List<Cve>> bulkDao = dbContextResolver.getBulkDao(dbContext);
-        IMetaDataDao<NvdMirrorMetaData> metadataDao = dbContextResolver.getMetaDataDao(dbContext);
+        IBulkDao<Cve> bulkDao = dbContextResolver.resolveBulkDao(dbContext);
+        IMetaDataDao<NvdMirrorMetaData> metadataDao = dbContextResolver.resolveMetaDataDao(dbContext);
         int cveCount = startIndex + 1;
 
         for (int i = startIndex; i < cveCount; i += Utils.NVD_MAX_PAGE_SIZE) {
@@ -59,8 +59,8 @@ public class NvdApiService {
 
     // TODO could probably remove this method and use handleGetPaginatedCves instead
     public void handleUpdateNvdMirror(String dbContext, String lastModStartDate, String lastModEndDate) {
-        IBulkDao<List<Cve>> bulkDao = dbContextResolver.getBulkDao(dbContext);
-        IMetaDataDao<NvdMirrorMetaData> metadataDao = dbContextResolver.getMetaDataDao(dbContext);
+        IBulkDao<Cve> bulkDao = dbContextResolver.resolveBulkDao(dbContext);
+        IMetaDataDao<NvdMirrorMetaData> metadataDao = dbContextResolver.resolveMetaDataDao(dbContext);
         int startIndex = 0;
         int totalResults = startIndex + 1;
 

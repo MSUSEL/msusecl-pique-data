@@ -139,7 +139,7 @@ public class DataUtilityTest {
 
         // Get a CVE that is currently stored in mongo
         IDao<Cve> mongoDao = new MongoCveDao();
-        Cve cve = mongoDao.getById("CVE-1999-0095");
+        Cve cve = mongoDao.fetchById("CVE-1999-0095");
         
         // insertMany into postgres
         IDao<Cve> postgresDao = new PostgresCveDao();

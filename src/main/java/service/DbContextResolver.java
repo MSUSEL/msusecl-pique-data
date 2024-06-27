@@ -13,19 +13,17 @@ import database.postgreSQL.PostgresBulkCveDao;
 import database.postgreSQL.PostgresCveDao;
 import database.postgreSQL.PostgresMetaDataDao;
 
-import java.util.List;
-
 public class DbContextResolver {
 
-    public IBulkDao<List<Cve>> getBulkDao(String dbContext) {
+    public IBulkDao<Cve> resolveBulkDao(String dbContext) {
         return dbContext.equals(Utils.DB_CONTEXT_LOCAL) ? new MongoBulkCveDao() : new PostgresBulkCveDao();
     }
 
-    public IMetaDataDao<NvdMirrorMetaData> getMetaDataDao(String dbContext) {
+    public IMetaDataDao<NvdMirrorMetaData> resolveMetaDataDao(String dbContext) {
         return dbContext.equals(Utils.DB_CONTEXT_LOCAL) ? new MongoMetaDataDao() : new PostgresMetaDataDao();
     }
 
-    public IDao<Cve> getCveDao(String dbContext) {
+    public IDao<Cve> resolveCveDao(String dbContext) {
         return dbContext.equals(Utils.DB_CONTEXT_LOCAL) ? new MongoCveDao() : new PostgresCveDao();
     }
 }

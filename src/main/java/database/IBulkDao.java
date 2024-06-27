@@ -1,5 +1,9 @@
 package database;
 
+import java.util.List;
+
 public interface IBulkDao<T> {
-    void insertMany(T entity);
+    void insertMany(List<T> entity);
+    T[] fetchMany(String[] entities);
+    T[] fetchAll();
 }
