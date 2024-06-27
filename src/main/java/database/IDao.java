@@ -5,7 +5,7 @@ package database;
  * @param <T>
  */
 public interface IDao<T> {
-    T getById(String id);
+    T fetchById(String id);
     void insert(T t); 
     void update(T t);
     void delete(T t);
