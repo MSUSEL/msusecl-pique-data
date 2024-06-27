@@ -34,11 +34,6 @@ public class MongoBulkCveDao implements IBulkDao<Cve>{
     private final CveDetailsMarshaller cveDetailsMarshaller = new CveDetailsMarshaller();
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoBulkCveDao.class);
 
-//    @Override
-//    public List<Cve> getById(String id) {
-//        return Collections.emptyList();
-//    }
-
     @Override
     public void insertMany(List<Cve> cves) {
         List<WriteModel<Document>> bulkOperations = new ArrayList<>();
@@ -63,14 +58,4 @@ public class MongoBulkCveDao implements IBulkDao<Cve>{
     public Cve[] fetchAll() {
         return new Cve[0];
     }
-
-//    @Override
-//    public void update(List<Cve> cveDetails) {
-//
-//    }
-//
-//    @Override
-//    public void delete(List<Cve> cveDetails) {
-//
-//    }
 }

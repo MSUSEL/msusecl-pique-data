@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import exceptions.DataAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +26,7 @@ public class PostgresCveDao implements IDao<Cve> {
     }
 
     @Override
-    public Cve fetchById(String id) {
+    public Cve fetchById(String id) throws DataAccessException {
         try {
             String sql = "SELECT details FROM nvd_mirror.cve WHERE cve_id = ?;";
             PreparedStatement statement = conn.prepareStatement(sql);
@@ -38,16 +39,16 @@ public class PostgresCveDao implements IDao<Cve> {
             } else {
                 // TODO fix error handling here
                 LOGGER.info("Query returned no results.");
+                throw new DataAccessException("Query returned no results.");
             }
         } catch (SQLException e) {
             LOGGER.warn("Database Query Failed. ", e);
+            throw new DataAccessException("Query failed.", e);
         }
-        // TODO I don't like this null.  Return empty CVE Object?  
-        return null;
     }
 
     @Override
-    public void insert(Cve cveDetails) {
+    public void insert(Cve cveDetails) throws DataAccessException {
         // TODO verify success?
         try {
             String sql = "INSERT INTO nvd_mirror.cve (cve_id, details) VALUES ($1, $2);";
@@ -56,17 +57,18 @@ public class PostgresCveDao implements IDao<Cve> {
             statement.setString(2, cveDetailsMarshaller.marshalJson(cveDetails));
         } catch (SQLException e) {
             LOGGER.warn("Database Query Failed. ", e);
+            throw new DataAccessException("Data");
         }
     }
 
     @Override
-    public void update(Cve t) {
+    public void update(Cve t) throws DataAccessException{
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'update'");
     }
 
     @Override
-    public void delete(Cve t) {
+    public void delete(Cve t) throws DataAccessException{
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'delete'");
     }
