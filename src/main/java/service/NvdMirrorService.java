@@ -5,12 +5,15 @@ import businessObjects.cveData.NvdMirrorMetaData;
 import database.IBulkDao;
 import database.IDao;
 import database.IMetaDataDao;
+import exceptions.DataAccessException;
+
+import java.sql.SQLException;
 
 public class NvdMirrorService {
     private final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
     private final DbContextResolver dbContextResolver = new DbContextResolver();
 
-    public Cve handleGetCveById(String dbContext, String cveId) {
+    public Cve handleGetCveById(String dbContext, String cveId) throws DataAccessException {
         IDao<Cve> dao = dbContextResolver.resolveCveDao(dbContext);
         return dao.fetchById(cveId);
     }
@@ -20,7 +23,7 @@ public class NvdMirrorService {
         return dao.fetchMany(cveIds);
     }
 
-    public String[] handleGetCwes(String dbContext, String cveId) {
+    public String[] handleGetCwes(String dbContext, String cveId) throws DataAccessException {
         Cve cve = handleGetCveById(dbContext, cveId);
         return cveResponseProcessor.extractCwes(cve);
     }

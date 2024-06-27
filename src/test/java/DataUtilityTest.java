@@ -1,5 +1,6 @@
 import businessObjects.cveData.NvdMirrorMetaData;
 import database.mongo.MongoCveDao;
+import exceptions.DataAccessException;
 import org.junit.Test;
 
 import database.IDao;
@@ -133,7 +134,7 @@ public class DataUtilityTest {
     }
     
     @Test
-    public void testPostgresInsert() throws IOException, SQLException {
+    public void testPostgresInsert() throws IOException, SQLException, DataAccessException {
         Connection conn = PostgresConnectionManager.getConnection();
         // This will definitely break and needs a totally different structure
 
@@ -147,13 +148,13 @@ public class DataUtilityTest {
     }
 
     @Test
-    public void testInteractiveGetCveById() {
+    public void testInteractiveGetCveById() throws DataAccessException {
         Cve result = PiqueData.getCveById(Utils.DB_CONTEXT_LOCAL,"CVE-1999-0095");
         assertNotNull(result);
     }
 
     @Test
-    public void testInteractiveGetCwes() {
+    public void testInteractiveGetCwes() throws DataAccessException {
         String[] result = PiqueData.getCwes("local", "CVE-1999-0095");
         assertEquals("NVD-CWE-Other", result[0]);
     }
