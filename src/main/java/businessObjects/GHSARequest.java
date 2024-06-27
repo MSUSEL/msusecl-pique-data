@@ -40,17 +40,8 @@ public class GHSARequest extends BaseRequest {
         GHSAResponse ghsaResponse = new GHSAResponse();
         SecurityAdvisoryMarshaller securityAdvisoryMarshaler = new SecurityAdvisoryMarshaller();
 
-        try {
-            uri = new URIBuilder(baseURI).build();
-        } catch (URISyntaxException e) {
-            LOGGER.error("Could not build URI with given inputs", e);
-            throw new RuntimeException(e);
-        }
-
-        HttpPost request = new HttpPost();
-        request.setURI(uri);
-        request.setHeaders(Utils.resolveHeaders(headers));
-        request.setEntity(new StringEntity(query, StandardCharsets.UTF_8));
+        uri = buildUri();
+        HttpPost request = formatRequest(uri);
 
         try (CloseableHttpClient client = HttpClients.createDefault();
              CloseableHttpResponse response = client.execute(request)) {
@@ -70,5 +61,23 @@ public class GHSARequest extends BaseRequest {
         }
 
         return ghsaResponse;
+    }
+
+    private URI buildUri() {
+        try {
+            return new URIBuilder(baseURI).build();
+        } catch (URISyntaxException e) {
+            LOGGER.error("Could not build URI with given inputs", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private HttpPost formatRequest(URI uri) {
+        HttpPost request = new HttpPost();
+        request.setURI(uri);
+        request.setHeaders(Utils.resolveHeaders(headers));
+        request.setEntity(new StringEntity(query, StandardCharsets.UTF_8));
+
+        return request;
     }
 }
