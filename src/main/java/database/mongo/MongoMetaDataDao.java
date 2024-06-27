@@ -30,7 +30,7 @@ public class MongoMetaDataDao implements IMetaDataDao<NvdMirrorMetaData> {
 //    }
 
     @Override
-    public NvdMirrorMetaData retrieveMetaData() {
+    public NvdMirrorMetaData fetchMetaData() {
         return null;
     }
 
