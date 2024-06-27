@@ -11,7 +11,7 @@ public class PostgresMetaDataDao implements IMetaDataDao<NvdMirrorMetaData> {
     }
 
     @Override
-    public NvdMirrorMetaData retrieveMetaData() {
+    public NvdMirrorMetaData fetchMetaData() {
         return null;
     }
 }

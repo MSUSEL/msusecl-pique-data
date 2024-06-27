@@ -12,6 +12,10 @@ public class PiqueData {
         return nvdMirrorService.handleGetCveById(dbContext, cveId);
     }
 
+    public static Cve[] getCveById(String dbContext, String[] cveIds) {
+        return nvdMirrorService.handleGetCveById(dbContext, cveIds);
+    }
+
     public static String[] getCwes(String dbContext, String cveId) {
         return nvdMirrorService.handleGetCwes(dbContext, cveId);
     }
