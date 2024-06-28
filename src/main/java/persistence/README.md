@@ -3,11 +3,11 @@
 
 ### Introduction
 PIQUE uses two main external sources of data regarding known vulnerabilities.
-The [National Vulnerability database (NVD)](https://nvd.nist.gov/) maintained
+The [National Vulnerability persistence (NVD)](https://nvd.nist.gov/) maintained
 by The National Institutes of Standards and Technology (NIST) "is the U.S. government
 repository of standards based vulnerability management data represented using the Security
 Content Automation Protocol (SCAP)." (nvd.nist.gov, accessed 5/1/2024). The other is the
-[GitHub Advisory database (GHSA)](https://github.com/github/advisory-database). The NVD is
+[GitHub Advisory persistence (GHSA)](https://github.com/github/advisory-database). The NVD is
 accessed via a RESTful businessObjects whereas the GHSA offers a GraphQL endpoint and schema. The "data"
 package contains programmatic tools to standardize and streamline consumption of these businessObjects's.
 These tools include Request and Response objects for both the NVD and GHSA. Handlers, deserialization
@@ -23,7 +23,7 @@ What follows are the recommended methods of accessing data for use with PIQUE. T
 provide classes necessary for authenticating, configuring, and executing calls to third-party
 businessObjects's. They are designed with current needs in mind, but are extensible to allow for consumption
 of new data sources. Additionally, PIQUE offers preconfigured tooling for building a mirror of the
-NVD using MongoDB and docker. Both businessObjects consumption utilities, and database access utilities are
+NVD using MongoDB and docker. Both businessObjects consumption utilities, and persistence access utilities are
 discussed in detail below.
 
 ----------
@@ -66,7 +66,7 @@ for a few seconds between calls.
 
 ----------
 
-### Consume the GitHub Vulnerability database
+### Consume the GitHub Vulnerability persistence
 The GHSA only offers a GraphQL endpoint. This provides a great deal of flexibility in crafting requests and
 responses. With GraphQL, you form a request that complies with the endpoint's schema and you receive exactly and
 only the data you query. Good practice is to maintain a copy of the official schema and use libraries to
@@ -114,12 +114,12 @@ GHSAResponse ghsaResponse = ghsaRequest.executeRequest();
 ```
 ----------
 
-### database Access
+### persistence Access
 PIQUE uses the Data Access Object pattern for interacting with databases. This pattern separates the
-business logic from the code managing access to databases. Because the implementation of any individual database
-is not tightly coupled to the business logic, any database or datastore can be swapped in without affecting
+business logic from the code managing access to databases. Because the implementation of any individual persistence
+is not tightly coupled to the business logic, any persistence or datastore can be swapped in without affecting
 the functioning of PIQUE. By default we use MongoDB to store CVE objects as Mongo Documents, but a relational
-database could be easily used by implementing the IDao interface in a new concrete class. XXXThis secion needs workXXX
+persistence could be easily used by implementing the IDao interface in a new concrete class. XXXThis secion needs workXXX
 
 
 

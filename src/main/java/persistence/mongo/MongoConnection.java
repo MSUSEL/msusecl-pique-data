@@ -1,4 +1,4 @@
-package database.mongo;
+package persistence.mongo;
 
 // import com.mongodb.MongoClientException;
 // import com.mongodb.MongoClientSettings;

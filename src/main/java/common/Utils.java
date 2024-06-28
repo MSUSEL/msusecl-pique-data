@@ -1,10 +1,14 @@
 package common;
 
+import com.google.gson.Gson;
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -22,7 +26,7 @@ public class Utils {
     // constants for use with data access
     public static final int DEFAULT_START_INDEX = 0;
     public static final int NVD_MAX_PAGE_SIZE = 2000;
-    public static final int DEFAULT_NVD_REQUEST_SLEEP = 6000;
+    public static final int DEFAULT_NVD_REQUEST_SLEEP = 7000;
     public static final String NVD_BASE_URI = "https://services.nvd.nist.gov/rest/json/cves/2.0";
     public static final String GHSA_URI = "https://api.github.com/graphql";
     public static final String DB_CONTEXT_LOCAL = "local";
@@ -44,10 +48,10 @@ public class Utils {
      */
     public static Header[] resolveHeaders(List<String> headerStrings) {
         Header[] headers = new Header[0];
-        int size = headerStrings.size() / 2;
+        int size = headerStrings.size();
 
         if (size % 2 == 0) {
-            headers = new Header[size];
+            headers = new Header[size / 2];
             for (int i = 0; i < headerStrings.size() - 1; i += 2) {
                 headers[i / 2] = new BasicHeader(headerStrings.get(i), headerStrings.get(i + 1));
             }
@@ -78,6 +82,20 @@ public class Utils {
         }
 
         return contentBuilder.toString();
+    }
+
+    public static String readFileWithBufferedReader(String path) {
+        try(BufferedReader br = new BufferedReader(new FileReader(path))) {
+            StringBuilder sb = new StringBuilder();
+            String line;
+
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+            return sb.toString();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
