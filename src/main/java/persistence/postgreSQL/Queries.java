@@ -1,4 +1,4 @@
-package database.postgreSQL;
+package persistence.postgreSQL;
 
 import lombok.Getter;
 

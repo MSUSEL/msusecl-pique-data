@@ -1,14 +1,14 @@
 import businessObjects.cveData.NvdMirrorMetaData;
-import database.mongo.MongoCveDao;
+import persistence.mongo.MongoCveDao;
 import exceptions.DataAccessException;
 import org.junit.Test;
 
-import database.IDao;
-import database.mongo.NVDMirror;
-import database.mongo.MongoBulkCveDao;
-import database.mongo.MongoMetaDataDao;
-import database.postgreSQL.PostgresCveDao;
-import database.postgreSQL.PostgresConnectionManager;
+import persistence.IDao;
+import persistence.mongo.NVDMirror;
+import persistence.mongo.MongoBulkCveDao;
+import persistence.mongo.MongoMetaDataDao;
+import persistence.postgreSQL.PostgresCveDao;
+import persistence.postgreSQL.PostgresConnectionManager;
 import presentation.PiqueData;
 
 import org.json.JSONException;
@@ -40,8 +40,8 @@ import java.util.List;
 import java.util.Properties;
 
 public class DataUtilityTest {
-    private static Properties prop = DataUtilityProperties.getProperties();
-    private static final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
+    private final Properties prop = DataUtilityProperties.getProperties();
+    private final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
 
     @Test
     public void testDataStoreFullBuild() {

@@ -1,4 +1,4 @@
-package database.postgreSQL;
+package persistence.postgreSQL;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,14 +10,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import businessObjects.cveData.Cve;
-import handlers.CveDetailsMarshaller;
+import handlers.CveMarshaller;
 import handlers.IJsonMarshaller;
-import database.IDao;
+import persistence.IDao;
 
 public class PostgresCveDao implements IDao<Cve> {
 
     private final Connection conn;
-    private final IJsonMarshaller<Cve> cveDetailsMarshaller = new CveDetailsMarshaller();
+    private final IJsonMarshaller<Cve> cveDetailsMarshaller = new CveMarshaller();
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresCveDao.class);
 
     public PostgresCveDao() {

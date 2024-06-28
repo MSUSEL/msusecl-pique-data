@@ -1,4 +1,4 @@
-package database.mongo;
+package persistence.mongo;
 
 import businessObjects.HTTPMethod;
 import businessObjects.NVDRequest;
@@ -9,9 +9,9 @@ import businessObjects.cveData.NvdMirrorMetaData;
 import businessObjects.cveData.Vulnerability;
 import common.DataUtilityProperties;
 import common.Utils;
-import database.IBulkDao;
+import persistence.IBulkDao;
 
-import database.IMetaDataDao;
+import persistence.IMetaDataDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.CveResponseProcessor;

@@ -7,8 +7,8 @@ import com.google.gson.JsonSyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CveDetailsMarshaller implements IJsonMarshaller<Cve> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CveDetailsMarshaller.class);
+public class CveMarshaller implements IJsonMarshaller<Cve> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CveMarshaller.class);
 
     @Override
     public Cve unmarshalJson(String json) {
