@@ -1,6 +1,6 @@
-package database.postgreSQL;
+package persistence.postgreSQL;
 
-import database.IMetaDataDao;
+import persistence.IMetaDataDao;
 import businessObjects.cveData.NvdMirrorMetaData;
 
 public class PostgresMetaDataDao implements IMetaDataDao<NvdMirrorMetaData> {

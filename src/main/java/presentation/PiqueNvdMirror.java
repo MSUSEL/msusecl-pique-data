@@ -1,7 +1,9 @@
 package presentation;
 
+import businessObjects.cveData.Cve;
 import businessObjects.cveData.NvdMirrorMetaData;
 import common.Utils;
+import exceptions.DataAccessException;
 import service.NvdApiService;
 import service.NvdMirrorService;
 
@@ -23,5 +25,9 @@ public class PiqueNvdMirror {
 
     public static NvdMirrorMetaData getCurrentMetaData(String dbContext) {
         return nvdMirrorService.handleGetCurrentMetaData(dbContext);
+    }
+
+    public static void insertSingleCve(String dbContext, Cve cve) throws DataAccessException {
+        nvdMirrorService.handleInsertSingleCve(dbContext, cve);
     }
 }

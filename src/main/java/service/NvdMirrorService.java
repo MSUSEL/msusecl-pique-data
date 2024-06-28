@@ -2,12 +2,10 @@ package service;
 
 import businessObjects.cveData.Cve;
 import businessObjects.cveData.NvdMirrorMetaData;
-import database.IBulkDao;
-import database.IDao;
-import database.IMetaDataDao;
+import persistence.IBulkDao;
+import persistence.IDao;
+import persistence.IMetaDataDao;
 import exceptions.DataAccessException;
-
-import java.sql.SQLException;
 
 public class NvdMirrorService {
     private final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
@@ -31,5 +29,10 @@ public class NvdMirrorService {
     public NvdMirrorMetaData handleGetCurrentMetaData(String dbContext) {
         IMetaDataDao<NvdMirrorMetaData> dao = dbContextResolver.resolveMetaDataDao(dbContext);
         return dao.fetchMetaData();
+    }
+
+    public void handleInsertSingleCve(String dbContext, Cve cve) throws DataAccessException {
+        IDao<Cve> dao = dbContextResolver.resolveCveDao(dbContext);
+        dao.insert(cve);
     }
 }

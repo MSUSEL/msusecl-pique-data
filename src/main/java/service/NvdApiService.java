@@ -8,8 +8,8 @@ import businessObjects.cveData.CVEResponse;
 import businessObjects.cveData.Cve;
 import common.DataUtilityProperties;
 import common.Utils;
-import database.IBulkDao;
-import database.IMetaDataDao;
+import persistence.IBulkDao;
+import persistence.IMetaDataDao;
 import businessObjects.cveData.NvdMirrorMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +53,7 @@ public class NvdApiService {
 
             bulkDao.insertMany(cves);   // TODO implement insertMany in postgresBulkDao
             conditionallyInsertMetaData(nvdMirrorMetaData, metadataDao, startIndex, cveCount);
-            handleSleep(Utils.DEFAULT_NVD_REQUEST_SLEEP, startIndex, cveCount);
+            handleSleep(startIndex, cveCount);
         }
     }
 
@@ -82,14 +82,14 @@ public class NvdApiService {
 
             bulkDao.insertMany(cves);
             conditionallyInsertMetaData(nvdMirrorMetaData, metadataDao, startIndex, totalResults);
-            handleSleep(Utils.DEFAULT_NVD_REQUEST_SLEEP, startIndex, totalResults);
+            handleSleep(startIndex, totalResults);
         }
     }
 
-    private void handleSleep(int length, int startIndex, int count) {
+    private void handleSleep(int startIndex, int count) {
         try {
             if (startIndex != count - 1) {
-                Thread.sleep(length);
+                Thread.sleep(Utils.DEFAULT_NVD_REQUEST_SLEEP);
             }
         } catch (InterruptedException e) {
             LOGGER.error("Thread interrupted", e);   // not sure if this is reachable in single-threaded code

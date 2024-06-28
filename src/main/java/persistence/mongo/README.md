@@ -25,9 +25,9 @@ Be sure that you have installed the following on your computer
 It's likely that all can be installed with apt/apt-get/snaps.
 
 1. Pull and run the mongodb community docker image with the following command. Note this will create a persistent volume on your
-computer that will require 250M - 500M of space. This is an unauthenticated local database running over localhost. I am working
-orchestrating this whole process with docker-compose. We will eventually have a config that switches between a local database and
-connecting to a persistent database.
+computer that will require 250M - 500M of space. This is an unauthenticated local persistence running over localhost. I am working
+orchestrating this whole process with docker-compose. We will eventually have a config that switches between a local persistence and
+connecting to a persistent persistence.
 
 
 ```
