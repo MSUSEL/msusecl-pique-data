@@ -3,15 +3,15 @@ package service;
 import businessObjects.cveData.Cve;
 import businessObjects.cveData.NvdMirrorMetaData;
 import common.Utils;
-import database.IBulkDao;
-import database.IDao;
-import database.IMetaDataDao;
-import database.mongo.MongoBulkCveDao;
-import database.mongo.MongoCveDao;
-import database.mongo.MongoMetaDataDao;
-import database.postgreSQL.PostgresBulkCveDao;
-import database.postgreSQL.PostgresCveDao;
-import database.postgreSQL.PostgresMetaDataDao;
+import persistence.IBulkDao;
+import persistence.IDao;
+import persistence.IMetaDataDao;
+import persistence.mongo.MongoBulkCveDao;
+import persistence.mongo.MongoCveDao;
+import persistence.mongo.MongoMetaDataDao;
+import persistence.postgreSQL.PostgresBulkCveDao;
+import persistence.postgreSQL.PostgresCveDao;
+import persistence.postgreSQL.PostgresMetaDataDao;
 
 public class DbContextResolver {
 

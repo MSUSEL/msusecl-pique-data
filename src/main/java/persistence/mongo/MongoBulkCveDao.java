@@ -1,7 +1,7 @@
-package database.mongo;
+package persistence.mongo;
 
 import businessObjects.cveData.Cve;
-import handlers.CveDetailsMarshaller;
+import handlers.CveMarshaller;
 
 import com.mongodb.MongoBulkWriteException;
 import com.mongodb.client.MongoClient;
@@ -10,14 +10,13 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.InsertOneModel;
 import com.mongodb.client.model.WriteModel;
 
-import database.IBulkDao;
+import persistence.IBulkDao;
 
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -31,7 +30,7 @@ public class MongoBulkCveDao implements IBulkDao<Cve>{
     private final MongoClient client = MongoConnection.getInstance();
     private final MongoDatabase db = client.getDatabase("nvdMirror");
     private final MongoCollection<Document> vulnerabilities = db.getCollection("vulnerabilities");
-    private final CveDetailsMarshaller cveDetailsMarshaller = new CveDetailsMarshaller();
+    private final CveMarshaller cveMarshaller = new CveMarshaller();
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoBulkCveDao.class);
 
     @Override
@@ -40,7 +39,7 @@ public class MongoBulkCveDao implements IBulkDao<Cve>{
 
         try {
             for (Cve cve : cves) {
-                bulkOperations.add(new InsertOneModel<>(Document.parse(cveDetailsMarshaller.marshalJson(cve))));
+                bulkOperations.add(new InsertOneModel<>(Document.parse(cveMarshaller.marshalJson(cve))));
             }
             vulnerabilities.bulkWrite(bulkOperations);
         } catch (MongoBulkWriteException e) {

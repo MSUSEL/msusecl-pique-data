@@ -1,4 +1,4 @@
-package database.mongo;
+package persistence.mongo;
 
 // import com.mongodb.MongoCredential;
 import businessObjects.cveData.NvdMirrorMetaData;
@@ -9,7 +9,7 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.result.UpdateResult;
 
-import database.IMetaDataDao;
+import persistence.IMetaDataDao;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

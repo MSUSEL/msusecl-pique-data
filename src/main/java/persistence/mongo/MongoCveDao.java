@@ -1,7 +1,7 @@
-package database.mongo;
+package persistence.mongo;
 
 import businessObjects.cveData.Cve;
-import handlers.CveDetailsMarshaller;
+import handlers.CveMarshaller;
 import handlers.IJsonMarshaller;
 
 import com.mongodb.client.MongoClient;
@@ -9,7 +9,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 
-import database.IDao;
+import persistence.IDao;
 
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -20,7 +20,7 @@ public class MongoCveDao implements IDao<Cve> {
     private final MongoClient client = MongoConnection.getInstance();
     private final MongoDatabase db = client.getDatabase("nvdMirror");
     private final MongoCollection<Document> vulnerabilities = db.getCollection("vulnerabilities");
-    private final IJsonMarshaller<Cve> cveDetailsMarshaller = new CveDetailsMarshaller();
+    private final IJsonMarshaller<Cve> cveDetailsMarshaller = new CveMarshaller();
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoCveDao.class);
 
     @Override
