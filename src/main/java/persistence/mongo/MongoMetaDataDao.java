@@ -1,7 +1,7 @@
 package persistence.mongo;
 
 // import com.mongodb.MongoCredential;
-import businessObjects.cveData.NvdMirrorMetaData;
+import businessObjects.cve.NvdMirrorMetaData;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;

@@ -1,4 +1,4 @@
-package businessObjects.ghsaData;
+package businessObjects.ghsa;
 
 import lombok.Getter;
 import lombok.Setter;
