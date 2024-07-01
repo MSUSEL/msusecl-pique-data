@@ -1,7 +1,7 @@
 package presentation;
 
-import businessObjects.cveData.Cve;
-import businessObjects.cveData.NvdMirrorMetaData;
+import businessObjects.cve.Cve;
+import businessObjects.cve.NvdMirrorMetaData;
 import common.Utils;
 import exceptions.DataAccessException;
 import service.NvdApiService;
@@ -17,13 +17,13 @@ public class PiqueNvdMirror {
         nvdApiService.handleGetPaginatedCves(dbContext, Utils.DEFAULT_START_INDEX, Utils.NVD_MAX_PAGE_SIZE);
     }
 
-    public static void updateNvdMirror(String dbContext) {
+    public static void updateNvdMirror(String dbContext) throws DataAccessException {
         NvdMirrorMetaData metadata = nvdMirrorService.handleGetCurrentMetaData(dbContext);
         Instant instant = Instant.now();
         nvdApiService.handleUpdateNvdMirror(dbContext, metadata.getTimestamp(), instant.toString());
     }
 
-    public static NvdMirrorMetaData getCurrentMetaData(String dbContext) {
+    public static NvdMirrorMetaData getCurrentMetaData(String dbContext) throws DataAccessException {
         return nvdMirrorService.handleGetCurrentMetaData(dbContext);
     }
 

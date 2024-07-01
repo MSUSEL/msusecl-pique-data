@@ -1,6 +1,6 @@
 package persistence.mongo;
 
-import businessObjects.cveData.Cve;
+import businessObjects.cve.Cve;
 import handlers.CveMarshaller;
 
 import com.mongodb.MongoBulkWriteException;

@@ -1,7 +1,7 @@
 package businessObjects;
 
 import businessObjects.baseClasses.BaseResponse;
-import businessObjects.ghsaData.SecurityAdvisory;
+import businessObjects.ghsa.SecurityAdvisory;
 import lombok.Getter;
 import lombok.Setter;
 

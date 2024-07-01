@@ -1,11 +1,11 @@
-package businessObjects.cveData;
+package businessObjects.cve;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class WeaknessDescription {
+public class Description {
     private String lang;
     private String value;
 }

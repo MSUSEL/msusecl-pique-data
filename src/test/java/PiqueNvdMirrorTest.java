@@ -1,4 +1,4 @@
-import businessObjects.cveData.Cve;
+import businessObjects.cve.Cve;
 import common.DataUtilityProperties;
 import common.Utils;
 import exceptions.DataAccessException;
@@ -6,6 +6,7 @@ import handlers.CveMarshaller;
 import handlers.IJsonMarshaller;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
+import persistence.postgreSQL.PgTableOperationsDao;
 import presentation.PiqueNvdMirror;
 
 import java.util.Properties;
@@ -39,5 +40,11 @@ public class PiqueNvdMirrorTest {
             log.error("Query failed with error: ", e);
             throw new RuntimeException(e);
         }
+    }
+
+    @Test
+    public void testBuildNvdMirrorTable() {
+        PgTableOperationsDao dao = new PgTableOperationsDao();
+        dao.buildCveTable();
     }
 }

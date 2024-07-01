@@ -1,7 +1,7 @@
 package service;
 
-import businessObjects.cveData.Cve;
-import businessObjects.cveData.NvdMirrorMetaData;
+import businessObjects.cve.Cve;
+import businessObjects.cve.NvdMirrorMetaData;
 import common.Utils;
 import persistence.IBulkDao;
 import persistence.IDao;

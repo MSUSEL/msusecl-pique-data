@@ -1,4 +1,4 @@
-import businessObjects.cveData.NvdMirrorMetaData;
+import businessObjects.cve.NvdMirrorMetaData;
 import persistence.mongo.MongoCveDao;
 import exceptions.DataAccessException;
 import org.junit.Test;
@@ -21,9 +21,9 @@ import businessObjects.HTTPMethod;
 import businessObjects.NVDRequest;
 import businessObjects.NVDRequestFactory;
 import businessObjects.NVDResponse;
-import businessObjects.cveData.Cve;
-import businessObjects.cveData.Vulnerability;
-import businessObjects.ghsaData.CweNode;
+import businessObjects.cve.Cve;
+import businessObjects.cve.Vulnerability;
+import businessObjects.ghsa.CweNode;
 import common.Utils;
 import common.DataUtilityProperties;
 import service.CveResponseProcessor;
@@ -148,13 +148,13 @@ public class DataUtilityTest {
     }
 
     @Test
-    public void testInteractiveGetCveById() throws DataAccessException {
+    public void testGetCveById() throws DataAccessException {
         Cve result = PiqueData.getCveById(Utils.DB_CONTEXT_LOCAL,"CVE-1999-0095");
         assertNotNull(result);
     }
 
     @Test
-    public void testInteractiveGetCwes() throws DataAccessException {
+    public void testGetCwes() throws DataAccessException {
         String[] result = PiqueData.getCwes("local", "CVE-1999-0095");
         assertEquals("NVD-CWE-Other", result[0]);
     }
