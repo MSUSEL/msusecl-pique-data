@@ -1,4 +1,4 @@
-package businessObjects.cveData;
+package businessObjects.cve;
 
 import lombok.Getter;
 import lombok.Setter;

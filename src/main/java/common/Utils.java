@@ -36,7 +36,8 @@ public class Utils {
     // constants for log messages
     public static final String FAILED_TO_READ_FILE = "Failed to read file";
     public static final String MALFORMED_JSON = "Malformed JSON";
-    public static final String DB_QUERY_FAILED = "Database Query Failed. ";
+    public static final String DB_QUERY_FAILED = "Query Failed. ";
+    public static final String DB_QUERY_NO_RESULTS = "Query returned no results. ";
 
     /**
      * Headers need to be formatted into an array of Header Objects.

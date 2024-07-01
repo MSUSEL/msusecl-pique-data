@@ -1,7 +1,7 @@
 package service;
 
-import businessObjects.cveData.Cve;
-import businessObjects.cveData.NvdMirrorMetaData;
+import businessObjects.cve.Cve;
+import businessObjects.cve.NvdMirrorMetaData;
 import persistence.IBulkDao;
 import persistence.IDao;
 import persistence.IMetaDataDao;
@@ -26,7 +26,7 @@ public class NvdMirrorService {
         return cveResponseProcessor.extractCwes(cve);
     }
 
-    public NvdMirrorMetaData handleGetCurrentMetaData(String dbContext) {
+    public NvdMirrorMetaData handleGetCurrentMetaData(String dbContext) throws DataAccessException {
         IMetaDataDao<NvdMirrorMetaData> dao = dbContextResolver.resolveMetaDataDao(dbContext);
         return dao.fetchMetaData();
     }

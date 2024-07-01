@@ -4,13 +4,13 @@ import businessObjects.HTTPMethod;
 import businessObjects.NVDRequest;
 import businessObjects.NVDRequestFactory;
 import businessObjects.NVDResponse;
-import businessObjects.cveData.CVEResponse;
-import businessObjects.cveData.Cve;
+import businessObjects.cve.CVEResponse;
+import businessObjects.cve.Cve;
 import common.DataUtilityProperties;
 import common.Utils;
 import persistence.IBulkDao;
 import persistence.IMetaDataDao;
-import businessObjects.cveData.NvdMirrorMetaData;
+import businessObjects.cve.NvdMirrorMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

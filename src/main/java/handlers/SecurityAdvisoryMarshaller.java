@@ -1,8 +1,8 @@
 package handlers;
 
-import businessObjects.ghsaData.CweNode;
-import businessObjects.ghsaData.Cwes;
-import businessObjects.ghsaData.SecurityAdvisory;
+import businessObjects.ghsa.CweNode;
+import businessObjects.ghsa.Cwes;
+import businessObjects.ghsa.SecurityAdvisory;
 import common.Utils;
 
 import org.json.JSONArray;

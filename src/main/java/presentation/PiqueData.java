@@ -1,7 +1,7 @@
 package presentation;
 
-import businessObjects.cveData.Cve;
-import businessObjects.ghsaData.SecurityAdvisory;
+import businessObjects.cve.Cve;
+import businessObjects.ghsa.SecurityAdvisory;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
 import service.GhsaApiService;
