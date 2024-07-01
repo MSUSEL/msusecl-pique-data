@@ -1,6 +1,6 @@
 package handlers;
 
-import businessObjects.cveData.Cve;
+import businessObjects.cve.Cve;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 

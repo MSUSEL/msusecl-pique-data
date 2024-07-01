@@ -1,7 +1,7 @@
 package service;
 
 import businessObjects.GHSAResponse;
-import businessObjects.ghsaData.CweNode;
+import businessObjects.ghsa.CweNode;
 
 import java.util.ArrayList;
 

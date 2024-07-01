@@ -1,6 +1,6 @@
 package persistence.postgreSQL;
 
-import businessObjects.cveData.Cve;
+import businessObjects.cve.Cve;
 import persistence.IBulkDao;
 
 import java.util.List;

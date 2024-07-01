@@ -1,21 +1,18 @@
 package persistence.postgreSQL;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 
+import common.Utils;
 import exceptions.DataAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import businessObjects.cveData.Cve;
+import businessObjects.cve.Cve;
 import handlers.CveMarshaller;
 import handlers.IJsonMarshaller;
 import persistence.IDao;
 
 public class PostgresCveDao implements IDao<Cve> {
-
     private final Connection conn;
     private final IJsonMarshaller<Cve> cveDetailsMarshaller = new CveMarshaller();
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresCveDao.class);
@@ -37,13 +34,12 @@ public class PostgresCveDao implements IDao<Cve> {
                 String result = rs.getString("details");
                 return cveDetailsMarshaller.unmarshalJson(result);
             } else {
-                // TODO fix error handling here
-                LOGGER.info("Query returned no results.");
-                throw new DataAccessException("Query returned no results.");
+                LOGGER.info(Utils.DB_QUERY_NO_RESULTS);
+                throw new DataAccessException(Utils.DB_QUERY_NO_RESULTS);
             }
         } catch (SQLException e) {
-            LOGGER.warn("Database Query Failed. ", e);
-            throw new DataAccessException("Query failed.", e);
+            LOGGER.error(Utils.DB_QUERY_FAILED, e);
+            throw new DataAccessException(Utils.DB_QUERY_FAILED, e);
         }
     }
 
@@ -51,13 +47,13 @@ public class PostgresCveDao implements IDao<Cve> {
     public void insert(Cve cveDetails) throws DataAccessException {
         // TODO verify success?
         try {
-            String sql = "INSERT INTO nvd_mirror.cve (cve_id, details) VALUES ($1, $2);";
+            String sql = "INSERT INTO nvd_mirror.cve (cve_id, details) VALUES (?, CAST(? AS jsonb));";
             PreparedStatement statement = conn.prepareStatement(sql);
             statement.setString(1, cveDetails.getId());
             statement.setString(2, cveDetailsMarshaller.marshalJson(cveDetails));
+            statement.executeUpdate();
         } catch (SQLException e) {
-            LOGGER.warn("Database Query Failed. ", e);
-            throw new DataAccessException("Data");
+            throw new DataAccessException(Utils.DB_QUERY_FAILED, e);
         }
     }
 

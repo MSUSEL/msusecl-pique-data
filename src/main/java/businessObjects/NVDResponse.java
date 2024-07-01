@@ -1,7 +1,7 @@
 package businessObjects;
 
 import businessObjects.baseClasses.BaseResponse;
-import businessObjects.cveData.CVEResponse;
+import businessObjects.cve.CVEResponse;
 import lombok.Getter;
 import lombok.Setter;
 

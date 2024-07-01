@@ -1,6 +1,6 @@
 package service;
 
-import businessObjects.cveData.*;
+import businessObjects.cve.*;
 import common.Utils;
 
 import java.util.ArrayList;

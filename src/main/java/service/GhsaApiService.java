@@ -4,7 +4,7 @@ import businessObjects.GHSARequest;
 import businessObjects.GHSAResponse;
 import businessObjects.GraphQlQueries;
 import businessObjects.HTTPMethod;
-import businessObjects.ghsaData.SecurityAdvisory;
+import businessObjects.ghsa.SecurityAdvisory;
 import common.DataUtilityProperties;
 import common.Utils;
 import exceptions.ApiCallException;
@@ -19,7 +19,7 @@ import java.util.Properties;
 
 public class GhsaApiService {
     private static final Logger LOGGER = LoggerFactory.getLogger(GhsaApiService.class);
-    private static Properties prop = DataUtilityProperties.getProperties();
+    private final Properties prop = DataUtilityProperties.getProperties();
 
     public SecurityAdvisory handleGetGhsa(String ghsaId) throws ApiCallException {
         String queryBody = formatQueryBody(ghsaId);
