@@ -22,10 +22,7 @@ public class GhsaApiService {
     private final Properties prop = DataUtilityProperties.getProperties();
 
     public SecurityAdvisory handleGetGhsa(String ghsaId) throws ApiCallException {
-        String queryBody = formatQueryBody(ghsaId);
-        List<String> headers = formatHeaders();
-
-        GHSARequest ghsaRequest = new GHSARequest(HTTPMethod.POST, Utils.GHSA_URI, headers, queryBody);
+        GHSARequest ghsaRequest = new GHSARequest(HTTPMethod.POST, Utils.GHSA_URI, formatHeaders(), formatQueryBody(ghsaId));
         GHSAResponse ghsaResponse = ghsaRequest.executeRequest();
 
         int status = ghsaResponse.getStatus();
