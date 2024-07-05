@@ -26,7 +26,7 @@ public class Utils {
     // constants for use with data access
     public static final int DEFAULT_START_INDEX = 0;
     public static final int NVD_MAX_PAGE_SIZE = 2000;
-    public static final int DEFAULT_NVD_REQUEST_SLEEP = 7000;
+    public static final int DEFAULT_NVD_REQUEST_SLEEP = 6000;
     public static final String NVD_BASE_URI = "https://services.nvd.nist.gov/rest/json/cves/2.0";
     public static final String GHSA_URI = "https://api.github.com/graphql";
     public static final String DB_CONTEXT_LOCAL = "local";
@@ -113,7 +113,4 @@ public class Utils {
             throw new RuntimeException(e);
         }
     }
-
-
-
 }
