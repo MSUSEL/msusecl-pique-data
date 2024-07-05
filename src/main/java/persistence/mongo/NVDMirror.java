@@ -21,7 +21,7 @@ import java.util.*;
 public class NVDMirror {
     private static final Logger LOGGER = LoggerFactory.getLogger(NVDMirror.class);
     private final Properties prop = DataUtilityProperties.getProperties();
-    private final List<String> apiKeyHeader = Arrays.asList("apiKey", Utils.getAuthToken(prop.getProperty("nvd-api-key-path")));
+    private final List<String> apiKeyHeader = Arrays.asList("apiKey", Utils.readFileWithBufferedReader(prop.getProperty("nvd-api-key-path")));
     private final IBulkDao<Cve> bulkCveDao = new MongoBulkCveDao();
     private final IMetaDataDao<NvdMirrorMetaData> metaDataDao = new MongoMetaDataDao();
     private final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();

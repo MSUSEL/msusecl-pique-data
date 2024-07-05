@@ -1,15 +1,21 @@
+import businessObjects.NVDRequest;
+import businessObjects.NVDRequestFactory;
 import businessObjects.cve.Cve;
 import common.DataUtilityProperties;
 import common.Utils;
+import exceptions.ApiCallException;
 import exceptions.DataAccessException;
 import handlers.CveMarshaller;
 import handlers.IJsonMarshaller;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import persistence.postgreSQL.PgTableOperationsDao;
+import presentation.PiqueData;
 import presentation.PiqueNvdMirror;
 
 import java.util.Properties;
+
+import static org.junit.Assert.assertNotNull;
 
 /**
  * These tests currently mutate the production database
@@ -34,17 +40,29 @@ public class PiqueNvdMirrorTest {
         String json = Utils.readFileWithBufferedReader("src/test/resources/test.json");
         Cve cve = jsonMarshaller.unmarshalJson(json);
 
-        try {
-            PiqueNvdMirror.insertSingleCve(postgresContext, cve);
-        } catch (DataAccessException e) {
-            log.error("Query failed with error: ", e);
-            throw new RuntimeException(e);
-        }
+        runInsertCve(postgresContext, cve);
+        runInsertCve(mongoContext, cve);
     }
 
     @Test
     public void testBuildNvdMirrorTable() {
         PgTableOperationsDao dao = new PgTableOperationsDao();
         dao.buildCveTable();
+    }
+
+    @Test
+    public void testGetCveFromNvd() throws ApiCallException {
+        Cve cve;
+        cve = PiqueData.getCveFromNvd("CVE-1999-0095");
+        assertNotNull(cve);
+    }
+
+    private void runInsertCve(String dbContext, Cve cve) {
+        try {
+            PiqueNvdMirror.insertSingleCve(dbContext, cve);
+        } catch (DataAccessException e) {
+            log.error("Query failed with error: ", e);
+            throw new RuntimeException(e);
+        }
     }
 }
