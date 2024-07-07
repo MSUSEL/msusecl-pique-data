@@ -2,7 +2,7 @@ package presentation;
 
 import businessObjects.cve.Cve;
 import businessObjects.cve.NvdMirrorMetaData;
-import common.Utils;
+import common.Constants;
 import exceptions.DataAccessException;
 import service.NvdApiService;
 import service.NvdMirrorService;
@@ -14,7 +14,7 @@ public class PiqueNvdMirror {
     private static final NvdMirrorService nvdMirrorService = new NvdMirrorService();
 
     public static void buildNvdMirror(String dbContext) {
-        nvdApiService.handleGetPaginatedCves(dbContext, Utils.DEFAULT_START_INDEX, Utils.NVD_MAX_PAGE_SIZE);
+        nvdApiService.handleGetPaginatedCves(dbContext, Constants.DEFAULT_START_INDEX, Constants.NVD_MAX_PAGE_SIZE);
     }
 
     public static void updateNvdMirror(String dbContext) throws DataAccessException {

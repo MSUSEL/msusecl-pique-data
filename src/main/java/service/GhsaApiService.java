@@ -5,9 +5,11 @@ import businessObjects.GHSAResponse;
 import businessObjects.GraphQlQueries;
 import businessObjects.HTTPMethod;
 import businessObjects.ghsa.SecurityAdvisory;
+import common.Constants;
 import common.DataUtilityProperties;
 import common.Utils;
 import exceptions.ApiCallException;
+import org.apache.http.Header;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -22,7 +24,7 @@ public class GhsaApiService {
     private final Properties prop = DataUtilityProperties.getProperties();
 
     public SecurityAdvisory handleGetGhsa(String ghsaId) throws ApiCallException {
-        GHSARequest ghsaRequest = new GHSARequest(HTTPMethod.POST, Utils.GHSA_URI, formatHeaders(), formatQueryBody(ghsaId));
+        GHSARequest ghsaRequest = new GHSARequest(HTTPMethod.POST, Constants.GHSA_URI, formatHeaders(), formatQueryBody(ghsaId));
         GHSAResponse ghsaResponse = ghsaRequest.executeRequest();
 
         int status = ghsaResponse.getStatus();
@@ -46,9 +48,9 @@ public class GhsaApiService {
         }
     }
 
-    private List<String> formatHeaders() {
+    private Header[] formatHeaders() {
         String githubToken = Utils.getAuthToken(prop.getProperty("github-token-path"));
         String authHeader = String.format("Bearer %s", githubToken);
-        return Arrays.asList("Content-Type", "application/json", "Authorization", authHeader);
+        return new Header[] {"Content-Type", "application/json", "Authorization", authHeader};
     }
 }
