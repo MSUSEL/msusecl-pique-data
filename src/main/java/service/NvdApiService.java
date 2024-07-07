@@ -7,21 +7,23 @@ import businessObjects.NVDResponse;
 import businessObjects.cve.CVEResponse;
 import businessObjects.cve.Cve;
 import common.DataUtilityProperties;
+import common.HeaderBuilder;
 import common.Utils;
+import org.apache.http.Header;
 import persistence.IBulkDao;
 import persistence.IMetaDataDao;
 import businessObjects.cve.NvdMirrorMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
 public class NvdApiService {
+    private final HeaderBuilder hb = new HeaderBuilder();
     private final Properties prop = DataUtilityProperties.getProperties();
-    private final List<String> headers = new ArrayList<String>{"apiKey", Utils.readFileWithBufferedReader(prop.getProperty("nvd-api-key-path")};
     private final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
     private final DbContextResolver dbContextResolver = new DbContextResolver();
     private static final Logger LOGGER = LoggerFactory.getLogger(NvdApiService.class);
@@ -29,10 +31,12 @@ public class NvdApiService {
     public Cve handleGetCveFromNvd(String cveId) {
         int startIndex = 0;
         int resultsPerPage = 1;
-        headers.add("cveId");
-        headers.add(cveId);
+        Header[] headers = hb.addHeader("apiKey", Utils.readFileWithBufferedReader(prop.getProperty("nvd-api-key-path")))
+                .addHeader("cveId", cveId)
+                .build();
 
-        NVDRequest request = NVDRequestFactory.createNVDRequest(HTTPMethod.GET, Utils.NVD_BASE_URI, headers, startIndex, resultsPerPage);
+
+        NVDRequest request = NVDRequestFactory.createNVDRequest(HTTPMethod.GET, Utils.NVD_BASE_URI, apiKeyHeader, startIndex, resultsPerPage);
         NVDResponse response = request.executeRequest();
         CVEResponse cveResponse = response.getCveResponse();
 
@@ -46,7 +50,7 @@ public class NvdApiService {
         int cveCount = startIndex + 1;
 
         for (int i = startIndex; i < cveCount; i += Utils.NVD_MAX_PAGE_SIZE) {
-            NVDRequest request = NVDRequestFactory.createNVDRequest(HTTPMethod.GET, Utils.NVD_BASE_URI, headers, startIndex, resultsPerPage);
+            NVDRequest request = NVDRequestFactory.createNVDRequest(HTTPMethod.GET, Utils.NVD_BASE_URI, apiKeyHeader, startIndex, resultsPerPage);
             NVDResponse response = request.executeRequest();
             CVEResponse cveResponse = response.getCveResponse();
 
@@ -71,7 +75,7 @@ public class NvdApiService {
             NVDRequest request = NVDRequestFactory.createNVDRequest(
                     HTTPMethod.GET,
                     Utils.NVD_BASE_URI,
-                    headers,
+                    apiKeyHeader,
                     Utils.DEFAULT_START_INDEX,
                     Utils.NVD_MAX_PAGE_SIZE,
                     lastModStartDate,
