@@ -5,6 +5,7 @@ import handlers.JsonResponseHandler;
 import handlers.NvdCveMarshaller;
 import common.Utils;
 
+import org.apache.http.Header;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -27,7 +28,7 @@ public class NVDRequest extends BaseRequest {
     private static final Logger LOGGER = LoggerFactory.getLogger(NVDRequest.class);
     JsonResponseHandler handler = new JsonResponseHandler();
 
-    public NVDRequest(String httpMethod, String baseURI, List<String> headers, List<NameValuePair> params) {
+    public NVDRequest(String httpMethod, String baseURI, Header[] headers, List<NameValuePair> params) {
         super(httpMethod, baseURI, headers);
         this.params = params;
     }
@@ -57,7 +58,7 @@ public class NVDRequest extends BaseRequest {
         }
 
         request.setURI(uri);
-        request.setHeaders(Utils.resolveHeaders(headers));
+        request.setHeaders(headers);
 
         try (CloseableHttpClient client = HttpClients.createDefault();
              CloseableHttpResponse response = client.execute(request)) {
