@@ -1,4 +1,5 @@
 import businessObjects.cve.NvdMirrorMetaData;
+import common.Constants;
 import persistence.mongo.MongoCveDao;
 import exceptions.DataAccessException;
 import org.junit.Test;
@@ -63,7 +64,7 @@ public class DataUtilityTest {
         String authHeader = String.format("Bearer %s", githubToken);
         List<String> headers = Arrays.asList("Content-Type", "application/json", "Authorization", authHeader);
 
-        GHSARequest ghsaRequest = new GHSARequest(HTTPMethod.POST, Utils.GHSA_URI, headers, formattedQuery);
+        GHSARequest ghsaRequest = new GHSARequest(HTTPMethod.POST, Constants.GHSA_URI, headers, formattedQuery);
         GHSAResponse ghsaResponse = ghsaRequest.executeRequest();
 
         assertEquals(200, ghsaResponse.getStatus());
@@ -78,7 +79,7 @@ public class DataUtilityTest {
     @Test
     public void testSimpleNVDRequest() {
         List<String> apiKeyHeader = Arrays.asList("apiKey", Utils.getAuthToken(prop.getProperty("nvd-api-key-path")));
-        NVDRequest nvdRequest = NVDRequestFactory.createNVDRequest(HTTPMethod.GET, Utils.NVD_BASE_URI, apiKeyHeader, 0, 1);
+        NVDRequest nvdRequest = NVDRequestFactory.createNVDRequest(HTTPMethod.GET, Constants.NVD_BASE_URI, apiKeyHeader, 0, 1);
         NVDResponse nvdResponse = nvdRequest.executeRequest();
 
         assertEquals(200, nvdResponse.getStatus());
@@ -91,7 +92,7 @@ public class DataUtilityTest {
         List<String> apiKey = Arrays.asList("apiKey", Utils.getAuthToken(prop.getProperty("nvd-api-key-path")));
         NVDResponse response;
 
-        NVDRequest request = NVDRequestFactory.createNVDRequest(HTTPMethod.GET, Utils.NVD_BASE_URI, apiKey, 0, 2000);
+        NVDRequest request = NVDRequestFactory.createNVDRequest(HTTPMethod.GET, Constants.NVD_BASE_URI, apiKey, 0, 2000);
         response = request.executeRequest();
         List<Cve> cves = new ArrayList<>();
 
@@ -107,7 +108,7 @@ public class DataUtilityTest {
 //        List<String> apiKey = Arrays.asList("apiKey", Utils.getAuthToken(prop.getProperty("nvd-api-key-path")));
 //        NVDResponse response;
 //
-//        NVDRequest request = NVDRequestFactory.createNVDRequest(HTTPMethod.GET, Utils.NVD_BASE_URI, apiKey, 0, 1);
+//        NVDRequest request = NVDRequestFactory.createNVDRequest(HTTPMethod.GET, Constants.NVD_BASE_URI, apiKey, 0, 1);
 //        response = request.executeRequest();
 //
 //        MongoMetaDataDao mongoMetaDataDao = new MongoMetaDataDao();
@@ -119,7 +120,7 @@ public class DataUtilityTest {
         List<String> apiKey = Arrays.asList("apiKey", Utils.getAuthToken(prop.getProperty("nvd-api-key-path")));
         NVDResponse response;
 
-        NVDRequest request = NVDRequestFactory.createNVDRequest(HTTPMethod.GET, Utils.NVD_BASE_URI, apiKey, 0, 1);
+        NVDRequest request = NVDRequestFactory.createNVDRequest(HTTPMethod.GET, Constants.NVD_BASE_URI, apiKey, 0, 1);
         response = request.executeRequest();
 
         NvdMirrorMetaData metaData= cveResponseProcessor.formatNvdMetaData(response.getCveResponse());
@@ -149,7 +150,7 @@ public class DataUtilityTest {
 
     @Test
     public void testGetCveById() throws DataAccessException {
-        Cve result = PiqueData.getCveById(Utils.DB_CONTEXT_LOCAL,"CVE-1999-0095");
+        Cve result = PiqueData.getCveById(Constants.DB_CONTEXT_LOCAL,"CVE-1999-0095");
         assertNotNull(result);
     }
 

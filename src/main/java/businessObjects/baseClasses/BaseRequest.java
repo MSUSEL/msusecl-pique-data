@@ -1,5 +1,6 @@
 package businessObjects.baseClasses;
 
+import org.apache.http.Header;
 import org.apache.http.NameValuePair;
 
 import java.util.List;
@@ -10,10 +11,10 @@ import java.util.List;
 public abstract class BaseRequest {
     protected String httpMethod;
     protected String baseURI;
-    protected List<String> headers;
+    protected Header[] headers;
     protected List<NameValuePair> params;
 
-    public BaseRequest(String httpMethod, String baseURI, List<String> headers) {
+    public BaseRequest(String httpMethod, String baseURI, Header[] headers) {
         this.httpMethod = httpMethod;
         this.baseURI = baseURI;
         this.headers = headers;

@@ -5,6 +5,7 @@ import handlers.JsonResponseHandler;
 import handlers.SecurityAdvisoryMarshaller;
 import common.Utils;
 
+import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
@@ -25,7 +26,7 @@ public class GHSARequest extends BaseRequest {
     private final JsonResponseHandler handler = new JsonResponseHandler();
     private final String query;
 
-    public GHSARequest(String httpMethod, String baseURI, List<String> headers, String query) {
+    public GHSARequest(String httpMethod, String baseURI, Header[] headers, String query) {
         super(httpMethod, baseURI, headers);
         this.query = query;
     }
@@ -75,7 +76,7 @@ public class GHSARequest extends BaseRequest {
     private HttpPost formatRequest(URI uri) {
         HttpPost request = new HttpPost();
         request.setURI(uri);
-        request.setHeaders(Utils.resolveHeaders(headers));
+        request.setHeaders(headers);
         request.setEntity(new StringEntity(query, StandardCharsets.UTF_8));
 
         return request;
