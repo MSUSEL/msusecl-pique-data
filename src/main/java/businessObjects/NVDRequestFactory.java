@@ -1,5 +1,8 @@
 package businessObjects;
 
+import common.Constants;
+import common.ParameterBuilder;
+import org.apache.http.Header;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
@@ -9,11 +12,16 @@ import java.util.List;
 public class NVDRequestFactory {
 
     // Constructors
-    public static NVDRequest createNVDRequest(String httpMethod, String baseURI, List<String> headers, int startIndex, int resultsPerPage) {
-        return new NVDRequest(httpMethod, baseURI, headers, configureBasicParams(startIndex, resultsPerPage));
+    public static NVDRequest createNVDRequest(String httpMethod, String baseURI, Header[] headers, int startIndex, int resultsPerPage) {
+        ParameterBuilder pb = new ParameterBuilder();
+        List<NameValuePair> params = pb.addParameter(Constants.START_INDEX_PARAM_NAME, Integer.toString(startIndex))
+                .addParameter(Constants.RESULTS_PER_PAGE_PARAM_NAME, Integer.toString(resultsPerPage))
+                .build();
+
+        return new NVDRequest(httpMethod, baseURI, headers, params);
     }
 
-    public static NVDRequest createNVDRequest(String httpMethod, String baseURI, List<String> headers, int startIndex, int resultsPerPage, String lastModStartDate, String lastModEndDate) {
+    public static NVDRequest createNVDRequest(String httpMethod, String baseURI, Header[] headers, int startIndex, int resultsPerPage, String lastModStartDate, String lastModEndDate) {
         return new NVDRequest(httpMethod, baseURI, headers, configureUpdateParams(startIndex, resultsPerPage, lastModStartDate, lastModEndDate));
     }
 
