@@ -54,7 +54,7 @@ public class Utils {
     public static String readFileContent(Path filePath) throws IOException {
         StringBuilder contentBuilder = new StringBuilder();
 
-        try (Stream<String> stream = Files.lines( filePath, StandardCharsets.UTF_8)) {
+        try (Stream<String> stream = Files.lines(filePath, StandardCharsets.UTF_8)) {
             stream.forEach(s -> contentBuilder.append(s).append("\n"));
         }
         catch (IOException e) {
@@ -87,7 +87,7 @@ public class Utils {
      */
     public static String getAuthToken(String authTokenPath) {
         try {
-            return readFileContent(Paths.get(authTokenPath.substring(1)));
+            return readFileContent(Paths.get(authTokenPath));
         } catch (IOException e) {
             LOGGER.error(Constants.FAILED_TO_READ_FILE, e);
             throw new RuntimeException(e);

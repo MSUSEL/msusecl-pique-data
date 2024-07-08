@@ -9,7 +9,7 @@ import service.NvdMirrorService;
 
 import java.time.Instant;
 
-public class PiqueNvdMirror {
+public class NvdMirror {
     private static final NvdApiService nvdApiService =  new NvdApiService();
     private static final NvdMirrorService nvdMirrorService = new NvdMirrorService();
 
@@ -23,7 +23,7 @@ public class PiqueNvdMirror {
         nvdApiService.handleUpdateNvdMirror(dbContext, metadata.getTimestamp(), instant.toString());
     }
 
-    public static NvdMirrorMetaData getCurrentMetaData(String dbContext) throws DataAccessException {
+    public static NvdMirrorMetaData getMetaData(String dbContext) throws DataAccessException {
         return nvdMirrorService.handleGetCurrentMetaData(dbContext);
     }
 

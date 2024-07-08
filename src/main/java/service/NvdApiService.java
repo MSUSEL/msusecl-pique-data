@@ -2,14 +2,11 @@ package service;
 
 import businessObjects.HTTPMethod;
 import businessObjects.NVDRequest;
-import businessObjects.NVDRequestFactory;
 import businessObjects.NVDResponse;
 import businessObjects.cve.CVEResponse;
 import businessObjects.cve.Cve;
 import businessObjects.cve.NvdMirrorMetaData;
-import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
 import common.*;
-import org.apache.http.Header;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import persistence.IBulkDao;
@@ -22,32 +19,50 @@ public class NvdApiService {
     private static final Logger LOGGER = LoggerFactory.getLogger(NvdApiService.class);
     private final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
     private final DbContextResolver dbContextResolver = new DbContextResolver();
-    private final HeaderBuilder hb = new HeaderBuilder();
+    private final HeaderBuilder headerBuilder = new HeaderBuilder();
     private final Properties prop = DataUtilityProperties.getProperties();
-    private final String apiKeyHeader = Utils.readFileWithBufferedReader(prop.getProperty("nvd-api-key-path"));
+    private final String apiKey = Utils.getAuthToken(prop.getProperty("nvd-api-key-path"));
     private final ParameterBuilder parameterBuilder = new ParameterBuilder();
 
+    /**
+     * Calls to NVD CVE2.0 API filtering results to single CVE
+     * @param cveId the cveId of the CVE in question
+     * @return Cve object from NVD response
+     */
     public Cve handleGetCveFromNvd(String cveId) {
         NVDRequest request = new NVDRequest(
                 HTTPMethod.GET,
-                Constants.NVD_BASE_URI,
-                hb.addHeader(NvdConstants.API_KEY_HEADER_NAME, apiKeyHeader).build(),
-                parameterBuilder.addParameter(NvdConstants.CVE_ID_PARAM_NAME, cveId).build());
+                Constants.NVD_CVE_URI,
+                headerBuilder.addHeader(NvdConstants.API_KEY, apiKey).build(),
+                parameterBuilder.addParameter(NvdConstants.CVE_ID, cveId).build());
         NVDResponse response = request.executeRequest();
         CVEResponse cveResponse = response.getCveResponse();
 
         return cveResponseProcessor.extractSingleCve(cveResponse);
     }
 
-    // TODO This method could probably also handle updating the mirror - Create NvdMirrorManager?
+    /**
+     * Gets CVEs in bulk from the NVD and stores them in the given database context.
+     * This is primarily used to build the SECL's NVD mirror
+     *
+     * @param dbContext defines database context (currently SECL's postgres NVD Mirror)
+     * @param startIndex Where in the index of CVEs should the NVD begin returning paginated results
+     * @param resultsPerPage Total number of results per call - typically the max number of 2000
+     */
     public void handleGetPaginatedCves(String dbContext, int startIndex, int resultsPerPage) {
         IBulkDao<Cve> bulkDao = dbContextResolver.resolveBulkDao(dbContext);
         IMetaDataDao<NvdMirrorMetaData> metadataDao = dbContextResolver.resolveMetaDataDao(dbContext);
         int cveCount = startIndex + 1;
 
         for (int i = startIndex; i < cveCount; i += Constants.NVD_MAX_PAGE_SIZE) {
-            Header[] headers = hb.addHeader(Constants.API_KEY_HEADER_NAME, apiKeyHeader).build();
-            NVDRequest request = NVDRequestFactory.createNVDRequest(HTTPMethod.GET, Constants.NVD_BASE_URI, headers, startIndex, resultsPerPage);
+            // send request and handle the response
+            NVDRequest request = new NVDRequest(
+                    HTTPMethod.GET,
+                    Constants.NVD_CVE_URI,
+                    headerBuilder.addHeader(NvdConstants.API_KEY, apiKey).build(),
+                    parameterBuilder.addParameter(NvdConstants.START_INDEX, Integer.toString(startIndex))
+                            .addParameter(NvdConstants.RESULTS_PER_PAGE, Integer.toString(Constants.NVD_MAX_PAGE_SIZE))
+                            .build());
             NVDResponse response = request.executeRequest();
             CVEResponse cveResponse = response.getCveResponse();
 
@@ -55,13 +70,22 @@ public class NvdApiService {
             List<Cve> cves = cveResponseProcessor.extractAllCves(cveResponse);
             NvdMirrorMetaData nvdMirrorMetaData = cveResponseProcessor.formatNvdMetaData(cveResponse);
 
+            // Persist the data
             bulkDao.insertMany(cves);   // TODO implement insertMany in postgresBulkDao
             conditionallyInsertMetaData(nvdMirrorMetaData, metadataDao, startIndex, cveCount);
             handleSleep(startIndex, cveCount);
         }
     }
 
-    // TODO could probably remove this method and use handleGetPaginatedCves instead
+
+    /**
+     * Handles updating the SECL NVD Mirror
+     * @param dbContext defines database context (currently SECL's postgres
+     *                  NVD Mirror or local containerized mongodb instance)
+     * @param lastModStartDate Timestamp of previous call to NVD CVE API to update SECL mirror
+     * @param lastModEndDate Typically it is the current time - but provides the upper bound to the time window
+     *                       from which to pull updates
+     */
     public void handleUpdateNvdMirror(String dbContext, String lastModStartDate, String lastModEndDate) {
         IBulkDao<Cve> bulkDao = dbContextResolver.resolveBulkDao(dbContext);
         IMetaDataDao<NvdMirrorMetaData> metadataDao = dbContextResolver.resolveMetaDataDao(dbContext);
@@ -69,14 +93,15 @@ public class NvdApiService {
         int totalResults = startIndex + 1;
 
         for (int i = startIndex; i < totalResults; i += Constants.NVD_MAX_PAGE_SIZE) {
-            NVDRequest request = NVDRequestFactory.createNVDRequest(
+            NVDRequest request = new NVDRequest(
                     HTTPMethod.GET,
-                    Constants.NVD_BASE_URI,
-                    apiKeyHeader,
-                    Constants.DEFAULT_START_INDEX,
-                    Constants.NVD_MAX_PAGE_SIZE,
-                    lastModStartDate,
-                    lastModEndDate);
+                    Constants.NVD_CVE_URI,
+                    headerBuilder.addHeader(NvdConstants.API_KEY, apiKey).build(),
+                    parameterBuilder.addParameter(NvdConstants.START_INDEX, Integer.toString(startIndex))
+                            .addParameter(NvdConstants.RESULTS_PER_PAGE, Integer.toString(Constants.NVD_MAX_PAGE_SIZE))
+                            .addParameter(NvdConstants.LAST_MOD_START_DATE, lastModStartDate)
+                            .addParameter(NvdConstants.LAST_MOD_END_DATE, lastModEndDate)
+                            .build());
             NVDResponse response = request.executeRequest();
             CVEResponse cveResponse = response.getCveResponse();
 

@@ -7,6 +7,7 @@ import businessObjects.HTTPMethod;
 import businessObjects.ghsa.SecurityAdvisory;
 import common.Constants;
 import common.DataUtilityProperties;
+import common.HeaderBuilder;
 import common.Utils;
 import exceptions.ApiCallException;
 import org.apache.http.Header;
@@ -22,9 +23,20 @@ import java.util.Properties;
 public class GhsaApiService {
     private static final Logger LOGGER = LoggerFactory.getLogger(GhsaApiService.class);
     private final Properties prop = DataUtilityProperties.getProperties();
+    private final HeaderBuilder headerBuilder = new HeaderBuilder();
 
     public SecurityAdvisory handleGetGhsa(String ghsaId) throws ApiCallException {
-        GHSARequest ghsaRequest = new GHSARequest(HTTPMethod.POST, Constants.GHSA_URI, formatHeaders(), formatQueryBody(ghsaId));
+        String CONTENT_TYPE = "Content-Type";
+        String APP_JSON = "application/json";
+        String AUTHORIZATION = "Authorization";
+
+        GHSARequest ghsaRequest = new GHSARequest(
+                HTTPMethod.POST,
+                Constants.GHSA_URI,
+                headerBuilder.addHeader(CONTENT_TYPE, APP_JSON)
+                        .addHeader(AUTHORIZATION, String.format("Bearer %s", Utils.getAuthToken(prop.getProperty("github-token-path"))))
+                        .build(),
+                formatQueryBody(ghsaId));
         GHSAResponse ghsaResponse = ghsaRequest.executeRequest();
 
         int status = ghsaResponse.getStatus();
@@ -46,11 +58,5 @@ public class GhsaApiService {
             LOGGER.error("Improper JSON formatting. Check query format. ", e);
             throw new RuntimeException(e);
         }
-    }
-
-    private Header[] formatHeaders() {
-        String githubToken = Utils.getAuthToken(prop.getProperty("github-token-path"));
-        String authHeader = String.format("Bearer %s", githubToken);
-        return new Header[] {"Content-Type", "application/json", "Authorization", authHeader};
     }
 }
