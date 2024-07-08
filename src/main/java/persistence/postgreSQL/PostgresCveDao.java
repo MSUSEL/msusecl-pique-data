@@ -12,7 +12,7 @@ import handlers.CveMarshaller;
 import handlers.IJsonMarshaller;
 import persistence.IDao;
 
-public class PostgresCveDao implements IDao<Cve> {
+public final class PostgresCveDao implements IDao<Cve> {
     private final Connection conn;
     private final IJsonMarshaller<Cve> cveDetailsMarshaller = new CveMarshaller();
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresCveDao.class);

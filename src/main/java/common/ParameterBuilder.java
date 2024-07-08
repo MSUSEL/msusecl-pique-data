@@ -6,7 +6,7 @@ import org.apache.http.message.BasicNameValuePair;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ParameterBuilder {
+public final class ParameterBuilder {
     private final List<NameValuePair> params = new ArrayList<>();
 
     public ParameterBuilder addParameter(String name, String value) {

@@ -3,8 +3,12 @@ package common;
 import java.io.FileReader;
 import java.io.IOException;
 
-public class DataUtilityProperties {
+public final class DataUtilityProperties {
 
+    /**
+     * This method pulled from SBOM PIQUE wrapper
+     * @return the default properties file
+     */
     public static java.util.Properties getProperties() {
         String propPath = "src/main/resources/props.properties";
         java.util.Properties props = new java.util.Properties();

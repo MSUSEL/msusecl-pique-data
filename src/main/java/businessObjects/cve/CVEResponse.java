@@ -12,7 +12,7 @@ import java.util.ArrayList;
  */
 @Getter
 @Setter
-public class CVEResponse {
+public final class CVEResponse {
     private int resultsPerPage;
     private int startIndex;
     private int totalResults;

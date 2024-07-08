@@ -1,9 +1,10 @@
 package businessObjects;
 
 import businessObjects.baseClasses.BaseRequest;
+import businessObjects.cve.CVEResponse;
+import handlers.IJsonMarshaller;
 import handlers.JsonResponseHandler;
 import handlers.NvdCveMarshaller;
-import common.Utils;
 
 import org.apache.http.Header;
 import org.apache.http.NameValuePair;
@@ -24,11 +25,10 @@ import java.util.List;
  * Inherits from Request and is used to execute GET requests against
  * the National Vulnerabilities Database
  */
-public class NVDRequest extends BaseRequest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(NVDRequest.class);
-    JsonResponseHandler handler = new JsonResponseHandler();
+public final class NvdRequest extends BaseRequest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(NvdRequest.class);
 
-    public NVDRequest(String httpMethod, String baseURI, Header[] headers, List<NameValuePair> params) {
+    public NvdRequest(String httpMethod, String baseURI, Header[] headers, List<NameValuePair> params) {
         super(httpMethod, baseURI, headers);
         this.params = params;
     }
@@ -36,29 +36,40 @@ public class NVDRequest extends BaseRequest {
     // if using this class as a template to extend Request functionality, overloaded constructors providing
     // options for POST/PUT etc. requests could go here. However, for the NVD, GET is likely all that will be offered.
 
+    /**
+     * Executes the API request and handles the result
+     * @return the requested NvdResponse object
+     */
     @Override
-    public NVDResponse executeRequest() {
+    public NvdResponse executeRequest() {
         // the NVD only offers HTTP GET endpoints so this class only implements executeGetRequest()
         // For different extensions of the Request superclass you might have a switch statement based on the
         // httpMethod param along with other private execute methods. e.g. executePostRequest(), executeDeleteRequest() etc.
         return executeGetRequest();
     }
 
-    private NVDResponse executeGetRequest() {
-        URI uri;
-        NVDResponse nvdResponse = new NVDResponse();
-        NvdCveMarshaller nvdCveMarshaler = new NvdCveMarshaller();
+    private NvdResponse executeGetRequest() {
         HttpGet request = new HttpGet();
+        URI uri = buildUri();
+        request.setURI(uri);
+        request.setHeaders(headers);
 
+        return makeHttpCall(request);
+    }
+
+    private URI buildUri() {
         try {
-            uri = new URIBuilder(baseURI).addParameters(params).build();
+            return new URIBuilder(baseURI).addParameters(params).build();
         } catch (URISyntaxException e) {
             LOGGER.error("Could not build URI with given inputs", e);
             throw new RuntimeException(e);
         }
+    }
 
-        request.setURI(uri);
-        request.setHeaders(headers);
+    private NvdResponse makeHttpCall(HttpGet request) {
+        NvdResponse nvdResponse = new NvdResponse();
+        IJsonMarshaller<CVEResponse> nvdCveMarshaller = new NvdCveMarshaller();
+        JsonResponseHandler handler = new JsonResponseHandler();
 
         try (CloseableHttpClient client = HttpClients.createDefault();
              CloseableHttpResponse response = client.execute(request)) {
@@ -66,7 +77,7 @@ public class NVDRequest extends BaseRequest {
             int status = response.getStatusLine().getStatusCode();
             if (status >= 200 && status < 300) {
                 String json = handler.handleResponse(response);
-                nvdResponse.setCveResponse(nvdCveMarshaler.unmarshalJson(json));
+                nvdResponse.setCveResponse(nvdCveMarshaller.unmarshalJson(json));
                 nvdResponse.setStatus(status);
             } else {
                 LOGGER.info("Response status: {}", status);
@@ -79,3 +90,4 @@ public class NVDRequest extends BaseRequest {
         return nvdResponse;
     }
 }
+

@@ -7,6 +7,6 @@ import java.util.ArrayList;
 
 @Getter
 @Setter
-public class Cwes {
+public final class Cwes {
     private ArrayList<CweNode> nodes;
 }

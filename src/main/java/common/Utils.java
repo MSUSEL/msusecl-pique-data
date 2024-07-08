@@ -15,34 +15,8 @@ import java.util.stream.Stream;
 /**
  *  Utility class for helper methods related to Data Access
  */
-public class Utils {
+public final class Utils {
     private static final Logger LOGGER = LoggerFactory.getLogger(Utils.class);
-
-
-    /**
-     * Headers need to be formatted into an array of Header Objects.
-     * The constructor for BaseRequest passes headers as strings for ease of use.
-     * This method resolves those strings to Header objects
-     *
-     * @param headerStrings List of header key,value pairs as strings
-     * @return array of Header objects
-     */
-//    public static Header[] resolveHeaders(List<String> headerStrings) {
-//        Header[] headers = new Header[0];
-//        int size = headerStrings.size();
-//
-//        if (size % 2 == 0) {
-//            headers = new Header[size / 2];
-//            for (int i = 0; i < headerStrings.size() - 1; i += 2) {
-//                headers[i / 2] = new BasicHeader(headerStrings.get(i), headerStrings.get(i + 1));
-//            }
-//        } else {
-//            // TODO throw custom Exception here instead?
-//            LOGGER.error("Incorrect format in headers list: Headers should always be key value pairs.");
-//        }
-//
-//        return headers;
-//    }
 
     /**
      * Reads a given file paths contents into a string and returns the results.
@@ -65,6 +39,11 @@ public class Utils {
         return contentBuilder.toString();
     }
 
+    /**
+     * Buffered file reader mainly used to read in json files for unit testing
+     * @param path is the path to the file
+     * @return contents of the file as a String object
+     */
     public static String readFileWithBufferedReader(String path) {
         try(BufferedReader br = new BufferedReader(new FileReader(path))) {
             StringBuilder sb = new StringBuilder();
@@ -80,7 +59,7 @@ public class Utils {
     }
 
     /**
-     * Gets the actual GitHub token from the given filepath
+     * Gets the actual token from the given filepath
      *
      * @param authTokenPath path to github token
      * @return the token as a String literal
