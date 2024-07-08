@@ -13,7 +13,7 @@ import persistence.postgreSQL.PostgresBulkCveDao;
 import persistence.postgreSQL.PostgresCveDao;
 import persistence.postgreSQL.PostgresMetaDataDao;
 
-public class DbContextResolver {
+public final class DbContextResolver {
 
     public IBulkDao<Cve> resolveBulkDao(String dbContext) {
         return dbContext.equals(Constants.DB_CONTEXT_LOCAL) ? new MongoBulkCveDao() : new PostgresBulkCveDao();

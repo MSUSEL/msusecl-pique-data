@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CvssData {
+public final class CvssData {
     private String version;
     private String vectorString;
     private String accessVector;

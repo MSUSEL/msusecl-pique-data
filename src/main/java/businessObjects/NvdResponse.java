@@ -11,7 +11,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class NVDResponse extends BaseResponse {
+public final class NvdResponse extends BaseResponse {
     private CVEResponse cveResponse;
 }
 

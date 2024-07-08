@@ -7,6 +7,6 @@ import java.util.ArrayList;
 
 @Getter
 @Setter
-public class Configuration {
+public final class Configuration {
     private ArrayList<Node> nodes;
 }

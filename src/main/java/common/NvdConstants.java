@@ -6,7 +6,7 @@ package common;
  * The use of these constants is encouraged in creating api calls to
  * prevent typos and for a very slight improvement in performance
  */
-public class NvdConstants {
+public final class NvdConstants {
     public static final String CVE_ID = "cveId";
     public static final String API_KEY = "apiKey";
     public static final String START_INDEX = "startIndex";

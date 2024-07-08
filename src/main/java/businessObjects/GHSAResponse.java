@@ -7,6 +7,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class GHSAResponse extends BaseResponse {
+public final class GHSAResponse extends BaseResponse {
     private SecurityAdvisory securityAdvisory;
 }

@@ -3,7 +3,7 @@ package common;
 /**
  * These are general constants used throughout the project
  */
-public class Constants {
+public final class Constants {
     public static final String DB_CONTEXT_LOCAL = "local";
     public static final String DB_CONTEXT_PERSISTENT = "persistent";
     public static final String DB_QUERY_FAILED = "Query Failed. ";

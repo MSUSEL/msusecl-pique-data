@@ -10,14 +10,11 @@ import common.DataUtilityProperties;
 import common.HeaderBuilder;
 import common.Utils;
 import exceptions.ApiCallException;
-import org.apache.http.Header;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Properties;
 
 public class GhsaApiService {

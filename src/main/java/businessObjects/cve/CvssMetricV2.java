@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CvssMetricV2 {
+public final class CvssMetricV2 {
     private String source;
     private String type;
     private CvssData cvssData;

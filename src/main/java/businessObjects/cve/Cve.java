@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 @Getter 
 @Setter
-public class Cve {
+public final class Cve {
     private String id;
     private String sourceIdentifier;
     private String published;

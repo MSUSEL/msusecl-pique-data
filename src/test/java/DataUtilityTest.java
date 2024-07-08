@@ -61,9 +61,9 @@ public class DataUtilityTest {
 //    public void testDaoInsertMany() {
 //        MongoBulkCveDao mongoBulkCveDao = new MongoBulkCveDao();
 //        List<String> apiKey = Arrays.asList("apiKey", Utils.getAuthToken(prop.getProperty("nvd-api-key-path")));
-//        NVDResponse response;
+//        NvdResponse response;
 //
-//        NVDRequest request = NVDRequestFactory.createNVDRequest(HTTPMethod.GET, Constants.NVD_CVE_URI, apiKey, 0, 2000);
+//        NvdRequest request = NVDRequestFactory.createNVDRequest(HTTPMethod.GET, Constants.NVD_CVE_URI, apiKey, 0, 2000);
 //        response = request.executeRequest();
 //        List<Cve> cves = new ArrayList<>();
 //
@@ -77,9 +77,9 @@ public class DataUtilityTest {
 //    @Test
 //    public void testMetaDataInsert() {
 //        List<String> apiKey = Arrays.asList("apiKey", Utils.getAuthToken(prop.getProperty("nvd-api-key-path")));
-//        NVDResponse response;
+//        NvdResponse response;
 //
-//        NVDRequest request = NVDRequestFactory.createNVDRequest(HTTPMethod.GET, Constants.NVD_CVE_URI, apiKey, 0, 1);
+//        NvdRequest request = NVDRequestFactory.createNVDRequest(HTTPMethod.GET, Constants.NVD_CVE_URI, apiKey, 0, 1);
 //        response = request.executeRequest();
 //
 //        MongoMetaDataDao mongoMetaDataDao = new MongoMetaDataDao();
@@ -89,9 +89,9 @@ public class DataUtilityTest {
 //    @Test
 //    public void testMetaDataReplace() {
 //        List<String> apiKey = Arrays.asList("apiKey", Utils.getAuthToken(prop.getProperty("nvd-api-key-path")));
-//        NVDResponse response;
+//        NvdResponse response;
 //
-//        NVDRequest request = NVDRequestFactory.createNVDRequest(HTTPMethod.GET, Constants.NVD_CVE_URI, apiKey, 0, 1);
+//        NvdRequest request = NVDRequestFactory.createNVDRequest(HTTPMethod.GET, Constants.NVD_CVE_URI, apiKey, 0, 1);
 //        response = request.executeRequest();
 //
 //        NvdMirrorMetaData metaData= cveResponseProcessor.formatNvdMetaData(response.getCveResponse());

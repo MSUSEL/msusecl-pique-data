@@ -14,20 +14,12 @@ import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MongoMetaDataDao implements IMetaDataDao<NvdMirrorMetaData> {
+public final class MongoMetaDataDao implements IMetaDataDao<NvdMirrorMetaData> {
     private final MongoClient client = MongoConnection.getInstance();
     private final MongoDatabase db = client.getDatabase("nvdMirror");
     private final MongoCollection<Document> vulnerabilities = db.getCollection("vulnerabilities");
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoMetaDataDao.class);
     private final Document metadataFilter = new Document("_id", "nvd_metadata");
-
-//    public void insert(CVEResponse cveResponse) {
-//        Document metadata = generateMetadata(cveResponse);
-//        long documentCount = vulnerabilities.countDocuments(metadataFilter);
-//        if(documentCount == 0) {
-//            vulnerabilities.insertOne(metadata);
-//        }
-//    }
 
     @Override
     public NvdMirrorMetaData fetchMetaData() {

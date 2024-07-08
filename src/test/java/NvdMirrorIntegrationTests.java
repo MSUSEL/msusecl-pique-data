@@ -1,4 +1,5 @@
 import businessObjects.cve.Cve;
+import businessObjects.cve.NvdMirrorMetaData;
 import common.Constants;
 import exceptions.DataAccessException;
 import org.junit.Test;
@@ -8,7 +9,7 @@ import presentation.PiqueData;
 /**
  * IMPORTANT!
  * These currently mutate the production database
- * Only run these if you know exactly what you're doing
+ * Only run these if you know exactly what you're doing!
  */
 
 // TODO mock database to test methods
@@ -36,12 +37,12 @@ public class NvdMirrorIntegrationTests {
 
     @Test
     public void testGetLocalMetaData() throws DataAccessException {
-        NvdMirror.getMetaData(Constants.DB_CONTEXT_LOCAL);
+        NvdMirrorMetaData metaData = NvdMirror.getMetaData(Constants.DB_CONTEXT_LOCAL);
     }
 
     @Test
     public void testGetPersistentMetaData() throws DataAccessException {
-        NvdMirror.getMetaData(Constants.DB_CONTEXT_PERSISTENT);
+        NvdMirrorMetaData metaData = NvdMirror.getMetaData(Constants.DB_CONTEXT_PERSISTENT);
     }
 
     @Test
@@ -54,7 +55,7 @@ public class NvdMirrorIntegrationTests {
     @Test
     public void testPersistentInsertSingleCve() throws DataAccessException {
         // TODO replace this with mocked Cve object
-        Cve cve = PiqueData.getCveById(Constants.DB_CONTEXT_PERSISTENT, "CVE-1999-0095");
+        Cve cve = PiqueData.getCveById(Constants.DB_CONTEXT_LOCAL, "CVE-1999-0095");
         NvdMirror.insertSingleCve(Constants.DB_CONTEXT_PERSISTENT, cve);
     }
 }

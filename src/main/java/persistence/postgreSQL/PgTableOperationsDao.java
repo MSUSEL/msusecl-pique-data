@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class PgTableOperationsDao {
+public final class PgTableOperationsDao {
     private final Connection conn;
 
     private final String dropCveData = "DROP TABLE IF EXISTS \"nvd_mirror\".\"cve\";\n" +
