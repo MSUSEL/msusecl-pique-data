@@ -1,6 +1,7 @@
 package service;
 
 import businessObjects.cve.*;
+import common.Constants;
 import common.Utils;
 
 import java.util.ArrayList;
@@ -37,7 +38,7 @@ public class CveResponseProcessor {
 
     public NvdMirrorMetaData formatNvdMetaData(CVEResponse response) {
         NvdMirrorMetaData metaData = new NvdMirrorMetaData();
-        metaData.setId(Utils.MONGO_NVD_METADATA_ID);
+        metaData.setId(Constants.MONGO_NVD_METADATA_ID);
         metaData.setTotalResults(Integer.toString(response.getTotalResults()));
         metaData.setFormat(response.getFormat());
         metaData.setVersion(response.getVersion());

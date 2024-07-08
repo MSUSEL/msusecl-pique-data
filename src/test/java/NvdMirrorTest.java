@@ -1,8 +1,8 @@
+import businessObjects.HTTPMethod;
 import businessObjects.NVDRequest;
-import businessObjects.NVDRequestFactory;
+import businessObjects.NVDResponse;
 import businessObjects.cve.Cve;
-import common.DataUtilityProperties;
-import common.Utils;
+import common.*;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
 import handlers.CveMarshaller;
@@ -11,10 +11,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import persistence.postgreSQL.PgTableOperationsDao;
 import presentation.PiqueData;
-import presentation.PiqueNvdMirror;
+import presentation.NvdMirror;
 
 import java.util.Properties;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 /**
@@ -23,15 +24,32 @@ import static org.junit.Assert.assertNotNull;
  * necessary to unit test this class properly
  */
 @Slf4j
-public class PiqueNvdMirrorTest {
+public class NvdMirrorTest {
     private final Properties prop = DataUtilityProperties.getProperties();
     // private final String dbContext = prop.getProperty("db-context");
-    private final String mongoContext = Utils.DB_CONTEXT_LOCAL;
-    private final String postgresContext = Utils.DB_CONTEXT_PERSISTENT;
+    private final String mongoContext = Constants.DB_CONTEXT_LOCAL;
+    private final String postgresContext = Constants.DB_CONTEXT_PERSISTENT;
+    private final HeaderBuilder headerBuilder = new HeaderBuilder();
+    private final String apiKey = Utils.getAuthToken(prop.getProperty("nvd-api-key-path"));
+    private final ParameterBuilder parameterBuilder = new ParameterBuilder();
 
     @Test
     public void testBuildFullMirrorWithNewCode() {
-        PiqueNvdMirror.buildNvdMirror(mongoContext);
+        NvdMirror.buildNvdMirror(mongoContext);
+    }
+
+    @Test
+    public void testNvdMirrorService() {
+        headerBuilder.addHeader(NvdConstants.API_KEY, apiKey).build();
+        NVDRequest nvdRequest = new NVDRequest(
+                HTTPMethod.GET,
+                Constants.NVD_CVE_URI,
+                headerBuilder.addHeader(NvdConstants.API_KEY, apiKey).build(),
+                parameterBuilder.addParameter(NvdConstants.CVE_ID, "CVE-1999-0095").build());
+        NVDResponse nvdResponse = nvdRequest.executeRequest();
+
+        assertEquals(200, nvdResponse.getStatus());
+        assertEquals("CVE-1999-0095", nvdResponse.getCveResponse().getVulnerabilities().get(0).getCve().getId());
     }
 
     @Test
@@ -59,7 +77,7 @@ public class PiqueNvdMirrorTest {
 
     private void runInsertCve(String dbContext, Cve cve) {
         try {
-            PiqueNvdMirror.insertSingleCve(dbContext, cve);
+            NvdMirror.insertSingleCve(dbContext, cve);
         } catch (DataAccessException e) {
             log.error("Query failed with error: ", e);
             throw new RuntimeException(e);

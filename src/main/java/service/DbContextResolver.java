@@ -2,7 +2,7 @@ package service;
 
 import businessObjects.cve.Cve;
 import businessObjects.cve.NvdMirrorMetaData;
-import common.Utils;
+import common.Constants;
 import persistence.IBulkDao;
 import persistence.IDao;
 import persistence.IMetaDataDao;
@@ -16,14 +16,14 @@ import persistence.postgreSQL.PostgresMetaDataDao;
 public class DbContextResolver {
 
     public IBulkDao<Cve> resolveBulkDao(String dbContext) {
-        return dbContext.equals(Utils.DB_CONTEXT_LOCAL) ? new MongoBulkCveDao() : new PostgresBulkCveDao();
+        return dbContext.equals(Constants.DB_CONTEXT_LOCAL) ? new MongoBulkCveDao() : new PostgresBulkCveDao();
     }
 
     public IMetaDataDao<NvdMirrorMetaData> resolveMetaDataDao(String dbContext) {
-        return dbContext.equals(Utils.DB_CONTEXT_LOCAL) ? new MongoMetaDataDao() : new PostgresMetaDataDao();
+        return dbContext.equals(Constants.DB_CONTEXT_LOCAL) ? new MongoMetaDataDao() : new PostgresMetaDataDao();
     }
 
     public IDao<Cve> resolveCveDao(String dbContext) {
-        return dbContext.equals(Utils.DB_CONTEXT_LOCAL) ? new MongoCveDao() : new PostgresCveDao();
+        return dbContext.equals(Constants.DB_CONTEXT_LOCAL) ? new MongoCveDao() : new PostgresCveDao();
     }
 }

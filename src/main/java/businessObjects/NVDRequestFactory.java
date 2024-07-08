@@ -1,6 +1,6 @@
 package businessObjects;
 
-import common.Constants;
+import common.NvdConstants;
 import common.ParameterBuilder;
 import org.apache.http.Header;
 import org.apache.http.NameValuePair;
@@ -9,13 +9,18 @@ import org.apache.http.message.BasicNameValuePair;
 import java.util.ArrayList;
 import java.util.List;
 
+
+/**
+ * Delete me
+ * Keeping temporarily to ensure builder patterns work as expected
+ */
 public class NVDRequestFactory {
 
     // Constructors
     public static NVDRequest createNVDRequest(String httpMethod, String baseURI, Header[] headers, int startIndex, int resultsPerPage) {
         ParameterBuilder pb = new ParameterBuilder();
-        List<NameValuePair> params = pb.addParameter(Constants.START_INDEX_PARAM_NAME, Integer.toString(startIndex))
-                .addParameter(Constants.RESULTS_PER_PAGE_PARAM_NAME, Integer.toString(resultsPerPage))
+        List<NameValuePair> params = pb.addParameter(NvdConstants.START_INDEX, Integer.toString(startIndex))
+                .addParameter(NvdConstants.RESULTS_PER_PAGE, Integer.toString(resultsPerPage))
                 .build();
 
         return new NVDRequest(httpMethod, baseURI, headers, params);
