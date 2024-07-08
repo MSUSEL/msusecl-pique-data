@@ -6,10 +6,10 @@ import exceptions.ApiCallException;
 import exceptions.DataAccessException;
 import service.GhsaApiService;
 import service.NvdApiService;
-import service.NvdMirrorService;
+import service.MirrorService;
 
 public class PiqueData {
-    private static final NvdMirrorService nvdMirrorService = new NvdMirrorService();
+    private static final MirrorService MIRROR_SERVICE = new MirrorService();
     private static final NvdApiService nvdApiService = new NvdApiService();
     private static final GhsaApiService ghsaApiService = new GhsaApiService();
 
@@ -17,15 +17,15 @@ public class PiqueData {
     //     Methods to interact with CVEs
     // ---------------------------------------------------------------------
     public static Cve getCveById(String dbContext, String cveId) throws DataAccessException {
-        return nvdMirrorService.handleGetCveById(dbContext, cveId);
+        return MIRROR_SERVICE.handleGetCveById(dbContext, cveId);
     }
 
     public static Cve[] getCveById(String dbContext, String[] cveIds) throws DataAccessException {
-        return nvdMirrorService.handleGetCveById(dbContext, cveIds);
+        return MIRROR_SERVICE.handleGetCveById(dbContext, cveIds);
     }
 
     public static String[] getCwes(String dbContext, String cveId) throws DataAccessException{
-        return nvdMirrorService.handleGetCwes(dbContext, cveId);
+        return MIRROR_SERVICE.handleGetCwes(dbContext, cveId);
     }
 
     public static Cve getCveFromNvd(String cveId) throws ApiCallException {
