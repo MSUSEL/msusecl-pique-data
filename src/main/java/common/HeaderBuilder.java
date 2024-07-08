@@ -16,8 +16,4 @@ public class HeaderBuilder {
     public Header[] build() {
         return headers.toArray(new Header[0]);
     }
-
-//    public Header[] build() {
-//        return headers.toArray(new Header[headers.size()]);
-//    }
 }

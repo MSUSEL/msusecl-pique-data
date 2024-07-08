@@ -2,7 +2,7 @@ package persistence.postgreSQL;
 
 import java.sql.*;
 
-import common.Utils;
+import common.Constants;
 import exceptions.DataAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,12 +34,12 @@ public class PostgresCveDao implements IDao<Cve> {
                 String result = rs.getString("details");
                 return cveDetailsMarshaller.unmarshalJson(result);
             } else {
-                LOGGER.info(Utils.DB_QUERY_NO_RESULTS);
-                throw new DataAccessException(Utils.DB_QUERY_NO_RESULTS);
+                LOGGER.info(Constants.DB_QUERY_NO_RESULTS);
+                throw new DataAccessException(Constants.DB_QUERY_NO_RESULTS);
             }
         } catch (SQLException e) {
-            LOGGER.error(Utils.DB_QUERY_FAILED, e);
-            throw new DataAccessException(Utils.DB_QUERY_FAILED, e);
+            LOGGER.error(Constants.DB_QUERY_FAILED, e);
+            throw new DataAccessException(Constants.DB_QUERY_FAILED, e);
         }
     }
 
@@ -53,7 +53,7 @@ public class PostgresCveDao implements IDao<Cve> {
             statement.setString(2, cveDetailsMarshaller.marshalJson(cveDetails));
             statement.executeUpdate();
         } catch (SQLException e) {
-            throw new DataAccessException(Utils.DB_QUERY_FAILED, e);
+            throw new DataAccessException(Constants.DB_QUERY_FAILED, e);
         }
     }
 
