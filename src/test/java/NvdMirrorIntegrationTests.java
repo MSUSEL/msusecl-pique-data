@@ -50,4 +50,11 @@ public class NvdMirrorIntegrationTests {
         Cve cve = PiqueData.getCveById(Constants.DB_CONTEXT_LOCAL, "CVE-1999-0095");
         NvdMirror.insertSingleCve(Constants.DB_CONTEXT_LOCAL, cve);
     }
+
+    @Test
+    public void testPersistentInsertSingleCve() throws DataAccessException {
+        // TODO replace this with mocked Cve object
+        Cve cve = PiqueData.getCveById(Constants.DB_CONTEXT_PERSISTENT, "CVE-1999-0095");
+        NvdMirror.insertSingleCve(Constants.DB_CONTEXT_PERSISTENT, cve);
+    }
 }
