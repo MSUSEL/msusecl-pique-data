@@ -5,7 +5,7 @@ import persistence.IBulkDao;
 
 import java.util.List;
 
-public class PostgresBulkCveDao implements IBulkDao<Cve> {
+public final class PostgresBulkCveDao implements IBulkDao<Cve> {
     @Override
     public void insertMany(List<Cve> entity) {
 

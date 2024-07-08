@@ -7,6 +7,6 @@ import java.util.ArrayList;
 
 @Getter
 @Setter
-public class Metrics {
+public final class Metrics {
     private ArrayList<CvssMetricV2> cvssMetricV2;
 }

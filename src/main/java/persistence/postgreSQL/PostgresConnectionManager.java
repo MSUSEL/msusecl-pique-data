@@ -11,7 +11,7 @@ import common.DataUtilityProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PostgresConnectionManager {
+public final class PostgresConnectionManager {
     private static final BasicDataSource connectionPool = new BasicDataSource();
     private static final Properties prop = initializeProperties();
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresConnectionManager.class);

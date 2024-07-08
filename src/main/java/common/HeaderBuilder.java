@@ -5,7 +5,7 @@ import org.apache.http.message.BasicHeader;
 
 import java.util.ArrayList;
 
-public class HeaderBuilder {
+public final class HeaderBuilder {
     private final ArrayList<Header> headers = new ArrayList<>();
 
     public HeaderBuilder addHeader(String name, String value) {

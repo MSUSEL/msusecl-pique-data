@@ -10,7 +10,7 @@ import java.nio.charset.StandardCharsets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JsonResponseHandler implements ResponseHandler<String> {
+public final class JsonResponseHandler implements ResponseHandler<String> {
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonResponseHandler.class);
 
     @Override

@@ -21,7 +21,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-public class GHSARequest extends BaseRequest {
+public final class GHSARequest extends BaseRequest {
     private static final Logger LOGGER = LoggerFactory.getLogger(GHSARequest.class);
     private final JsonResponseHandler handler = new JsonResponseHandler();
     private final String query;

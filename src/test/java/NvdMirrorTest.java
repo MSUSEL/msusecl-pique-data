@@ -1,6 +1,6 @@
 import businessObjects.HTTPMethod;
-import businessObjects.NVDRequest;
-import businessObjects.NVDResponse;
+import businessObjects.NvdRequest;
+import businessObjects.NvdResponse;
 import businessObjects.cve.Cve;
 import common.*;
 import exceptions.ApiCallException;
@@ -41,12 +41,12 @@ public class NvdMirrorTest {
     @Test
     public void testNvdMirrorService() {
         headerBuilder.addHeader(NvdConstants.API_KEY, apiKey).build();
-        NVDRequest nvdRequest = new NVDRequest(
+        NvdRequest nvdRequest = new NvdRequest(
                 HTTPMethod.GET,
                 Constants.NVD_CVE_URI,
                 headerBuilder.addHeader(NvdConstants.API_KEY, apiKey).build(),
                 parameterBuilder.addParameter(NvdConstants.CVE_ID, "CVE-1999-0095").build());
-        NVDResponse nvdResponse = nvdRequest.executeRequest();
+        NvdResponse nvdResponse = nvdRequest.executeRequest();
 
         assertEquals(200, nvdResponse.getStatus());
         assertEquals("CVE-1999-0095", nvdResponse.getCveResponse().getVulnerabilities().get(0).getCve().getId());

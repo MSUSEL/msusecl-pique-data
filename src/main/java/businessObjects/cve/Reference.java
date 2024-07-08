@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class Reference {
+public final class Reference {
     private String url;
     private String source;
 }

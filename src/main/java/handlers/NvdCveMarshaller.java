@@ -7,7 +7,7 @@ import com.google.gson.JsonSyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NvdCveMarshaller implements IJsonMarshaller<CVEResponse> {
+public final class NvdCveMarshaller implements IJsonMarshaller<CVEResponse> {
     private static final Logger LOGGER = LoggerFactory.getLogger(NvdCveMarshaller.class);
 
     @Override

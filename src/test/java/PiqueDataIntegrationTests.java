@@ -5,6 +5,7 @@ import common.DataUtilityProperties;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
 import org.junit.Test;
+import presentation.NvdMirror;
 import presentation.PiqueData;
 
 import java.util.Properties;
@@ -20,15 +21,21 @@ import static org.junit.Assert.assertNotNull;
 public class PiqueDataIntegrationTests {
     private final Properties prop = DataUtilityProperties.getProperties();
     private final String CVE_A = "CVE-1999-0095";
-    private final String CVE_B = "CVE-1999-1122";
+    private final String CVE_B = "CVE-1999-1302";
     private final String CVE_A_CWE_ORACLE = "NVD-CWE-Other";
-    private final String CVE_B_CWE_ORACLE = "Vulnerability in restore in SunOS 4.0.3 and earlier allows local users to gain privileges.";
+    private final String CVE_B_CWE_ORACLE = "NVD-CWE-noinfo";
     private final String GHSA_ID_A = "GHSA-53q7-4874-24qg";
 
     @Test
-    public void testGetCveById() throws DataAccessException {
+    public void testLocalGetCveById() throws DataAccessException {
         Cve result = PiqueData.getCveById(Constants.DB_CONTEXT_LOCAL, CVE_A);
         assertEquals(CVE_A, result.getId());
+    }
+
+    @Test
+    public void testPersistentGetCveById() throws DataAccessException {
+        Cve cve = PiqueData.getCveById(Constants.DB_CONTEXT_PERSISTENT, CVE_A);
+        NvdMirror.insertSingleCve(Constants.DB_CONTEXT_PERSISTENT, cve);
     }
 
     @Test

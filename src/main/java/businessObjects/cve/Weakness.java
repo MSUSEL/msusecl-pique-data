@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 @Getter
 @Setter
-public class Weakness {
+public final class Weakness {
     private String source;
     private String type;
     private ArrayList<WeaknessDescription> description;
