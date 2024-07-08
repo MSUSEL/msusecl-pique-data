@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class WeaknessDescription {
+public final class WeaknessDescription {
     private String lang;
     private String value;
 }

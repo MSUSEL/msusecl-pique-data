@@ -1,6 +1,8 @@
 package persistence.mongo;
 
 import businessObjects.cve.Cve;
+import com.mongodb.client.MongoIterable;
+import com.mongodb.client.model.Filters;
 import handlers.CveMarshaller;
 
 import com.mongodb.MongoBulkWriteException;
@@ -10,6 +12,7 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.InsertOneModel;
 import com.mongodb.client.model.WriteModel;
 
+import org.bson.conversions.Bson;
 import persistence.IBulkDao;
 
 import org.bson.Document;
@@ -17,7 +20,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import static com.mongodb.assertions.Assertions.assertNotNull;
 
 /**
  * CAUTION - This class should only be used to perform operations
@@ -26,7 +32,7 @@ import java.util.List;
  * Please use the MongoCveDao class for inserting into / updating
  * a subset of cves in the NVD.
  */
-public class MongoBulkCveDao implements IBulkDao<Cve>{
+public final class MongoBulkCveDao implements IBulkDao<Cve>{
     private final MongoClient client = MongoConnection.getInstance();
     private final MongoDatabase db = client.getDatabase("nvdMirror");
     private final MongoCollection<Document> vulnerabilities = db.getCollection("vulnerabilities");
@@ -49,8 +55,17 @@ public class MongoBulkCveDao implements IBulkDao<Cve>{
     }
 
     @Override
-    public Cve[] fetchMany(String[] entities) {
-        return new Cve[0];
+    public Cve[] fetchMany(String[] cveIds) {
+        assertNotNull(client);
+        List<String> idList = Arrays.asList(cveIds);
+        Bson filter = Filters.in("id", idList);
+        MongoIterable<Document> documents = vulnerabilities.find(filter);
+        List<Cve> cves = new ArrayList<>();
+        for(Document document : documents) {
+            String json = document.toJson();
+            cves.add(cveMarshaller.unmarshalJson(json));
+        }
+        return cves.toArray(new Cve[0]);
     }
 
     @Override

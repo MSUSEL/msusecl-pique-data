@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 @Getter
 @Setter
-public class Node {
+public final class Node {
     private String operator;
     private String negate;
     private ArrayList<CpeMatch> cpeMatch;

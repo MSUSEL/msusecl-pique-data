@@ -10,7 +10,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class SecurityAdvisory {
+public final class SecurityAdvisory {
     private String ghsaId;
     private String summary;
     private Cwes cwes;

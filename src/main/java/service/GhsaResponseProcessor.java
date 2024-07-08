@@ -5,7 +5,7 @@ import businessObjects.ghsa.CweNode;
 
 import java.util.ArrayList;
 
-public class GhsaResponseProcessor {
+public final class GhsaResponseProcessor {
     public ArrayList<CweNode> extractCweNodes(GHSAResponse ghsaResponse) {
         return ghsaResponse.getSecurityAdvisory().getCwes().getNodes();
     }

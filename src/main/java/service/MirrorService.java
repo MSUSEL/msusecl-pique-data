@@ -7,7 +7,7 @@ import persistence.IDao;
 import persistence.IMetaDataDao;
 import exceptions.DataAccessException;
 
-public class MirrorService {
+public final class MirrorService {
     private final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
     private final DbContextResolver dbContextResolver = new DbContextResolver();
 
