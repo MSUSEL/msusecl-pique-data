@@ -1,5 +1,6 @@
 package persistence.postgreSQL;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -25,9 +26,9 @@ public final class PostgresConnectionManager {
                         prop.getProperty("dbname")));
         connectionPool.setUsername(prop.getProperty("username"));
         connectionPool.setPassword(prop.getProperty("password"));
-        connectionPool.setMinIdle(5);
-        connectionPool.setMaxIdle(10);
-        connectionPool.setMaxOpenPreparedStatements(100);
+//        connectionPool.setMinIdle(5);
+//        connectionPool.setMaxIdle(10);
+//        connectionPool.setMaxOpenPreparedStatements(100);
     }
 
     public static Connection getConnection() {
@@ -35,6 +36,15 @@ public final class PostgresConnectionManager {
             return connectionPool.getConnection();
         } catch (SQLException e) {
             LOGGER.error("Connection to postgres failed. ", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void setDbProperties(String hostname, String port, String dbname) {
+        try {
+            FileWriter fileWriter = new FileWriter("db.properties");
+            fileWriter.write("driver=jdbc");
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
