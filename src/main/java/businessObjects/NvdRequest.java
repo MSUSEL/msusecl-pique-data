@@ -2,6 +2,8 @@ package businessObjects;
 
 import businessObjects.baseClasses.BaseRequest;
 import businessObjects.cve.CVEResponse;
+import com.sun.corba.se.impl.orbutil.closure.Constant;
+import common.Constants;
 import handlers.IJsonMarshaller;
 import handlers.JsonResponseHandler;
 import handlers.NvdCveMarshaller;
@@ -61,30 +63,27 @@ public final class NvdRequest extends BaseRequest {
         try {
             return new URIBuilder(baseURI).addParameters(params).build();
         } catch (URISyntaxException e) {
-            LOGGER.error("Could not build URI with given inputs", e);
+            LOGGER.error(Constants.URI_BUILD_FAILURE_MESSAGE, e);
             throw new RuntimeException(e);
         }
     }
 
     private NvdResponse makeHttpCall(HttpGet request) {
         NvdResponse nvdResponse = new NvdResponse();
-        IJsonMarshaller<CVEResponse> nvdCveMarshaller = new NvdCveMarshaller();
-        JsonResponseHandler handler = new JsonResponseHandler();
 
         try (CloseableHttpClient client = HttpClients.createDefault();
              CloseableHttpResponse response = client.execute(request)) {
 
             int status = response.getStatusLine().getStatusCode();
             if (status >= 200 && status < 300) {
-                String json = handler.handleResponse(response);
-                nvdResponse.setCveResponse(nvdCveMarshaller.unmarshalJson(json));
+                String json = new JsonResponseHandler().handleResponse(response);
+                nvdResponse.setCveResponse(new NvdCveMarshaller().unmarshalJson(json));
                 nvdResponse.setStatus(status);
             } else {
-                LOGGER.info("Response status: {}", status);
-                throw new IOException("Failed to execute request: " + response.getStatusLine());
+                LOGGER.info(Constants.RESPONSE_STATUS_MESSAGE, status);
+                throw new IOException(Constants.REQUEST_EXECUTION_FAILURE_MESSAGE + response.getStatusLine());
             }
         } catch (IOException e) {
-            LOGGER.error("Request failed", e);
             throw new RuntimeException(e);
         }
         return nvdResponse;
