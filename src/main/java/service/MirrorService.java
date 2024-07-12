@@ -16,7 +16,7 @@ public final class MirrorService {
         return dao.fetchById(cveId);
     }
 
-    public Cve[] handleGetCveById(String dbContext, String[] cveIds) {
+    public Cve[] handleGetCveById(String dbContext, String[] cveIds) throws DataAccessException {
         IBulkDao<Cve> dao = dbContextResolver.resolveBulkDao(dbContext);
         return dao.fetchMany(cveIds);
     }
@@ -35,4 +35,10 @@ public final class MirrorService {
         IDao<Cve> dao = dbContextResolver.resolveCveDao(dbContext);
         dao.insert(cve);
     }
+
+    public void handleDeleteSingleCve(String dbContext, String cveId) throws DataAccessException {
+        IDao<Cve> dao = dbContextResolver.resolveCveDao(dbContext);
+        dao.delete(cveId);
+    }
+
 }

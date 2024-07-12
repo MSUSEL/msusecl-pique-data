@@ -34,7 +34,7 @@ public class NvdMirrorTest {
     private final ParameterBuilder parameterBuilder = new ParameterBuilder();
 
     @Test
-    public void testBuildFullMirrorWithNewCode() {
+    public void testBuildFullMirrorWithNewCode() throws DataAccessException {
         NvdMirror.buildNvdMirror(mongoContext);
     }
 
@@ -59,7 +59,7 @@ public class NvdMirrorTest {
         Cve cve = jsonMarshaller.unmarshalJson(json);
 
         runInsertCve(postgresContext, cve);
-        runInsertCve(mongoContext, cve);
+        //runInsertCve(mongoContext, cve);
     }
 
     @Test

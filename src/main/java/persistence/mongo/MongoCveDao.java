@@ -58,7 +58,7 @@ public final class MongoCveDao implements IDao<Cve> {
     }
 
     @Override
-    public void delete(Cve cveDetails) {
+    public void delete(String cveId) {
 
     }
 }
