@@ -25,7 +25,7 @@ public final class PostgresCveDao implements IDao<Cve> {
     @Override
     public Cve fetchById(String id) throws DataAccessException {
         try {
-            String sql = "SELECT details FROM nvd_mirror.cve WHERE cve_id = ?;";
+            String sql = "SELECT details FROM nvd.cve WHERE cve_id = ?;";
             PreparedStatement statement = conn.prepareStatement(sql);
             statement.setString(1, id);
             ResultSet rs = statement.executeQuery();
@@ -46,8 +46,8 @@ public final class PostgresCveDao implements IDao<Cve> {
     @Override
     public void insert(Cve cveDetails) throws DataAccessException {
         // TODO verify success?
+        String sql = "INSERT INTO nvd.cve (cve_id, details) VALUES (?, CAST(? AS jsonb));";
         try {
-            String sql = "INSERT INTO nvd_mirror.cve (cve_id, details) VALUES (?, CAST(? AS jsonb));";
             PreparedStatement statement = conn.prepareStatement(sql);
             statement.setString(1, cveDetails.getId());
             statement.setString(2, cveDetailsMarshaller.marshalJson(cveDetails));
@@ -64,8 +64,14 @@ public final class PostgresCveDao implements IDao<Cve> {
     }
 
     @Override
-    public void delete(Cve t) throws DataAccessException{
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'delete'");
+    public void delete(String cveId) throws DataAccessException{
+        String sql = "DELETE FROM nvd.cve WHERE cve_id = ? RETURNING cve_id;";
+        try {
+            PreparedStatement statement = conn.prepareStatement(sql);
+            statement.setString(1, cveId);
+            statement.executeQuery();
+        } catch (SQLException e) {
+            throw new DataAccessException("Query failed. ", e);
+        }
     }
 }

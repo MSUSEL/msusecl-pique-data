@@ -2,6 +2,8 @@ package exceptions;
 
 import lombok.Getter;
 
+import java.sql.SQLException;
+
 @Getter
 public class ApiCallException extends Exception {
     private final int errorCode;
