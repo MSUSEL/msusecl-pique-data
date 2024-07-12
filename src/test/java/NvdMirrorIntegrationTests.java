@@ -16,12 +16,12 @@ import presentation.PiqueData;
 public class NvdMirrorIntegrationTests {
 
     @Test
-    public void testBuildLocalNvdMirror() {
+    public void testBuildLocalNvdMirror() throws DataAccessException {
         NvdMirror.buildNvdMirror(Constants.DB_CONTEXT_LOCAL);
     }
 
     @Test
-    public void testBuildPersistentNvdMirror() {
+    public void testBuildPersistentNvdMirror() throws DataAccessException {
         NvdMirror.buildNvdMirror(Constants.DB_CONTEXT_PERSISTENT);
     }
 
