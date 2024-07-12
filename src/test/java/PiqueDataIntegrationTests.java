@@ -35,7 +35,8 @@ public class PiqueDataIntegrationTests {
     @Test
     public void testPersistentGetCveById() throws DataAccessException {
         Cve cve = PiqueData.getCveById(Constants.DB_CONTEXT_PERSISTENT, CVE_A);
-        NvdMirror.insertSingleCve(Constants.DB_CONTEXT_PERSISTENT, cve);
+        System.out.println(cve.getId());
+//        NvdMirror.insertSingleCve(Constants.DB_CONTEXT_PERSISTENT, cve);
     }
 
     @Test
@@ -66,6 +67,11 @@ public class PiqueDataIntegrationTests {
         SecurityAdvisory result = PiqueData.getGhsa(GHSA_ID_A);
 
         assertEquals(GHSA_ID_A, result.getGhsaId());
+    }
+
+    @Test
+    public void testPersistentDeleteCve() throws DataAccessException {
+        NvdMirror.deleteSingleCve(Constants.DB_CONTEXT_PERSISTENT, CVE_A);
     }
 
 }

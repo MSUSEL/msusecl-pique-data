@@ -7,6 +7,7 @@ import businessObjects.cve.CVEResponse;
 import businessObjects.cve.Cve;
 import businessObjects.cve.NvdMirrorMetaData;
 import common.*;
+import exceptions.DataAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import persistence.IBulkDao;
@@ -19,10 +20,8 @@ public final class NvdApiService {
     private static final Logger LOGGER = LoggerFactory.getLogger(NvdApiService.class);
     private final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
     private final DbContextResolver dbContextResolver = new DbContextResolver();
-    private final HeaderBuilder headerBuilder = new HeaderBuilder();
     private final Properties prop = DataUtilityProperties.getProperties();
     private final String apiKey = Utils.getAuthToken(prop.getProperty("nvd-api-key-path"));
-    private final ParameterBuilder parameterBuilder = new ParameterBuilder();
 
     /**
      * Calls to NVD CVE2.0 API filtering results to single CVE
@@ -30,6 +29,9 @@ public final class NvdApiService {
      * @return Cve object from NVD response
      */
     public Cve handleGetCveFromNvd(String cveId) {
+        HeaderBuilder headerBuilder = new HeaderBuilder();
+        ParameterBuilder parameterBuilder = new ParameterBuilder();
+
         NvdRequest request = new NvdRequest(
                 HTTPMethod.GET,
                 Constants.NVD_CVE_URI,
@@ -49,19 +51,21 @@ public final class NvdApiService {
      * @param startIndex Where in the index of CVEs should the NVD begin returning paginated results
      * @param resultsPerPage Total number of results per call - typically the max number of 2000
      */
-    public void handleGetPaginatedCves(String dbContext, int startIndex, int resultsPerPage) {
+    public void handleGetPaginatedCves(String dbContext, int startIndex, int resultsPerPage) throws DataAccessException {
         IBulkDao<Cve> bulkDao = dbContextResolver.resolveBulkDao(dbContext);
         IMetaDataDao<NvdMirrorMetaData> metadataDao = dbContextResolver.resolveMetaDataDao(dbContext);
         int cveCount = startIndex + 1;
 
         for (int i = startIndex; i < cveCount; i += Constants.NVD_MAX_PAGE_SIZE) {
+            HeaderBuilder headerBuilder = new HeaderBuilder();
+            ParameterBuilder parameterBuilder = new ParameterBuilder();
             // send request and handle the response
             NvdRequest request = new NvdRequest(
                     HTTPMethod.GET,
                     Constants.NVD_CVE_URI,
                     headerBuilder.addHeader(NvdConstants.API_KEY, apiKey).build(),
-                    parameterBuilder.addParameter(NvdConstants.START_INDEX, Integer.toString(startIndex))
-                            .addParameter(NvdConstants.RESULTS_PER_PAGE, Integer.toString(Constants.NVD_MAX_PAGE_SIZE))
+                    parameterBuilder.addParameter(NvdConstants.START_INDEX, Integer.toString(i))
+                            .addParameter(NvdConstants.RESULTS_PER_PAGE, Integer.toString(resultsPerPage))
                             .build());
             NvdResponse response = request.executeRequest();
             CVEResponse cveResponse = response.getCveResponse();
@@ -86,13 +90,16 @@ public final class NvdApiService {
      * @param lastModEndDate Typically it is the current time - but provides the upper bound to the time window
      *                       from which to pull updates
      */
-    public void handleUpdateNvdMirror(String dbContext, String lastModStartDate, String lastModEndDate) {
+    public void handleUpdateNvdMirror(String dbContext, String lastModStartDate, String lastModEndDate) throws DataAccessException {
         IBulkDao<Cve> bulkDao = dbContextResolver.resolveBulkDao(dbContext);
         IMetaDataDao<NvdMirrorMetaData> metadataDao = dbContextResolver.resolveMetaDataDao(dbContext);
         int startIndex = 0;
         int totalResults = startIndex + 1;
 
         for (int i = startIndex; i < totalResults; i += Constants.NVD_MAX_PAGE_SIZE) {
+            HeaderBuilder headerBuilder = new HeaderBuilder();
+            ParameterBuilder parameterBuilder = new ParameterBuilder();
+
             NvdRequest request = new NvdRequest(
                     HTTPMethod.GET,
                     Constants.NVD_CVE_URI,

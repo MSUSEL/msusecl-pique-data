@@ -12,6 +12,7 @@ import common.DataUtilityProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 public final class PostgresConnectionManager {
     private static final BasicDataSource connectionPool = new BasicDataSource();
     private static final Properties prop = initializeProperties();
@@ -26,9 +27,6 @@ public final class PostgresConnectionManager {
                         prop.getProperty("dbname")));
         connectionPool.setUsername(prop.getProperty("username"));
         connectionPool.setPassword(prop.getProperty("password"));
-//        connectionPool.setMinIdle(5);
-//        connectionPool.setMaxIdle(10);
-//        connectionPool.setMaxOpenPreparedStatements(100);
     }
 
     public static Connection getConnection() {

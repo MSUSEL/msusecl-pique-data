@@ -18,7 +18,7 @@ public final class NvdMirror {
     private static final NvdApiService nvdApiService =  new NvdApiService();
     private static final MirrorService mirrorService = new MirrorService();
 
-    public static void buildNvdMirror(String dbContext) {
+    public static void buildNvdMirror(String dbContext) throws DataAccessException {
         nvdApiService.handleGetPaginatedCves(dbContext, Constants.DEFAULT_START_INDEX, Constants.NVD_MAX_PAGE_SIZE);
     }
 
@@ -34,5 +34,9 @@ public final class NvdMirror {
 
     public static void insertSingleCve(String dbContext, Cve cve) throws DataAccessException {
         mirrorService.handleInsertSingleCve(dbContext, cve);
+    }
+
+    public static void deleteSingleCve(String dbContext, String cveId) throws DataAccessException {
+        mirrorService.handleDeleteSingleCve(dbContext, cveId);
     }
 }
