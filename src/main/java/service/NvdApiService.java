@@ -8,6 +8,8 @@ import businessObjects.cve.Cve;
 import businessObjects.cve.NvdMirrorMetaData;
 import common.*;
 import exceptions.DataAccessException;
+import org.apache.http.Header;
+import org.apache.http.NameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import persistence.IBulkDao;
@@ -21,7 +23,7 @@ public final class NvdApiService {
     private final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
     private final DbContextResolver dbContextResolver = new DbContextResolver();
     private final Properties prop = DataUtilityProperties.getProperties();
-    private final String apiKey = Utils.getAuthToken(prop.getProperty("nvd-api-key-path"));
+    private final String apiKey = Utils.getAuthToken(prop.getProperty(Constants.NVD_API_KEY_PATH));
 
     /**
      * Calls to NVD CVE2.0 API filtering results to single CVE
@@ -29,14 +31,7 @@ public final class NvdApiService {
      * @return Cve object from NVD response
      */
     public Cve handleGetCveFromNvd(String cveId) {
-        HeaderBuilder headerBuilder = new HeaderBuilder();
-        ParameterBuilder parameterBuilder = new ParameterBuilder();
-
-        NvdRequest request = new NvdRequest(
-                HTTPMethod.GET,
-                Constants.NVD_CVE_URI,
-                headerBuilder.addHeader(NvdConstants.API_KEY, apiKey).build(),
-                parameterBuilder.addParameter(NvdConstants.CVE_ID, cveId).build());
+        NvdRequest request = new NvdRequest(HTTPMethod.GET, Constants.NVD_CVE_URI, useDefaultHeaders(), new ParameterBuilder().addParameter(NvdConstants.CVE_ID, cveId).build());
         NvdResponse response = request.executeRequest();
         CVEResponse cveResponse = response.getCveResponse();
 
@@ -57,16 +52,10 @@ public final class NvdApiService {
         int cveCount = startIndex + 1;
 
         for (int i = startIndex; i < cveCount; i += Constants.NVD_MAX_PAGE_SIZE) {
-            HeaderBuilder headerBuilder = new HeaderBuilder();
             ParameterBuilder parameterBuilder = new ParameterBuilder();
+
             // send request and handle the response
-            NvdRequest request = new NvdRequest(
-                    HTTPMethod.GET,
-                    Constants.NVD_CVE_URI,
-                    headerBuilder.addHeader(NvdConstants.API_KEY, apiKey).build(),
-                    parameterBuilder.addParameter(NvdConstants.START_INDEX, Integer.toString(i))
-                            .addParameter(NvdConstants.RESULTS_PER_PAGE, Integer.toString(resultsPerPage))
-                            .build());
+            NvdRequest request = new NvdRequest(HTTPMethod.GET, Constants.NVD_CVE_URI, useDefaultHeaders(), buildPaginateParams(i, resultsPerPage, parameterBuilder));
             NvdResponse response = request.executeRequest();
             CVEResponse cveResponse = response.getCveResponse();
 
@@ -75,7 +64,7 @@ public final class NvdApiService {
             NvdMirrorMetaData nvdMirrorMetaData = cveResponseProcessor.formatNvdMetaData(cveResponse);
 
             // Persist the data
-            bulkDao.insertMany(cves);   // TODO implement insertMany in postgresBulkDao
+            bulkDao.insertMany(cves);
             conditionallyInsertMetaData(nvdMirrorMetaData, metadataDao, startIndex, cveCount);
             handleSleep(startIndex, cveCount);
         }
@@ -97,18 +86,9 @@ public final class NvdApiService {
         int totalResults = startIndex + 1;
 
         for (int i = startIndex; i < totalResults; i += Constants.NVD_MAX_PAGE_SIZE) {
-            HeaderBuilder headerBuilder = new HeaderBuilder();
             ParameterBuilder parameterBuilder = new ParameterBuilder();
 
-            NvdRequest request = new NvdRequest(
-                    HTTPMethod.GET,
-                    Constants.NVD_CVE_URI,
-                    headerBuilder.addHeader(NvdConstants.API_KEY, apiKey).build(),
-                    parameterBuilder.addParameter(NvdConstants.START_INDEX, Integer.toString(startIndex))
-                            .addParameter(NvdConstants.RESULTS_PER_PAGE, Integer.toString(Constants.NVD_MAX_PAGE_SIZE))
-                            .addParameter(NvdConstants.LAST_MOD_START_DATE, lastModStartDate)
-                            .addParameter(NvdConstants.LAST_MOD_END_DATE, lastModEndDate)
-                            .build());
+            NvdRequest request = new NvdRequest(HTTPMethod.GET, Constants.NVD_CVE_URI, useDefaultHeaders(), buildUpdateParams(i, lastModStartDate, lastModEndDate, parameterBuilder));
             NvdResponse response = request.executeRequest();
             CVEResponse cveResponse = response.getCveResponse();
 
@@ -120,6 +100,25 @@ public final class NvdApiService {
             conditionallyInsertMetaData(nvdMirrorMetaData, metadataDao, startIndex, totalResults);
             handleSleep(startIndex, totalResults);
         }
+    }
+
+    private Header[] useDefaultHeaders() {
+        return new HeaderBuilder().addHeader(NvdConstants.API_KEY, apiKey).build();
+    }
+
+    private List<NameValuePair> buildPaginateParams(int index, int resultsPerPage, ParameterBuilder parameterBuilder) {
+        return parameterBuilder
+                .addParameter(NvdConstants.START_INDEX, Integer.toString(index))
+                .addParameter(NvdConstants.RESULTS_PER_PAGE, Integer.toString(resultsPerPage))
+                .build();
+    }
+
+    private List<NameValuePair> buildUpdateParams(int index, String lastModStartDate, String lastModEndDate, ParameterBuilder parameterBuilder) {
+        buildPaginateParams(index, Constants.NVD_MAX_PAGE_SIZE, parameterBuilder);
+        return parameterBuilder
+                .addParameter(NvdConstants.LAST_MOD_START_DATE, lastModStartDate)
+                .addParameter(NvdConstants.LAST_MOD_END_DATE, lastModEndDate)
+                .build();
     }
 
     private void handleSleep(int startIndex, int count) {

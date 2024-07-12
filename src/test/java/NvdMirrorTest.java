@@ -26,16 +26,13 @@ import static org.junit.Assert.assertNotNull;
 @Slf4j
 public class NvdMirrorTest {
     private final Properties prop = DataUtilityProperties.getProperties();
-    // private final String dbContext = prop.getProperty("db-context");
-    private final String mongoContext = Constants.DB_CONTEXT_LOCAL;
-    private final String postgresContext = Constants.DB_CONTEXT_PERSISTENT;
     private final HeaderBuilder headerBuilder = new HeaderBuilder();
-    private final String apiKey = Utils.getAuthToken(prop.getProperty("nvd-api-key-path"));
+    private final String apiKey = Utils.getAuthToken(prop.getProperty(Constants.NVD_API_KEY_PATH));
     private final ParameterBuilder parameterBuilder = new ParameterBuilder();
 
     @Test
     public void testBuildFullMirrorWithNewCode() throws DataAccessException {
-        NvdMirror.buildNvdMirror(mongoContext);
+        NvdMirror.buildNvdMirror(Constants.DB_CONTEXT_LOCAL);
     }
 
     @Test
@@ -58,7 +55,7 @@ public class NvdMirrorTest {
         String json = Utils.readFileWithBufferedReader("src/test/resources/test.json");
         Cve cve = jsonMarshaller.unmarshalJson(json);
 
-        runInsertCve(postgresContext, cve);
+        runInsertCve(Constants.DB_CONTEXT_PERSISTENT, cve);
         //runInsertCve(mongoContext, cve);
     }
 

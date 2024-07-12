@@ -1,6 +1,7 @@
 package businessObjects;
 
 import businessObjects.baseClasses.BaseRequest;
+import common.Constants;
 import handlers.JsonResponseHandler;
 import handlers.SecurityAdvisoryMarshaller;
 import common.Utils;
@@ -36,6 +37,7 @@ public final class GHSARequest extends BaseRequest {
         return executeGHSARequest();
     }
 
+    // TODO fix the awkward error handling here
     private GHSAResponse executeGHSARequest() {
         URI uri;
         GHSAResponse ghsaResponse = new GHSAResponse();
@@ -53,11 +55,10 @@ public final class GHSARequest extends BaseRequest {
                 ghsaResponse.setSecurityAdvisory(securityAdvisoryMarshaler.unmarshalJson(json));
                 ghsaResponse.setStatus(status);
             } else {
-                LOGGER.info("Response Status: {}", status);
-                throw new IOException("Failed to execute request: " + response.getStatusLine());
+                LOGGER.info(Constants.RESPONSE_STATUS_MESSAGE, status);
+                throw new IOException(Constants.REQUEST_EXECUTION_FAILURE_MESSAGE + response.getStatusLine());
             }
         } catch ( IOException e) {
-            LOGGER.info("Request failed", e);
             throw new RuntimeException(e);
         }
 
@@ -68,7 +69,7 @@ public final class GHSARequest extends BaseRequest {
         try {
             return new URIBuilder(baseURI).build();
         } catch (URISyntaxException e) {
-            LOGGER.error("Could not build URI with given inputs", e);
+            LOGGER.error(Constants.URI_BUILD_FAILURE_MESSAGE, e);
             throw new RuntimeException(e);
         }
     }
