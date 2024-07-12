@@ -18,4 +18,7 @@ public final class Constants {
     public static final int NVD_MAX_PAGE_SIZE = 2000;
     public static final String NVD_API_KEY_PATH = "nvd-api-key-path";
     public static final String GITHUB_TOKEN_PATH = "github-token-path";
+    public static final String URI_BUILD_FAILURE_MESSAGE = "Could not build URI with given inputs";
+    public static final String RESPONSE_STATUS_MESSAGE = "Response Status: {}";
+    public static final String REQUEST_EXECUTION_FAILURE_MESSAGE = "Failed to execute request: ";
 }
