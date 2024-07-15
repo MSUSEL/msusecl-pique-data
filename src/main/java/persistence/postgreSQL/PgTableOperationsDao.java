@@ -1,5 +1,7 @@
 package persistence.postgreSQL;
 
+import persistence.IDataSource;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -19,8 +21,8 @@ public final class PgTableOperationsDao {
             "CONSTRAINT \"cve_pkey\" PRIMARY KEY (\"id\") " +
             ") WITH (oids = false); ";
 
-    public PgTableOperationsDao() {
-        conn = PostgresConnectionManager.getConnection();
+    public PgTableOperationsDao(IDataSource<Connection> conn) {
+        this.conn = conn.getConnection();
     }
 
     public void buildCveTable() {
