@@ -1,4 +1,9 @@
+import com.mongodb.client.MongoClient;
 import exceptions.ApiCallException;
+import handlers.CveMarshaller;
+import handlers.IJsonMarshaller;
+import persistence.IDataSource;
+import persistence.mongo.MongoConnectionManager;
 import persistence.mongo.MongoCveDao;
 import exceptions.DataAccessException;
 import org.junit.Test;
@@ -101,21 +106,25 @@ public class DataUtilityTest {
     
     @Test
     public void testPostgresConnection() throws IOException, SQLException {
-        Connection conn = PostgresConnectionManager.getConnection();
+        IDataSource<Connection> dataSource = new PostgresConnectionManager();
+        Connection conn = dataSource.getConnection();
         assertNotNull(conn);
     }
     
     @Test
     public void testPostgresInsert() throws IOException, SQLException, DataAccessException {
-        Connection conn = PostgresConnectionManager.getConnection();
+        IDataSource<Connection> dataSource = new PostgresConnectionManager();
+        IDataSource<MongoClient> mongoDataSource = new MongoConnectionManager();
+        IJsonMarshaller<Cve> marshaller = new CveMarshaller();
+        Connection conn =  dataSource.getConnection();
         // This will definitely break and needs a totally different structure
 
         // Get a CVE that is currently stored in mongo
-        IDao<Cve> mongoDao = new MongoCveDao();
+        IDao<Cve> mongoDao = new MongoCveDao(mongoDataSource, marshaller);
         Cve cve = mongoDao.fetchById("CVE-1999-0095");
         
         // insertMany into postgres
-        IDao<Cve> postgresDao = new PostgresCveDao();
+        IDao<Cve> postgresDao = new PostgresCveDao(new PostgresConnectionManager(), new CveMarshaller());
         postgresDao.insert(cve);
     }
 
