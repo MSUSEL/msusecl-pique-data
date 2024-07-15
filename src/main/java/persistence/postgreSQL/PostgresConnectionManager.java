@@ -9,13 +9,14 @@ import org.apache.commons.dbcp2.BasicDataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import persistence.IDataSource;
 
 
-public final class PostgresConnectionManager {
+public final class PostgresConnectionManager implements IDataSource<Connection> {
     private static final BasicDataSource connectionPool = new BasicDataSource();
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresConnectionManager.class);
 
-    static {
+    public PostgresConnectionManager() {
         connectionPool.setUrl(
                 buildConnectionString(
                         System.getenv("PG_DRIVER"),
@@ -26,7 +27,8 @@ public final class PostgresConnectionManager {
         connectionPool.setPassword(System.getenv("PG_PASS"));
     }
 
-    public static Connection getConnection() {
+    @Override
+    public Connection getConnection() {
         try {
             return connectionPool.getConnection();
         } catch (SQLException e) {
@@ -35,7 +37,14 @@ public final class PostgresConnectionManager {
         }
     }
 
-    private PostgresConnectionManager() {}
+    public static void setDbProperties(String hostname, String port, String dbname) {
+        try {
+            FileWriter fileWriter = new FileWriter("db.properties");
+            fileWriter.write("driver=jdbc");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     private static String buildConnectionString(String driver, String hostname, String port, String dbname) {
         return String.format("%s://%s:%s/%s", driver, hostname, port, dbname);
