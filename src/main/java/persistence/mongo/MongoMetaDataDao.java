@@ -9,17 +9,25 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.result.UpdateResult;
 
+import handlers.IJsonMarshaller;
+import persistence.IDataSource;
 import persistence.IMetaDataDao;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class MongoMetaDataDao implements IMetaDataDao<NvdMirrorMetaData> {
-    private final MongoClient client = MongoConnection.getInstance();
-    private final MongoDatabase db = client.getDatabase("nvdMirror");
-    private final MongoCollection<Document> vulnerabilities = db.getCollection("vulnerabilities");
-    private static final Logger LOGGER = LoggerFactory.getLogger(MongoMetaDataDao.class);
+    private final MongoCollection<Document> vulnerabilities;
     private final Document metadataFilter = new Document("_id", "nvd_metadata");
+    private final IJsonMarshaller<NvdMirrorMetaData> marshaller;
+    private static final Logger LOGGER = LoggerFactory.getLogger(MongoMetaDataDao.class);
+
+    public MongoMetaDataDao(IDataSource<MongoClient> dataSource, IJsonMarshaller<NvdMirrorMetaData> marshaller) {
+        MongoClient client = dataSource.getConnection();
+        MongoDatabase db = client.getDatabase("nvdMirror");
+        this.vulnerabilities = db.getCollection("vulnerabilities");
+        this.marshaller = marshaller;
+    }
 
     @Override
     public NvdMirrorMetaData fetchMetaData() {

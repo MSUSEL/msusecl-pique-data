@@ -5,6 +5,7 @@ import businessObjects.cve.NvdMirrorMetaData;
 import common.Constants;
 import common.DataUtilityProperties;
 import handlers.CveMarshaller;
+import handlers.MetaDataMarshaller;
 import persistence.IBulkDao;
 import persistence.IDao;
 import persistence.IDataSource;
@@ -21,8 +22,6 @@ import persistence.postgreSQL.PostgresMetaDataDao;
 import java.util.Properties;
 
 public final class DbContextResolver {
-    private final Properties prop = DataUtilityProperties.getProperties();
-
     public IBulkDao<Cve> resolveBulkDao(String dbContext) {
         return dbContext.equals(Constants.DB_CONTEXT_LOCAL)
                 ? new MongoBulkCveDao()
@@ -30,7 +29,9 @@ public final class DbContextResolver {
     }
 
     public IMetaDataDao<NvdMirrorMetaData> resolveMetaDataDao(String dbContext) {
-        return dbContext.equals(Constants.DB_CONTEXT_LOCAL) ? new MongoMetaDataDao() : new PostgresMetaDataDao();
+        return dbContext.equals(Constants.DB_CONTEXT_LOCAL)
+                ? new MongoMetaDataDao()
+                : new PostgresMetaDataDao(new PostgresConnectionManager(), new MetaDataMarshaller());
     }
 
     public IDao<Cve> resolveCveDao(String dbContext) {

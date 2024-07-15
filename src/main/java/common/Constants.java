@@ -21,4 +21,5 @@ public final class Constants {
     public static final String URI_BUILD_FAILURE_MESSAGE = "Could not build URI with given inputs";
     public static final String RESPONSE_STATUS_MESSAGE = "Response Status: {}";
     public static final String REQUEST_EXECUTION_FAILURE_MESSAGE = "Failed to execute request: ";
+    public static final String MALFORMED_JSON_SYNTAX_MESSAGE = "Incorrect JSON syntax - uable to parse to object";
 }
