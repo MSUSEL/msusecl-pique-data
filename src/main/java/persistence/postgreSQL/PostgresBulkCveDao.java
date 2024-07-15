@@ -1,10 +1,7 @@
 package persistence.postgreSQL;
 
 import businessObjects.cve.Cve;
-import common.Constants;
-import exceptions.ApiCallException;
 import exceptions.DataAccessException;
-import handlers.CveMarshaller;
 import handlers.IJsonMarshaller;
 import persistence.IBulkDao;
 import persistence.IDataSource;

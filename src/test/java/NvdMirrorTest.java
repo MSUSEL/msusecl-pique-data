@@ -2,6 +2,7 @@ import businessObjects.HTTPMethod;
 import businessObjects.NvdRequest;
 import businessObjects.NvdResponse;
 import businessObjects.cve.Cve;
+import com.sun.xml.internal.bind.v2.model.core.ID;
 import common.*;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
@@ -9,10 +10,13 @@ import handlers.CveMarshaller;
 import handlers.IJsonMarshaller;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
+import persistence.IDataSource;
 import persistence.postgreSQL.PgTableOperationsDao;
+import persistence.postgreSQL.PostgresConnectionManager;
 import presentation.PiqueData;
 import presentation.NvdMirror;
 
+import java.sql.Connection;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
@@ -61,7 +65,8 @@ public class NvdMirrorTest {
 
     @Test
     public void testBuildNvdMirrorTable() {
-        PgTableOperationsDao dao = new PgTableOperationsDao();
+        IDataSource<Connection> conn = new PostgresConnectionManager();
+        PgTableOperationsDao dao = new PgTableOperationsDao(conn);
         dao.buildCveTable();
     }
 
