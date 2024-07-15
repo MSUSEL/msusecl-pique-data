@@ -4,29 +4,26 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Properties;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 
-import common.DataUtilityProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 public final class PostgresConnectionManager {
     private static final BasicDataSource connectionPool = new BasicDataSource();
-    private static final Properties prop = initializeProperties();
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresConnectionManager.class);
 
     static {
         connectionPool.setUrl(
                 buildConnectionString(
-                        prop.getProperty("driver"),
-                        prop.getProperty("hostname"),
-                        prop.getProperty("port"),
-                        prop.getProperty("dbname")));
-        connectionPool.setUsername(prop.getProperty("username"));
-        connectionPool.setPassword(prop.getProperty("password"));
+                        System.getenv("PG_DRIVER"),
+                        System.getenv("PG_HOSTNAME"),
+                        System.getenv("PG_PORT"),
+                        System.getenv("PG_DBNAME")));
+        connectionPool.setUsername(System.getenv("PG_USERNAME"));
+        connectionPool.setPassword(System.getenv("PG_PASS"));
     }
 
     public static Connection getConnection() {
@@ -38,26 +35,9 @@ public final class PostgresConnectionManager {
         }
     }
 
-    public static void setDbProperties(String hostname, String port, String dbname) {
-        try {
-            FileWriter fileWriter = new FileWriter("db.properties");
-            fileWriter.write("driver=jdbc");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     private PostgresConnectionManager() {}
 
     private static String buildConnectionString(String driver, String hostname, String port, String dbname) {
         return String.format("%s://%s:%s/%s", driver, hostname, port, dbname);
-    }
-
-    private static Properties initializeProperties() {
-        try {
-            return DataUtilityProperties.getProperties("src/main/resources/postgres.properties");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 }
