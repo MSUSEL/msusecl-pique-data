@@ -1,4 +1,6 @@
 import exceptions.ApiCallException;
+import handlers.CveMarshaller;
+import persistence.IDataSource;
 import persistence.mongo.MongoCveDao;
 import exceptions.DataAccessException;
 import org.junit.Test;
@@ -101,13 +103,15 @@ public class DataUtilityTest {
     
     @Test
     public void testPostgresConnection() throws IOException, SQLException {
-        Connection conn = PostgresConnectionManager.getConnection();
+        IDataSource<Connection> dataSource = new PostgresConnectionManager(prop);
+        Connection conn = dataSource.getConnection();
         assertNotNull(conn);
     }
     
     @Test
     public void testPostgresInsert() throws IOException, SQLException, DataAccessException {
-        Connection conn = PostgresConnectionManager.getConnection();
+        IDataSource dataSource = new PostgresConnectionManager(prop);
+        Connection conn =  dataSource.getConnection();
         // This will definitely break and needs a totally different structure
 
         // Get a CVE that is currently stored in mongo
@@ -115,7 +119,7 @@ public class DataUtilityTest {
         Cve cve = mongoDao.fetchById("CVE-1999-0095");
         
         // insertMany into postgres
-        IDao<Cve> postgresDao = new PostgresCveDao();
+        IDao<Cve> postgresDao = new PostgresCveDao(new PostgresConnectionManager(prop), new CveMarshaller());
         postgresDao.insert(cve);
     }
 

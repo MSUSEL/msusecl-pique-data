@@ -8,18 +8,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import businessObjects.cve.Cve;
-import handlers.CveMarshaller;
 import handlers.IJsonMarshaller;
 import persistence.IDao;
+import persistence.IDataSource;
 
 public final class PostgresCveDao implements IDao<Cve> {
     private final Connection conn;
-    private final IJsonMarshaller<Cve> cveDetailsMarshaller = new CveMarshaller();
+    private final IJsonMarshaller<Cve> cveDetailsMarshaller;
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresCveDao.class);
 
-    public PostgresCveDao() {
-        // Gets a connection from the Postgres Connection Pool
-        conn = PostgresConnectionManager.getConnection();
+    public PostgresCveDao(IDataSource<Connection> dataSource, IJsonMarshaller<Cve> cveDetailsMarshaller1) {
+        this.cveDetailsMarshaller = cveDetailsMarshaller1;
+        this.conn = dataSource.getConnection();
     }
 
     @Override
