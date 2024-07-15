@@ -11,14 +11,14 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import common.DataUtilityProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import persistence.IDataSource;
 
 
-public final class PostgresConnectionManager {
-    private static final BasicDataSource connectionPool = new BasicDataSource();
-    private static final Properties prop = initializeProperties();
-    private static final Logger LOGGER = LoggerFactory.getLogger(PostgresConnectionManager.class);
+public final class PostgresConnectionManager implements IDataSource<Connection> {
+    private final BasicDataSource connectionPool = new BasicDataSource();
+    private final Logger LOGGER = LoggerFactory.getLogger(PostgresConnectionManager.class);
 
-    static {
+    public PostgresConnectionManager(Properties prop) {
         connectionPool.setUrl(
                 buildConnectionString(
                         prop.getProperty("driver"),
@@ -29,7 +29,8 @@ public final class PostgresConnectionManager {
         connectionPool.setPassword(prop.getProperty("password"));
     }
 
-    public static Connection getConnection() {
+    @Override
+    public Connection getConnection() {
         try {
             return connectionPool.getConnection();
         } catch (SQLException e) {
@@ -38,22 +39,11 @@ public final class PostgresConnectionManager {
         }
     }
 
-    public static void setDbProperties(String hostname, String port, String dbname) {
-        try {
-            FileWriter fileWriter = new FileWriter("db.properties");
-            fileWriter.write("driver=jdbc");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private PostgresConnectionManager() {}
-
-    private static String buildConnectionString(String driver, String hostname, String port, String dbname) {
+    private String buildConnectionString(String driver, String hostname, String port, String dbname) {
         return String.format("%s://%s:%s/%s", driver, hostname, port, dbname);
     }
 
-    private static Properties initializeProperties() {
+    private Properties initializeProperties() {
         try {
             return DataUtilityProperties.getProperties("src/main/resources/postgres.properties");
         } catch (IOException e) {
