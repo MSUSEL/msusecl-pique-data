@@ -12,12 +12,14 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.InsertOneModel;
 import com.mongodb.client.model.WriteModel;
 
+import handlers.IJsonMarshaller;
 import org.bson.conversions.Bson;
 import persistence.IBulkDao;
 
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import persistence.IDataSource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,12 +34,17 @@ import static com.mongodb.assertions.Assertions.assertNotNull;
  * Please use the MongoCveDao class for inserting into / updating
  * a subset of cves in the NVD.
  */
-public final class MongoBulkCveDao implements IBulkDao<Cve>{
-    private final MongoClient client = MongoConnection.getInstance();
-    private final MongoDatabase db = client.getDatabase("nvdMirror");
-    private final MongoCollection<Document> vulnerabilities = db.getCollection("vulnerabilities");
-    private final CveMarshaller cveMarshaller = new CveMarshaller();
+public final class MongoBulkCveDao implements IBulkDao<Cve> {
+    private final MongoClient client;
+    private final MongoCollection<Document> vulnerabilities;
+    private final IJsonMarshaller<Cve> cveMarshaller;
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoBulkCveDao.class);
+
+    public MongoBulkCveDao(IDataSource<MongoClient> dataSource, IJsonMarshaller<Cve> cveMarshaller) {
+        this.client = dataSource.getConnection();
+        this.vulnerabilities = client.getDatabase("nvdMirror").getCollection("vulnerabilities");
+        this.cveMarshaller = cveMarshaller;
+    }
 
     @Override
     public void insertMany(List<Cve> cves) {
