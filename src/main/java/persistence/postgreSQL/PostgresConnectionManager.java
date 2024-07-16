@@ -1,7 +1,5 @@
 package persistence.postgreSQL;
 
-import java.io.FileWriter;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -33,15 +31,6 @@ public final class PostgresConnectionManager implements IDataSource<Connection> 
             return connectionPool.getConnection();
         } catch (SQLException e) {
             LOGGER.error("Connection to postgres failed. ", e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static void setDbProperties(String hostname, String port, String dbname) {
-        try {
-            FileWriter fileWriter = new FileWriter("db.properties");
-            fileWriter.write("driver=jdbc");
-        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

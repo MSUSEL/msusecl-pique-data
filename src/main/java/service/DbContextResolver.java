@@ -24,13 +24,13 @@ import java.util.Properties;
 public final class DbContextResolver {
     public IBulkDao<Cve> resolveBulkDao(String dbContext) {
         return dbContext.equals(Constants.DB_CONTEXT_LOCAL)
-                ? new MongoBulkCveDao()
+                ? new MongoBulkCveDao(new MongoConnectionManager(), new CveMarshaller())
                 : new PostgresBulkCveDao(new PostgresConnectionManager(), new CveMarshaller());
     }
 
     public IMetaDataDao<NvdMirrorMetaData> resolveMetaDataDao(String dbContext) {
         return dbContext.equals(Constants.DB_CONTEXT_LOCAL)
-                ? new MongoMetaDataDao()
+                ? new MongoMetaDataDao(new MongoConnectionManager(), new MetaDataMarshaller())
                 : new PostgresMetaDataDao(new PostgresConnectionManager(), new MetaDataMarshaller());
     }
 
