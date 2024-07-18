@@ -30,8 +30,8 @@ public final class DbContextResolver {
 
     public IMetaDataDao<NvdMirrorMetaData> resolveMetaDataDao(String dbContext) {
         return dbContext.equals(Constants.DB_CONTEXT_LOCAL)
-                ? new MongoMetaDataDao(new MongoConnectionManager(), new MetaDataMarshaller())
-                : new PostgresMetaDataDao(new PostgresConnectionManager(), new MetaDataMarshaller());
+                ? new MongoMetaDataDao(new MongoConnectionManager())
+                : new PostgresMetaDataDao(new PostgresConnectionManager());
     }
 
     public IDao<Cve> resolveCveDao(String dbContext) {

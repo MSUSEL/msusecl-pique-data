@@ -6,6 +6,7 @@ import persistence.IBulkDao;
 import persistence.IDao;
 import persistence.IMetaDataDao;
 import exceptions.DataAccessException;
+import presentation.CveResponseProcessor;
 
 public final class MirrorService {
     private final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
@@ -41,4 +42,6 @@ public final class MirrorService {
         dao.delete(cveId);
     }
 
+    public void handleInsertMetaData(String dbContext) {
+    }
 }

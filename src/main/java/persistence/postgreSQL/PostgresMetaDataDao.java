@@ -1,30 +1,65 @@
 package persistence.postgreSQL;
 
-import handlers.IJsonMarshaller;
-import persistence.IDao;
+import exceptions.DataAccessException;
 import persistence.IDataSource;
 import persistence.IMetaDataDao;
 import businessObjects.cve.NvdMirrorMetaData;
 
-import java.sql.Connection;
+import java.sql.*;
 
 public final class PostgresMetaDataDao implements IMetaDataDao<NvdMirrorMetaData> {
     private final Connection conn;
-    private final IJsonMarshaller<NvdMirrorMetaData> marshaller;
 
-    public PostgresMetaDataDao(IDataSource<Connection> dataSource, IJsonMarshaller<NvdMirrorMetaData> marshaller) {
+    public PostgresMetaDataDao(IDataSource<Connection> dataSource) {
         this.conn = dataSource.getConnection();
-        this.marshaller = marshaller;
     }
 
     @Override
-    public void updateMetaData(NvdMirrorMetaData metaData) {
-        //TODO implement this method
+    public boolean updateMetaData(NvdMirrorMetaData metaData) throws DataAccessException {
+        try {
+            String sql = String.format("UPDATE nvd.cve " +
+                            "SET totalResults = %s, " +
+                            "format = %s, " +
+                            "version = %s, " +
+                            "timestamp = %s;",
+                    metaData.getTotalResults(),
+                    metaData.getFormat(),
+                    metaData.getVersion(),
+                    metaData.getTimestamp());
+
+            PreparedStatement statement = conn.prepareStatement(sql);
+            return statement.execute();
+        }
+        catch (SQLException e) {
+            throw new DataAccessException(e);
+        }
     }
 
     @Override
-    public NvdMirrorMetaData fetchMetaData() {
-        //TODO implement this method
-        return null;
+    public NvdMirrorMetaData fetchMetaData() throws DataAccessException {
+        try {
+            String sql = "SELECT * FROM nvd.metadata;";
+            Statement statement = conn.createStatement();
+            ResultSet rs = statement.executeQuery(sql);
+            NvdMirrorMetaData metaData = new NvdMirrorMetaData();
+
+            if (rs.next()) {
+                String id = rs.getString("id");
+                String totalResults = rs.getString("totalResults");
+                String format = rs.getString("format");
+                String version = rs.getString("version");
+                String timestamp = rs.getString("timestamp");
+
+                metaData.setId(id);
+                metaData.setTotalResults(totalResults);
+                metaData.setFormat(format);
+                metaData.setVersion(version);
+                metaData.setTimestamp(timestamp);
+            }
+
+            return metaData;
+        } catch (SQLException e) {
+            throw new DataAccessException(e);
+        }
     }
 }

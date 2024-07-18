@@ -1,6 +1,11 @@
 package persistence;
 
+import exceptions.ApiCallException;
+import exceptions.DataAccessException;
+
+import java.sql.SQLException;
+
 public interface IMetaDataDao<T> {
-    void updateMetaData(T metaData);
-    T fetchMetaData();
+    boolean updateMetaData(T metaData) throws DataAccessException;
+    T fetchMetaData() throws DataAccessException;
 }

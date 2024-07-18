@@ -17,6 +17,7 @@ import presentation.PiqueData;
 import presentation.NvdMirror;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
@@ -35,7 +36,7 @@ public class NvdMirrorTest {
     private final ParameterBuilder parameterBuilder = new ParameterBuilder();
 
     @Test
-    public void testBuildFullMirrorWithNewCode() throws DataAccessException {
+    public void testBuildFullMirrorWithNewCode() throws DataAccessException, SQLException {
         NvdMirror.buildNvdMirror(Constants.DB_CONTEXT_LOCAL);
     }
 
@@ -71,10 +72,18 @@ public class NvdMirrorTest {
     }
 
     @Test
+    public void testBuildMetaDataTable() {
+        IDataSource<Connection> conn = new PostgresConnectionManager();
+        PgTableOperationsDao dao = new PgTableOperationsDao(conn);
+        dao.buildMetaDataTable();
+    }
+
+    @Test
     public void testGetCveFromNvd() throws ApiCallException {
         Cve cve;
         cve = PiqueData.getCveFromNvd("CVE-1999-0095");
         assertNotNull(cve);
+        assertEquals("something", cve.getDescriptions().get(0).getValue());
     }
 
     private void runInsertCve(String dbContext, Cve cve) {

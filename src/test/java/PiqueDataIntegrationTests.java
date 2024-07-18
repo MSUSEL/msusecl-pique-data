@@ -1,17 +1,13 @@
 import businessObjects.cve.Cve;
 import businessObjects.ghsa.SecurityAdvisory;
 import common.Constants;
-import common.DataUtilityProperties;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
 import org.junit.Test;
 import presentation.NvdMirror;
 import presentation.PiqueData;
 
-import java.util.Properties;
-
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * Integration tests covering PiqueData in the presentation layer
@@ -19,7 +15,6 @@ import static org.junit.Assert.assertNotNull;
 
 // TODO test edge cases and create more robust asserts
 public class PiqueDataIntegrationTests {
-    private final Properties prop = DataUtilityProperties.getProperties();
     private final String CVE_A = "CVE-1999-0095";
     private final String CVE_B = "CVE-1999-1302";
     private final String CVE_A_CWE_ORACLE = "NVD-CWE-Other";
