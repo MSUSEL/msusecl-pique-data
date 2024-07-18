@@ -1,13 +1,11 @@
 # PiqueData Library
 
 ### Introduction and Background
-
-
 PiqueData (on github as "msusecl-data-utility") is a java library primarily intended for the Software Engineering and Cybersercutiy
 Laboratory, Montana State University - Bozeman (SECL). While members of this research lab are the intended users, anyone developing a PIQUE
 model may find this library useful for accessing third-party APIs or managing a local mirror of the National Vulnerability Database (NVD).
-**Please note that at this time, the SECL does not offer public support for this library, does not guarantee functionality, and 
-it is "use at your own risk".** The original intent of this project was to provide opinionated access to the NVD's CVE2.0 API.
+__Please note that at this time, the SECL does not offer public support for this library, does not guarantee functionality, and 
+it is "use at your own risk".__ The original intent of this project was to provide opinionated access to the NVD's CVE2.0 API.
 The official NVD APIs provide limited functionality. If greater expressiveness or flexibility is required, users are encouraged to [mirror the 
 database](https://nvd.nist.gov/developers/api-workflows). Some PIQUE models which depend on the NVD, already build a mirror of the NVD at startup. 
 However, this complicates the setup, benchmarking and evaluation phases of PIQUE. As such, this project evolved from simply
