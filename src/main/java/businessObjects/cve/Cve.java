@@ -1,6 +1,5 @@
 package businessObjects.cve;
 
-import businessObjects.baseClasses.AbstractBaseEntity;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,7 +7,7 @@ import java.util.ArrayList;
 
 @Getter 
 @Setter
-public final class Cve extends AbstractBaseEntity {
+public final class Cve {
     private String id;
     private String sourceIdentifier;
     private String published;
