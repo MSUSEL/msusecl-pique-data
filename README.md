@@ -13,6 +13,9 @@ by members of the SECL.** Recognizing that not all users of PiqueData will be me
 build ephemeral mirrors with MongoDB and Docker. Outside the lab, this is the recommended approach.  More instructions follow on
 how to build permanent and ephemeral mirrors and interact with 3rd-party APIs. Finally, this is a work in progress. The developers
 will attempt to avoid breaking changes but stability is not currently guaranteed.
+
+
+
 -----------------
 
 ### Installation
