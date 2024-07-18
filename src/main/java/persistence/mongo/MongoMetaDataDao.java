@@ -19,14 +19,12 @@ import org.slf4j.LoggerFactory;
 public final class MongoMetaDataDao implements IMetaDataDao<NvdMirrorMetaData> {
     private final MongoCollection<Document> vulnerabilities;
     private final Document metadataFilter = new Document("_id", "nvd_metadata");
-    private final IJsonMarshaller<NvdMirrorMetaData> marshaller;
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoMetaDataDao.class);
 
-    public MongoMetaDataDao(IDataSource<MongoClient> dataSource, IJsonMarshaller<NvdMirrorMetaData> marshaller) {
+    public MongoMetaDataDao(IDataSource<MongoClient> dataSource) {
         MongoClient client = dataSource.getConnection();
         MongoDatabase db = client.getDatabase("nvdMirror");
         this.vulnerabilities = db.getCollection("vulnerabilities");
-        this.marshaller = marshaller;
     }
 
     @Override
@@ -35,13 +33,15 @@ public final class MongoMetaDataDao implements IMetaDataDao<NvdMirrorMetaData> {
     }
 
     @Override
-    public void updateMetaData(NvdMirrorMetaData rawMetaData) {
+    public boolean updateMetaData(NvdMirrorMetaData rawMetaData) {
         Document metadata = generateMetadata(rawMetaData);
         ReplaceOptions opts = new ReplaceOptions().upsert(true);
         UpdateResult updateResult = vulnerabilities.replaceOne(metadataFilter, metadata, opts);
         if (!updateResult.wasAcknowledged()) {
            LOGGER.error("Update was not acknowleged. Check DB connection. ");
+           return false;
         }
+        return true;
     }
 
     // TODO fix retrieve method here

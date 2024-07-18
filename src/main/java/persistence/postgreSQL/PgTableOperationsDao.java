@@ -21,6 +21,14 @@ public final class PgTableOperationsDao {
             "CONSTRAINT \"cve_pkey\" PRIMARY KEY (\"id\") " +
             ") WITH (oids = false); ";
 
+    private final String createMetaDataTable = "CREATE TABLE IF NOT EXISTS \"nvd\".\"metadata\" ( " +
+            "\"id\" SERIAL PRIMARY KEY, " +
+            "\"totalResults\" TEXT NOT NULL, " +
+            "\"format\" TEXT NOT NULL, " +
+            "\"version\" TEXT NOT NULL, " +
+            "\"timestamp\" TEXT NOT NULL " +
+            ");";
+
     public PgTableOperationsDao(IDataSource<Connection> conn) {
         this.conn = conn.getConnection();
     }
@@ -32,6 +40,16 @@ public final class PgTableOperationsDao {
 
             dropTable.execute(dropCveData);
             createTable.execute(createCveTable);
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void buildMetaDataTable() {
+        try {
+            Statement metaDataTable = conn.createStatement();
+            metaDataTable.execute(createMetaDataTable);
 
         } catch (SQLException e) {
             throw new RuntimeException(e);

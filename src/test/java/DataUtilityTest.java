@@ -15,7 +15,7 @@ import presentation.PiqueData;
 
 import businessObjects.cve.Cve;
 import common.DataUtilityProperties;
-import service.CveResponseProcessor;
+import presentation.CveResponseProcessor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
