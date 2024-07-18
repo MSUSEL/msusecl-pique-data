@@ -1,6 +1,5 @@
 # PiqueData Library
 
-### Introduction and Background
 PiqueData (on github as "msusecl-data-utility") is a java library primarily intended for the Software Engineering and Cybersercutiy
 Laboratory, Montana State University - Bozeman (SECL). While members of this research lab are the intended users, anyone developing a PIQUE
 model may find this library useful for accessing third-party APIs or managing a local mirror of the National Vulnerability Database (NVD).
