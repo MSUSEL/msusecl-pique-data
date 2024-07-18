@@ -3,10 +3,12 @@ package presentation;
 import businessObjects.cve.Cve;
 import businessObjects.cve.NvdMirrorMetaData;
 import common.Constants;
+import exceptions.ApiCallException;
 import exceptions.DataAccessException;
 import service.NvdApiService;
 import service.MirrorService;
 
+import java.sql.SQLException;
 import java.time.Instant;
 
 /**
@@ -22,7 +24,7 @@ public final class NvdMirror {
         nvdApiService.handleGetPaginatedCves(dbContext, Constants.DEFAULT_START_INDEX, Constants.NVD_MAX_PAGE_SIZE);
     }
 
-    public static void updateNvdMirror(String dbContext) throws DataAccessException {
+    public static void updateNvdMirror(String dbContext) throws DataAccessException, ApiCallException {
         NvdMirrorMetaData metadata = mirrorService.handleGetCurrentMetaData(dbContext);
         Instant instant = Instant.now();
         nvdApiService.handleUpdateNvdMirror(dbContext, metadata.getTimestamp(), instant.toString());
@@ -38,5 +40,9 @@ public final class NvdMirror {
 
     public static void deleteSingleCve(String dbContext, String cveId) throws DataAccessException {
         mirrorService.handleDeleteSingleCve(dbContext, cveId);
+    }
+
+    public static void insertMetaData(String dbContext) {
+        mirrorService.handleInsertMetaData(dbContext);
     }
 }

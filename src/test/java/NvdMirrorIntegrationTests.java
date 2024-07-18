@@ -1,10 +1,13 @@
 import businessObjects.cve.Cve;
 import businessObjects.cve.NvdMirrorMetaData;
 import common.Constants;
+import exceptions.ApiCallException;
 import exceptions.DataAccessException;
 import org.junit.Test;
 import presentation.NvdMirror;
 import presentation.PiqueData;
+
+import java.sql.SQLException;
 
 /**
  * IMPORTANT!
@@ -16,22 +19,22 @@ import presentation.PiqueData;
 public class NvdMirrorIntegrationTests {
 
     @Test
-    public void testBuildLocalNvdMirror() throws DataAccessException {
+    public void testBuildLocalNvdMirror() throws DataAccessException, SQLException {
         NvdMirror.buildNvdMirror(Constants.DB_CONTEXT_LOCAL);
     }
 
     @Test
-    public void testBuildPersistentNvdMirror() throws DataAccessException {
+    public void testBuildPersistentNvdMirror() throws DataAccessException, SQLException {
         NvdMirror.buildNvdMirror(Constants.DB_CONTEXT_PERSISTENT);
     }
 
     @Test
-    public void testUpdateLocalNvdMirror() throws DataAccessException {
+    public void testUpdateLocalNvdMirror() throws DataAccessException, ApiCallException {
         NvdMirror.updateNvdMirror(Constants.DB_CONTEXT_LOCAL);
     }
 
     @Test
-    public void testUpdatePersistent() throws DataAccessException {
+    public void testUpdatePersistent() throws DataAccessException, ApiCallException {
         NvdMirror.updateNvdMirror(Constants.DB_CONTEXT_PERSISTENT);
     }
 
