@@ -11,7 +11,7 @@ import java.sql.SQLException;
 
 /**
  * IMPORTANT!
- * These currently mutate the production database
+ * Some of these currently mutate the production database
  * Only run these if you know exactly what you're doing!
  */
 
