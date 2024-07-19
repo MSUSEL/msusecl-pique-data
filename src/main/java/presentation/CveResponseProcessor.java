@@ -1,4 +1,4 @@
-package service;
+package presentation;
 
 import businessObjects.cve.*;
 import common.Constants;
@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class CveResponseProcessor {
 
-    public String[] extractCwes(Cve cve) {
+    public static String[] extractCwes(Cve cve) {
         ArrayList<Weakness> cweList = cve.getWeaknesses();
 
         int size = cweList.size();

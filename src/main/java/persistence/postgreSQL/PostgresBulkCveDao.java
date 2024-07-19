@@ -1,12 +1,10 @@
 package persistence.postgreSQL;
 
 import businessObjects.cve.Cve;
-import common.Constants;
-import exceptions.ApiCallException;
 import exceptions.DataAccessException;
-import handlers.CveMarshaller;
 import handlers.IJsonMarshaller;
 import persistence.IBulkDao;
+import persistence.IDataSource;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,10 +13,11 @@ import java.util.List;
 
 public final class PostgresBulkCveDao implements IBulkDao<Cve> {
     private final Connection conn;
-    private final IJsonMarshaller<Cve> marshaller = new CveMarshaller();
+    private final IJsonMarshaller<Cve> marshaller;
 
-    public PostgresBulkCveDao() {
-        conn = PostgresConnectionManager.getConnection();
+    public PostgresBulkCveDao(IDataSource<Connection> dataSource, IJsonMarshaller<Cve> marshaller) {
+        this.conn = dataSource.getConnection();
+        this.marshaller = marshaller;
     }
 
     @Override

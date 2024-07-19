@@ -8,18 +8,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import businessObjects.cve.Cve;
-import handlers.CveMarshaller;
 import handlers.IJsonMarshaller;
 import persistence.IDao;
+import persistence.IDataSource;
 
 public final class PostgresCveDao implements IDao<Cve> {
     private final Connection conn;
-    private final IJsonMarshaller<Cve> cveDetailsMarshaller = new CveMarshaller();
+    private final IJsonMarshaller<Cve> cveDetailsMarshaller;
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresCveDao.class);
 
-    public PostgresCveDao() {
-        // Gets a connection from the Postgres Connection Pool
-        conn = PostgresConnectionManager.getConnection();
+    public PostgresCveDao(IDataSource<Connection> dataSource, IJsonMarshaller<Cve> cveMarshaller) {
+        this.cveDetailsMarshaller = cveMarshaller;
+        this.conn = dataSource.getConnection();
     }
 
     @Override
@@ -44,13 +44,12 @@ public final class PostgresCveDao implements IDao<Cve> {
     }
 
     @Override
-    public void insert(Cve cveDetails) throws DataAccessException {
-        // TODO verify success?
+    public void insert(Cve cve) throws DataAccessException {
         String sql = "INSERT INTO nvd.cve (cve_id, details) VALUES (?, CAST(? AS jsonb));";
         try {
             PreparedStatement statement = conn.prepareStatement(sql);
-            statement.setString(1, cveDetails.getId());
-            statement.setString(2, cveDetailsMarshaller.marshalJson(cveDetails));
+            statement.setString(1, cve.getId());
+            statement.setString(2, cveDetailsMarshaller.marshalJson(cve));
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException(Constants.DB_QUERY_FAILED, e);
@@ -58,13 +57,19 @@ public final class PostgresCveDao implements IDao<Cve> {
     }
 
     @Override
-    public void update(Cve t) throws DataAccessException{
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'update'");
+    public void update(Cve cve) throws DataAccessException {
+        try {
+            CallableStatement callableStatement = conn.prepareCall("{call update_cve_details(?, ?)}");
+            callableStatement.setString(1, cve.getId());
+            callableStatement.setString(2, cveDetailsMarshaller.marshalJson(cve));
+            callableStatement.execute();
+        } catch (SQLException e) {
+            throw new DataAccessException(e);
+        }
     }
 
     @Override
-    public void delete(String cveId) throws DataAccessException{
+    public void delete(String cveId) throws DataAccessException {
         String sql = "DELETE FROM nvd.cve WHERE cve_id = ? RETURNING cve_id;";
         try {
             PreparedStatement statement = conn.prepareStatement(sql);
