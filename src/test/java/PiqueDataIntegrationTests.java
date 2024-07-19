@@ -1,25 +1,22 @@
 import businessObjects.cve.Cve;
 import businessObjects.ghsa.SecurityAdvisory;
 import common.Constants;
-import common.DataUtilityProperties;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
 import org.junit.Test;
 import presentation.NvdMirror;
 import presentation.PiqueData;
 
-import java.util.Properties;
-
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * Integration tests covering PiqueData in the presentation layer
  */
 
 // TODO test edge cases and create more robust asserts
+// TODO separate local and persistent tests.
+// TODO Create Mocked databases rather than hitting "production"
 public class PiqueDataIntegrationTests {
-    private final Properties prop = DataUtilityProperties.getProperties();
     private final String CVE_A = "CVE-1999-0095";
     private final String CVE_B = "CVE-1999-1302";
     private final String CVE_A_CWE_ORACLE = "NVD-CWE-Other";
@@ -34,15 +31,24 @@ public class PiqueDataIntegrationTests {
 
     @Test
     public void testPersistentGetCveById() throws DataAccessException {
-        Cve cve = PiqueData.getCveById(Constants.DB_CONTEXT_PERSISTENT, CVE_A);
-        System.out.println(cve.getId());
-//        NvdMirror.insertSingleCve(Constants.DB_CONTEXT_PERSISTENT, cve);
+        Cve cve = PiqueData.getCveById(Constants.DB_CONTEXT_PERSISTENT, CVE_B);
+        assertEquals(CVE_B, cve.getId());
+        assertEquals(CVE_B_CWE_ORACLE, cve.getWeaknesses().get(0).getDescription().get(0).getValue());
     }
 
     @Test
-    public void testGetCvesById() throws DataAccessException {
+    public void testGetLocalCvesById() throws DataAccessException {
         String[] cveIds = {CVE_A, CVE_B};
         Cve[] result = PiqueData.getCveById(Constants.DB_CONTEXT_LOCAL, cveIds);
+
+        assertEquals(CVE_A, result[0].getId());
+        assertEquals(CVE_B, result[1].getId());
+    }
+
+    @Test
+    public void testGetPersistentCvesById() throws DataAccessException {
+        String[] cveIds = {CVE_A, CVE_B};
+        Cve[] result = PiqueData.getCveById(Constants.DB_CONTEXT_PERSISTENT, cveIds);
 
         assertEquals(CVE_A, result[0].getId());
         assertEquals(CVE_B, result[1].getId());

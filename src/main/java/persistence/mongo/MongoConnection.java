@@ -2,14 +2,11 @@ package persistence.mongo;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Creates and manages a Mongo Connection
  */
 public final class MongoConnection {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MongoConnection.class);
     private static volatile MongoClient mongoClient = null;
 
     private MongoConnection() {}

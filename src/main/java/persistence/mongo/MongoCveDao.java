@@ -14,14 +14,20 @@ import persistence.IDao;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import persistence.IDataSource;
 
 
 public final class MongoCveDao implements IDao<Cve> {
-    private final MongoClient client = MongoConnection.getInstance();
-    private final MongoDatabase db = client.getDatabase("nvdMirror");
-    private final MongoCollection<Document> vulnerabilities = db.getCollection("vulnerabilities");
-    private final IJsonMarshaller<Cve> cveDetailsMarshaller = new CveMarshaller();
+    private final MongoCollection<Document> vulnerabilities;
+    private final IJsonMarshaller<Cve> cveDetailsMarshaller;
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoCveDao.class);
+
+    public MongoCveDao(IDataSource<MongoClient> dataSource, IJsonMarshaller<Cve> cveDetailsMarshaller) {
+        MongoClient client = dataSource.getConnection();
+        MongoDatabase db = client.getDatabase("nvdMirror");
+        this.vulnerabilities = db.getCollection("vulnerabilities");
+        this.cveDetailsMarshaller = cveDetailsMarshaller;
+    }
 
     @Override
     public Cve fetchById(String id) {

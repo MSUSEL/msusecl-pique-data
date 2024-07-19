@@ -1,14 +1,17 @@
 import businessObjects.cve.Cve;
 import businessObjects.cve.NvdMirrorMetaData;
 import common.Constants;
+import exceptions.ApiCallException;
 import exceptions.DataAccessException;
 import org.junit.Test;
 import presentation.NvdMirror;
 import presentation.PiqueData;
 
+import java.sql.SQLException;
+
 /**
  * IMPORTANT!
- * These currently mutate the production database
+ * Some of these currently mutate the production database
  * Only run these if you know exactly what you're doing!
  */
 
@@ -16,22 +19,22 @@ import presentation.PiqueData;
 public class NvdMirrorIntegrationTests {
 
     @Test
-    public void testBuildLocalNvdMirror() throws DataAccessException {
+    public void testBuildLocalNvdMirror() throws DataAccessException, SQLException {
         NvdMirror.buildNvdMirror(Constants.DB_CONTEXT_LOCAL);
     }
 
     @Test
-    public void testBuildPersistentNvdMirror() throws DataAccessException {
+    public void testBuildPersistentNvdMirror() throws DataAccessException, SQLException {
         NvdMirror.buildNvdMirror(Constants.DB_CONTEXT_PERSISTENT);
     }
 
     @Test
-    public void testUpdateLocalNvdMirror() throws DataAccessException {
+    public void testUpdateLocalNvdMirror() throws DataAccessException, ApiCallException {
         NvdMirror.updateNvdMirror(Constants.DB_CONTEXT_LOCAL);
     }
 
     @Test
-    public void testUpdatePersistent() throws DataAccessException {
+    public void testUpdatePersistent() throws DataAccessException, ApiCallException {
         NvdMirror.updateNvdMirror(Constants.DB_CONTEXT_PERSISTENT);
     }
 
@@ -57,5 +60,11 @@ public class NvdMirrorIntegrationTests {
         // TODO replace this with mocked Cve object
         Cve cve = PiqueData.getCveById(Constants.DB_CONTEXT_LOCAL, "CVE-1999-0095");
         NvdMirror.insertSingleCve(Constants.DB_CONTEXT_PERSISTENT, cve);
+    }
+
+    @Test
+    public void testGetCveFromMirror() throws DataAccessException {
+        Cve cve = PiqueData.getCveById(Constants.DB_CONTEXT_PERSISTENT, TestConstants.TEST_CVE_ID);
+        System.out.println(cve.getId());
     }
 }

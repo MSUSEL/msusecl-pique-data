@@ -1,125 +1,176 @@
-# Data Access Cookbook
+# PiqueData Library
+
+PiqueData (on github as "msusecl-data-utility") is a java library primarily intended for the Software Engineering and Cybersercutiy
+Laboratory, Montana State University - Bozeman (SECL). While members of this research lab are the intended users, anyone developing a PIQUE
+model may find this library useful for accessing third-party APIs or managing a local mirror of the National Vulnerability Database (NVD).
+__Please note that at this time, the SECL does not offer public support for this library, does not guarantee functionality, and 
+it is "use at your own risk".__ The original intent of this project was to provide opinionated access to the NVD's CVE2.0 API.
+The official NVD APIs provide limited functionality. If greater expressiveness or flexibility is required, users are encouraged to [mirror the 
+database](https://nvd.nist.gov/developers/api-workflows). Some PIQUE models which depend on the NVD, already build a mirror of the NVD at startup. 
+However, this complicates the setup, benchmarking and evaluation phases of PIQUE. As such, this project evolved from simply
+accessing the NVD through API calls to maintaining an on-prem mirror at the lab. **Again, please note that this mirror is for use only
+by members of the SECL.** Recognizing that not all users of PiqueData will be members of SECL, this library provides flexibility to
+build ephemeral mirrors with MongoDB and Docker. Outside the lab, this is the recommended approach.  More instructions follow on
+how to build permanent and ephemeral mirrors and interact with 3rd-party APIs. Finally, this is a work in progress. The developers
+will attempt to avoid breaking changes but stability is not currently guaranteed.
 
 
-### Introduction
-PIQUE uses two main external sources of data regarding known vulnerabilities.
-The [National Vulnerability database (NVD)](https://nvd.nist.gov/) maintained
-by The National Institutes of Standards and Technology (NIST), "is the U.S. government
-repository of standards based vulnerability management data represented using the Security
-Content Automation Protocol (SCAP)." (nvd.nist.gov, accessed 5/1/2024). The other is the
-[GitHub Advisory database (GHSA)](https://github.com/github/advisory-database). The NVD is
-accessed via a RESTful API whereas the GHSA offers a GraphQL endpoint and schema. The "Data"
-library contains programmatic tools to standardize and streamline consumption of these businessObjects's.
-These tools include Request and Response objects for both the NVD and GHSA. Handlers, deserialization
-utilities, and POJOs are included as well. Directions follow, but this is designed to be a plug-and-play
-interface for consuming API's with PIQUE.
 
-In addition to third-party businessObjects consumption, PIQUE is configured to work with a local mirror of
-the entire NVD. This is a best practice suggested by NIST when working with large amounts of NVD data.
-At MSU, this mirror is persistent and hosted on an on-prem server, but this mirror can be instantiated
-ephemerally using docker and MongoDB. Instructions for both options are included in !!!!!!XXXXXXXX SETUP DIRECTIONS !XXXXXXXXX!!!!!!!!!!!!!!!!
+-----------------
 
-What follows are the recommended methods of accessing data for use with PIQUE. These opinionated tools
-provide classes necessary for authenticating, configuring, and executing calls to third-party
-of new data sources. Additionally, PIQUE offers preconfigured tooling for building a mirror of the
-NVD using MongoDB and docker. Both businessObjects consumption utilities, and database access utilities are
-discussed in detail below.
+### Installation
+This project requires java 8+ and only supports the maven build system.
+To install, add the following to your project's pom.xml file. Alternatively, you can clone the 
+git repository and compile from source using java language level 8.
+```
+<dependency>
+    <groupId>[PiqueData_group_id]</groupId>
+    <artifactId>[PiqueData_artifact_id]</artifactId>
+    <version>0.0.1</version>
+</dependency>
+```
+-----------------
+## Database Context and Setup
 
-----------
+### On-Prem NVD Mirror
+The PiqueData library supports two different database systems and is architected to easily incorporate 
+new data sources. If you are developing a pique model in the SECL, and that pique model depends on information from
+the NVD, the on-prem (or persistent) database is likely the right data source. The on-prem NVD mirror is updated 
+at least daily through the official NVD API so that the official NVD and the SECL mirror are in sync.
+#### Steps to Configure Connection:
+1. Obtain a username, password, and connection information for the on-prem database from Ryan or Derek
+2. Set the following environment variables on your development machine.
+```
+PG_DRIVER=jdbc:postgresql
+PG_HOSTNAME=<hostname or ip provided>
+PG_PORT=<port provided>
+PG_DBNAME=<database name provided>
+PG_USERNAME=<your username>
+PG_PASS=<your password>
+```
+Note that you may need to adjust your settings to make these environment variables persistent between sessions.
+You may also need to start your IDE from a terminal session depending on your system configuration.
 
-### Consume The NVD CVE 2.0 businessObjects
-_Before proceeding, recall that the local mirror will be more performant for almost every use case.
-Instructions for the Data Access layer are located [here.]_
+3. Pass the String `"persistent"` as the `dbContext` parameter for relevant methods. It is recommended to store this 
+as a static constant, in a properties file, or in some sort of credential injection service.
 
-### Steps
-1. Generate an NVD businessObjects Key [here.](https://nvd.nist.gov/developers/request-an-api-key)
-   * Place that key in the \<project root directory>/input/nvd_key.txt (All on one line and without spaces)
-2. Instantiate pique-properties file
-3. Instantiate NVDRequestFactory
-4. Build an NVDRequest Object with the NVDRequestFactory
-5. Execute the request and store the handled response in the NVDResponse object
+If you would like a graphical program to explore the NVD Mirror, [pgadmin](https://www.pgadmin.org/) and 
+[adminer](https://www.adminer.org/) are free, open source RDBMS programs that provide an intuitive, 
+graphical environment.
 
-### Example Code
+
+### Local NVD Mirror
+If you are not a member of the SECL or you wish to build your own mirror, PiqueData supports the local creation
+of a dockerized MongoDB instance. No credentials are needed to use the local database, however, some setup is 
+still necessary.
+
+#### Steps to Configure Connection:
+
+1. Run the following command.
+```
+docker run -v nvd-mirror:/data/db --name mongodb -p 27017:27017 -d mongodb/mongodb-community-server:latest
+```
+This uses the [official docker image of mongodb community edition](https://www.mongodb.com/resources/products/compatibilities/docker)
+and sets up a persistent volume on your local machine. If the docker container shuts down, the nvd data will remain on your system
+accessible to another docker container.
+
+
+2. Pass the String `"local"` as the `dbContext` parameter for relevant methods. It is recommended to store this
+   as a static constant, in a properties file, or in some sort of credential injection service.
+
+3. Hydrate the local database with data from the NVD.
 
 ```java
+String local = "local";
 
-import common.Utils;
-
-Properties prop = PiqueProperties.getProperties();
-List<String> apiKey = Arrays.asList("apiKey", helperFunctions.getAuthToken(prop.getProperty("nvd-businessObjects-key-path")));
-NVDRequestFactory nvdRequestFactory = new NVDRequestFactory();
-
-NVDRequest request = nvdRequestFactory.createNVDRequest(HTTPMethod.GET, Utils.NVD_BASE_URI, apiKey, START_INDEX, RESULTS_PER_PAGE);
-NVDResponse response = request.executeRequest();
-
-    return response.
-
-getCveResponse();
+try {
+    NvdMirror.buildNvdMirror(local);
+} catch (DataAccessException e) {
+    throw new RuntimeException(e);
+}
 ```
-### A Note About Rate Limits
-The NVD imposes tiered rate limits on requests. All data is accessible without an businessObjects key, but
-rate limits are dramatically higher for requests made with a key. The NVD also encourages paginated
-responses for large requests. The results per page parameter defines the maximum page size. This page
-size is limited to a maximum of 2000 by NIST. For large requests, it is recommended to sleep your program
-for a few seconds between calls.
 
-----------
+-----------------
 
-### Consume the GitHub Vulnerability database
-The GHSA only offers a GraphQL endpoint. This provides a great deal of flexibility in crafting requests and
-responses. With GraphQL, you form a request that complies with the endpoint's schema and you receive exactly and
-only the data you query. Good practice is to maintain a copy of the official schema and use libraries to
-form type-safe queries that are guaranteed to match the schema. However, this creates overhead and maintenance
-in the calling program. As such, we have elected to simply make GraphQL calls with raw strings that have been
-manually formatted to match the GHSA schema. If we extend our use of in the future, appropriate libraries should
-be used to validate queries.
+## Interacting with PiqueData
 
-### Steps
-1. Generate a GitHub Personal Access Token.
-   * Instructions are located [here.](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
-2. Define your query and ghsaId variable strings.
-3. Create a properly-formatted JSONObject representation of your query and convert that to a String object.
-4. Interpolate any variables
-5. Instantiate GHSA Request and Response objects.
-6. Format authentication header
-7. Execute the request and store the handled response.
+Three classes offer the user-facing functionality of this library.
+* __PiqueData__ provides static methods for interacting with third-party data. This includes methods to interact with
+on-prem/ephemeral databases as well as third-party sources like the NVD.
+* __NvdMirror__ provides static methods to manage a permanent mirror of the NVD
+* __CveReponseProcessor__ provides an easy way to extract any field from a Cve object.
 
-### Example Code
+Example usages are included below.
+
+### Accessing On-Prem or Local Database
+This is the preferred way to interact with CVE data in the SECL. Direct access to a database whether over localhost
+or to our on-prem server is much faster than hitting public API endpoints. The following examples will use the persistent 
+dbContext. For a local mirror, simply pass the "local" string for the dbContext parameter.
 
 ```java
-import common.Utils;
+class ExampleClass {
+   private final String cveId = "CVE-1999-0095";
+   private final String dbContext = "persistent";
 
-// Define variables
-String ghsaId = "GHSA-vh2m-22xx-q94f";
-JSONObject jsonBody = new JSONObject();
+   // Gets a list of CWE's associated with a particular CVE
+   public String[] exampleGetCweMethod() {
+      try {
+          return PiqueData.getCwes(dbContext, cveId);
+      } catch (DataAccessException e) {
+          throw new RuntimeException(e);
+      }
+   }
 
-// Format query as json
-    jsonBody.
-
-put("query",GraphQlQueries.GHSA_SECURITY_ADVISORY_QUERY);
-
-String query = jsonBody.toString();
-
-// Insert variable (This is not GraphQL best practice, but suffices for now)
-String formattedQuery = String.format(query, ghsaId);
-
-// Format authentication and headers
-String githubToken = helperFunctions.getAuthToken(prop.getProperty("github-token-path"));
-String authHeader = String.format("Bearer %s", githubToken);
-List<String> headers = Arrays.asList("Content-Type", "application/json", "Authorization", authHeader);
-
-// Execute request
-GHSARequest ghsaRequest = new GHSARequest(HTTPMethod.POST, Utils.GHSA_URI, headers, formattedQuery);
-GHSAResponse ghsaResponse = ghsaRequest.executeRequest();
+   // Future work will include methods to extract each field from a Cve object 
+   // in the CveResponseProcessor class. In the meantime you can access any field 
+   // in the Cve object and nested objects with normal java getters as with the following.
+   
+   // Gets a Descriptions value from a given CVE
+   public String getDescriptionsValue() {
+      try {
+          Cve cve = PiqueData.getCveById(dbContext, cveId);
+          return cveFromLocalMirror.getDescriptions().get(0).getValue();
+      } catch (DataAccessException e) {
+          throw new RuntimeException(e);
+      }
+   }
+}
 ```
-----------
 
-### Database Access
-This library uses the Data Access Object pattern for interacting with databases. This pattern separates the
-business logic from the code managing access to databases. Because the implementation of any individual database
-is not tightly coupled to the business logic, any database or datastore can be swapped in without affecting
-the functioning of PIQUE. By default we use MongoDB to store CVE objects as Mongo Documents, but a relational
-database could be easily used by implementing the IDao interface in a new concrete class. XXXThis secion needs workXXX
+-----------------
+
+### Consuming 3rd-party APIs
+The PiqueData class provides static methods for interacting with third-party APIs. Currently, PiqueData is configured to interact
+with the National Vulnerability Database and GitHub Security Advisories. The NVD offers only RESTful endpoints and PiqueData deserializes
+the responses to POJOs (These are typically accessed through the Cve class). This library also provides tools to marshal and unmarshal json
+representations of the Cve objects.  
+
+GHSA's are only offered via a GraphQL endpoint. Currently, PiqueData can consume this API, but it is optimized for only a very small subset
+of the GHSA graph. A future release will contain a full GraphQL library with type-safe queries.
+
+#### Example
+
+```java
+class ExampleClass {
+   private final String cveId = "CVE-1999-0095";
+   private final String dbContext = "persistent";
 
 
+   // Get a CVE from the National Vulnerability Database 
+   public String getACveFromTheNvd() {
+      try {
+          Cve cve = PiqueData.getCveFromNvd(dbContext, cveId);
+      } catch (ApiCallException e) {
+          throw new RuntimeException(e);
+      }
+   }
+}
+```
+
+-----------------
+
+### More info
+For a complete picture of available methods, it is recommended to read through the PiqueData and NvdMirror classes in the 
+`presentation` package. The methods and classes are extensively documented there. In subsequent releases, this will be 
+replaced by javadocs.
 

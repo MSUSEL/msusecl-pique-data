@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import persistence.IBulkDao;
 import persistence.IMetaDataDao;
+import presentation.CveResponseProcessor;
 
 import java.util.List;
 import java.util.Properties;
@@ -130,7 +131,7 @@ public final class NvdApiService {
         }
     }
 
-    private void conditionallyInsertMetaData(NvdMirrorMetaData metaData, IMetaDataDao<NvdMirrorMetaData> metaDataDao, int startIndex, int count) {
+    private void conditionallyInsertMetaData(NvdMirrorMetaData metaData, IMetaDataDao<NvdMirrorMetaData> metaDataDao, int startIndex, int count) throws DataAccessException {
         if (startIndex == count - 1) {
             metaDataDao.updateMetaData(metaData);
         }
