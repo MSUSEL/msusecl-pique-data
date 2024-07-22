@@ -3,12 +3,9 @@ package service;
 import businessObjects.cve.Cve;
 import businessObjects.cve.NvdMirrorMetaData;
 import common.Constants;
-import common.DataUtilityProperties;
 import handlers.CveMarshaller;
-import handlers.MetaDataMarshaller;
 import persistence.IBulkDao;
 import persistence.IDao;
-import persistence.IDataSource;
 import persistence.IMetaDataDao;
 import persistence.mongo.MongoBulkCveDao;
 import persistence.mongo.MongoConnectionManager;
@@ -18,8 +15,6 @@ import persistence.postgreSQL.PostgresBulkCveDao;
 import persistence.postgreSQL.PostgresConnectionManager;
 import persistence.postgreSQL.PostgresCveDao;
 import persistence.postgreSQL.PostgresMetaDataDao;
-
-import java.util.Properties;
 
 public final class DbContextResolver {
     public IBulkDao<Cve> resolveBulkDao(String dbContext) {

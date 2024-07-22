@@ -8,6 +8,8 @@ import persistence.IMetaDataDao;
 import exceptions.DataAccessException;
 import presentation.CveResponseProcessor;
 
+import java.util.List;
+
 public final class MirrorService {
     private final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
     private final DbContextResolver dbContextResolver = new DbContextResolver();
@@ -17,7 +19,7 @@ public final class MirrorService {
         return dao.fetchById(cveId);
     }
 
-    public Cve[] handleGetCveById(String dbContext, String[] cveIds) throws DataAccessException {
+    public List<Cve> handleGetCveById(String dbContext, String[] cveIds) throws DataAccessException {
         IBulkDao<Cve> dao = dbContextResolver.resolveBulkDao(dbContext);
         return dao.fetchMany(cveIds);
     }

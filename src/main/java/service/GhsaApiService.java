@@ -6,20 +6,16 @@ import businessObjects.GraphQlQueries;
 import businessObjects.HTTPMethod;
 import businessObjects.ghsa.SecurityAdvisory;
 import common.Constants;
-import common.DataUtilityProperties;
 import common.HeaderBuilder;
-import common.Utils;
 import exceptions.ApiCallException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Properties;
 
 public class GhsaApiService {
     private static final Logger LOGGER = LoggerFactory.getLogger(GhsaApiService.class);
-    private final Properties prop = DataUtilityProperties.getProperties();
     private final HeaderBuilder headerBuilder = new HeaderBuilder();
 
     public SecurityAdvisory handleGetGhsa(String ghsaId) throws ApiCallException {
@@ -31,7 +27,7 @@ public class GhsaApiService {
                 HTTPMethod.POST,
                 Constants.GHSA_URI,
                 headerBuilder.addHeader(CONTENT_TYPE, APP_JSON)
-                        .addHeader(AUTHORIZATION, String.format("Bearer %s", Utils.getAuthToken(prop.getProperty("github-token-path"))))
+                        .addHeader(AUTHORIZATION, String.format("Bearer %s", System.getenv("NVD_KEY")))
                         .build(),
                 formatQueryBody(ghsaId));
         GHSAResponse ghsaResponse = ghsaRequest.executeRequest();
