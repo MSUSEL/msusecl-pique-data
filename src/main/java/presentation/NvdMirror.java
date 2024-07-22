@@ -41,8 +41,4 @@ public final class NvdMirror {
     public static void deleteSingleCve(String dbContext, String cveId) throws DataAccessException {
         mirrorService.handleDeleteSingleCve(dbContext, cveId);
     }
-
-    public static void insertMetaData(String dbContext) {
-        mirrorService.handleInsertMetaData(dbContext);
-    }
 }
