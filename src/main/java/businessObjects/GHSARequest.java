@@ -4,7 +4,6 @@ import businessObjects.baseClasses.BaseRequest;
 import common.Constants;
 import handlers.JsonResponseHandler;
 import handlers.SecurityAdvisoryMarshaller;
-import common.Utils;
 
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -20,7 +19,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 
 public final class GHSARequest extends BaseRequest {
     private static final Logger LOGGER = LoggerFactory.getLogger(GHSARequest.class);

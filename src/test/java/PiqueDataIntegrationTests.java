@@ -7,6 +7,8 @@ import org.junit.Test;
 import presentation.NvdMirror;
 import presentation.PiqueData;
 
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -34,30 +36,37 @@ public class PiqueDataIntegrationTests {
     @Test
     public void testGetLocalCvesById() throws DataAccessException {
         String[] cveIds = {TestConstants.CVE_A, TestConstants.CVE_B};
-        Cve[] result = PiqueData.getCveById(Constants.DB_CONTEXT_LOCAL, cveIds);
+        List<Cve> result = PiqueData.getCveById(Constants.DB_CONTEXT_LOCAL, cveIds);
 
-        assertEquals(TestConstants.CVE_A, result[0].getId());
-        assertEquals(TestConstants.CVE_B, result[1].getId());
+        assertEquals(TestConstants.CVE_A, result.get(0).getId());
+        assertEquals(TestConstants.CVE_B, result.get(1).getId());
     }
 
     @Test
     public void testGetPersistentCvesById() throws DataAccessException {
         String[] cveIds = {TestConstants.CVE_A, TestConstants.CVE_B};
-        Cve[] result = PiqueData.getCveById(Constants.DB_CONTEXT_PERSISTENT, cveIds);
+        List<Cve> result = PiqueData.getCveById(Constants.DB_CONTEXT_PERSISTENT, cveIds);
 
-        assertEquals(TestConstants.CVE_A, result[0].getId());
-        assertEquals(TestConstants.CVE_B, result[1].getId());
+        assertEquals(TestConstants.CVE_A, result.get(0).getId());
+        assertEquals(TestConstants.CVE_B, result.get(1).getId());
     }
 
     @Test
-    public void testGetCwes() throws DataAccessException {
+    public void testGetLocalCwes() throws DataAccessException {
        String[] cwes = PiqueData.getCwes(Constants.DB_CONTEXT_LOCAL, TestConstants.CVE_B);
 
        assertEquals(cwes[0], TestConstants.CVE_B_CWE_ORACLE);
     }
 
     @Test
-    public void testGetCveFromNvd() throws ApiCallException {
+    public void testGetPersistentCwes() throws DataAccessException {
+        String[] cwes = PiqueData.getCwes(Constants.DB_CONTEXT_PERSISTENT, TestConstants.CVE_B);
+
+        assertEquals(cwes[0], TestConstants.CVE_B_CWE_ORACLE);
+    }
+
+    @Test
+    public void testGetCveFromNvd() {
         Cve result = PiqueData.getCveFromNvd(TestConstants.CVE_A);
 
         assertEquals(TestConstants.CVE_A, result.getId());

@@ -3,12 +3,10 @@ package persistence.mongo;
 import businessObjects.cve.Cve;
 import com.mongodb.client.MongoIterable;
 import com.mongodb.client.model.Filters;
-import handlers.CveMarshaller;
 
 import com.mongodb.MongoBulkWriteException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.InsertOneModel;
 import com.mongodb.client.model.WriteModel;
 
@@ -62,7 +60,7 @@ public final class MongoBulkCveDao implements IBulkDao<Cve> {
     }
 
     @Override
-    public Cve[] fetchMany(String[] cveIds) {
+    public List<Cve> fetchMany(String[] cveIds) {
         assertNotNull(client);
         List<String> idList = Arrays.asList(cveIds);
         Bson filter = Filters.in("id", idList);
@@ -72,7 +70,7 @@ public final class MongoBulkCveDao implements IBulkDao<Cve> {
             String json = document.toJson();
             cves.add(cveMarshaller.unmarshalJson(json));
         }
-        return cves.toArray(new Cve[0]);
+        return cves;
     }
 
     @Override
