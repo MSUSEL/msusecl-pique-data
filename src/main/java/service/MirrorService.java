@@ -6,8 +6,8 @@ import persistence.IBulkDao;
 import persistence.IDao;
 import persistence.IMetaDataDao;
 import exceptions.DataAccessException;
-import presentation.CveResponseProcessor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public final class MirrorService {
@@ -24,9 +24,9 @@ public final class MirrorService {
         return dao.fetchMany(cveIds);
     }
 
-    public String[] handleGetCwes(String dbContext, String cveId) throws DataAccessException {
+    public ArrayList<String> handleGetNvdCweDescriptions(String dbContext, String cveId) throws DataAccessException {
         Cve cve = handleGetCveById(dbContext, cveId);
-        return cveResponseProcessor.extractCwes(cve);
+        return cveResponseProcessor.extractCweDescriptions(cve);
     }
 
     public NvdMirrorMetaData handleGetCurrentMetaData(String dbContext) throws DataAccessException {

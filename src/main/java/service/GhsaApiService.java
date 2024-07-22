@@ -13,6 +13,8 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+
 
 public class GhsaApiService {
     private static final Logger LOGGER = LoggerFactory.getLogger(GhsaApiService.class);
@@ -38,6 +40,11 @@ public class GhsaApiService {
         } else {
             throw new ApiCallException(status);
         }
+    }
+
+    public ArrayList<String> handleGetCweIdsFromGhsa(String ghsaId) throws ApiCallException {
+        SecurityAdvisory advisory = handleGetGhsa(ghsaId);
+        return new GhsaResponseProcessor().extractCweIds(advisory);
     }
 
     // TODO replace the following methods with dedicated GraphQL library

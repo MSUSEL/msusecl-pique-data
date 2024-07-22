@@ -7,6 +7,7 @@ import org.junit.Test;
 import presentation.NvdMirror;
 import presentation.PiqueData;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -53,16 +54,16 @@ public class PiqueDataIntegrationTests {
 
     @Test
     public void testGetLocalCwes() throws DataAccessException {
-       String[] cwes = PiqueData.getCwes(Constants.DB_CONTEXT_LOCAL, TestConstants.CVE_B);
+       ArrayList<String> cwes = PiqueData.getNvdCweDescriptions(Constants.DB_CONTEXT_LOCAL, TestConstants.CVE_B);
 
-       assertEquals(cwes[0], TestConstants.CVE_B_CWE_ORACLE);
+       assertEquals(cwes.get(0), TestConstants.CVE_B_CWE_ORACLE);
     }
 
     @Test
     public void testGetPersistentCwes() throws DataAccessException {
-        String[] cwes = PiqueData.getCwes(Constants.DB_CONTEXT_PERSISTENT, TestConstants.CVE_B);
+        ArrayList<String> cwes = PiqueData.getNvdCweDescriptions(Constants.DB_CONTEXT_PERSISTENT, TestConstants.CVE_B);
 
-        assertEquals(cwes[0], TestConstants.CVE_B_CWE_ORACLE);
+        assertEquals(cwes.get(0), TestConstants.CVE_B_CWE_ORACLE);
     }
 
     @Test

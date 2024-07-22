@@ -8,6 +8,7 @@ import service.GhsaApiService;
 import service.NvdApiService;
 import service.MirrorService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -59,8 +60,8 @@ public class PiqueData {
      * @return String array of CWEs
      * @throws DataAccessException
      */
-    public static String[] getCwes(String dbContext, String cveId) throws DataAccessException{
-        return mirrorService.handleGetCwes(dbContext, cveId);
+    public static ArrayList<String> getNvdCweDescriptions(String dbContext, String cveId) throws DataAccessException{
+        return mirrorService.handleGetNvdCweDescriptions(dbContext, cveId);
     }
 
     /**
@@ -84,6 +85,10 @@ public class PiqueData {
      */
     public static SecurityAdvisory getGhsa(String ghsaId) throws ApiCallException {
         return ghsaApiService.handleGetGhsa(ghsaId);
+    }
+
+    public static ArrayList<String> getCweIdsFromGhsa(String ghsaId) throws ApiCallException {
+        return ghsaApiService.handleGetCweIdsFromGhsa(ghsaId);
     }
 
 }
