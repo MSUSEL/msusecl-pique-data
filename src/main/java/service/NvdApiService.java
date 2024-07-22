@@ -23,8 +23,6 @@ public final class NvdApiService {
     private static final Logger LOGGER = LoggerFactory.getLogger(NvdApiService.class);
     private final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
     private final DbContextResolver dbContextResolver = new DbContextResolver();
-    private final Properties prop = DataUtilityProperties.getProperties();
-    private final String apiKey = Utils.getAuthToken(prop.getProperty(Constants.NVD_API_KEY_PATH));
 
     /**
      * Calls to NVD CVE2.0 API filtering results to single CVE
@@ -102,7 +100,7 @@ public final class NvdApiService {
     }
 
     private Header[] useDefaultHeaders() {
-        return new HeaderBuilder().addHeader(NvdConstants.API_KEY, apiKey).build();
+        return new HeaderBuilder().addHeader(NvdConstants.API_KEY, System.getenv("NVD_KEY")).build();
     }
 
     private List<NameValuePair> buildPaginateParams(int index, int resultsPerPage, ParameterBuilder parameterBuilder) {

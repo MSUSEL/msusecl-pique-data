@@ -8,7 +8,6 @@ import exceptions.DataAccessException;
 import service.NvdApiService;
 import service.MirrorService;
 
-import java.sql.SQLException;
 import java.time.Instant;
 
 /**
