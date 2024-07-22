@@ -41,7 +41,4 @@ public final class MirrorService {
         IDao<Cve> dao = dbContextResolver.resolveCveDao(dbContext);
         dao.delete(cveId);
     }
-
-    public void handleInsertMetaData(String dbContext) {
-    }
 }

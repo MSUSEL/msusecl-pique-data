@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class CveResponseProcessor {
 
-    public static String[] extractCwes(Cve cve) {
+    public String[] extractCwes(Cve cve) {
         ArrayList<Weakness> cweList = cve.getWeaknesses();
 
         int size = cweList.size();
