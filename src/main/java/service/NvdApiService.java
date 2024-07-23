@@ -60,7 +60,7 @@ public final class NvdApiService {
             NvdMirrorMetaData nvdMirrorMetaData = cveResponseProcessor.formatNvdMetaData(cveResponse);
 
             bulkDao.insertMany(cves);
-            conditionallyInsertMetaData(nvdMirrorMetaData, metadataDao, startIndex, cveCount);
+            insertMetaData(nvdMirrorMetaData, metadataDao, startIndex, cveCount, true);
             handleSleep(startIndex, cveCount);
         }
     }
@@ -92,7 +92,7 @@ public final class NvdApiService {
             NvdMirrorMetaData nvdMirrorMetaData = cveResponseProcessor.formatNvdMetaData(cveResponse);
 
             bulkDao.insertMany(cves);
-            conditionallyInsertMetaData(nvdMirrorMetaData, metadataDao, startIndex, totalResults);
+            insertMetaData(nvdMirrorMetaData, metadataDao, startIndex, totalResults, false);
             handleSleep(startIndex, totalResults);
         }
     }
@@ -127,8 +127,12 @@ public final class NvdApiService {
         }
     }
 
-    private void conditionallyInsertMetaData(NvdMirrorMetaData metaData, IMetaDataDao<NvdMirrorMetaData> metaDataDao, int startIndex, int count) throws DataAccessException {
-        if (startIndex == count - 1) {
+    private void insertMetaData(NvdMirrorMetaData metaData, IMetaDataDao<NvdMirrorMetaData> metaDataDao, int startIndex, int count, boolean conditional) throws DataAccessException {
+        if(conditional) {
+            if (startIndex == count - 1) {
+                metaDataDao.updateMetaData(metaData);
+            }
+        } else {
             metaDataDao.updateMetaData(metaData);
         }
     }

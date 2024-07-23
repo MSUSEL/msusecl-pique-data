@@ -4,10 +4,16 @@ import common.Constants;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
 import org.junit.Test;
+import persistence.IDataSource;
+import persistence.IMetaDataDao;
+import persistence.postgreSQL.PostgresConnectionManager;
+import persistence.postgreSQL.PostgresMetaDataDao;
 import presentation.NvdMirror;
 import presentation.PiqueData;
 
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.Instant;
 
 /**
  * IMPORTANT!
@@ -46,6 +52,11 @@ public class NvdMirrorIntegrationTests {
     @Test
     public void testGetPersistentMetaData() throws DataAccessException {
         NvdMirrorMetaData metaData = NvdMirror.getMetaData(Constants.DB_CONTEXT_PERSISTENT);
+        System.out.println(metaData.getId());
+        System.out.println(metaData.getTotalResults());
+        System.out.println(metaData.getFormat());
+        System.out.println(metaData.getVersion());
+        System.out.println(metaData.getTimestamp());
     }
 
     @Test
@@ -66,5 +77,19 @@ public class NvdMirrorIntegrationTests {
     public void testGetCveFromMirror() throws DataAccessException {
         Cve cve = PiqueData.getCveById(Constants.DB_CONTEXT_PERSISTENT, TestConstants.CVE_A);
         System.out.println(cve.getId());
+    }
+
+    @Test
+    public void testInsertMetaData() throws DataAccessException {
+        IDataSource<Connection> dataSource = new PostgresConnectionManager();
+        IMetaDataDao<NvdMirrorMetaData> dao = new PostgresMetaDataDao(dataSource);
+        NvdMirrorMetaData metaData = new NvdMirrorMetaData();
+        metaData.setTimestamp("2024-07-07T23:26:08.260");
+        metaData.setId("1");
+        metaData.setVersion("2.0");
+        metaData.setTotalResults("255980");
+        metaData.setFormat("NVD_CVE");
+
+        dao.updateMetaData(metaData);
     }
 }
