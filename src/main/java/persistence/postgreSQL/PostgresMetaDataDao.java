@@ -17,11 +17,11 @@ public final class PostgresMetaDataDao implements IMetaDataDao<NvdMirrorMetaData
     @Override
     public boolean updateMetaData(NvdMirrorMetaData metaData) throws DataAccessException {
         try {
-            String sql = String.format("UPDATE nvd.cve " +
-                            "SET totalResults = %s, " +
-                            "format = %s, " +
-                            "version = %s, " +
-                            "timestamp = %s;",
+            String sql = String.format("UPDATE nvd.metadata " +
+                            "SET total_results = '%s', " +
+                            "format = '%s', " +
+                            "api_version = '%s', " +
+                            "last_timestamp = '%s'::text;",
                     metaData.getTotalResults(),
                     metaData.getFormat(),
                     metaData.getVersion(),
@@ -45,10 +45,10 @@ public final class PostgresMetaDataDao implements IMetaDataDao<NvdMirrorMetaData
 
             if (rs.next()) {
                 String id = rs.getString("id");
-                String totalResults = rs.getString("totalResults");
+                String totalResults = rs.getString("total_results");
                 String format = rs.getString("format");
-                String version = rs.getString("version");
-                String timestamp = rs.getString("timestamp");
+                String version = rs.getString("api_version");
+                String timestamp = rs.getString("last_timestamp");
 
                 metaData.setId(id);
                 metaData.setTotalResults(totalResults);
