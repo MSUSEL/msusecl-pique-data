@@ -23,14 +23,14 @@ public final class PgTableOperationsDao {
 
     private final String createMetaDataTable = "CREATE TABLE IF NOT EXISTS \"nvd\".\"metadata\" ( " +
             "\"id\" SERIAL PRIMARY KEY, " +
-            "\"totalResults\" TEXT NOT NULL, " +
-            "\"format\" TEXT NOT NULL, " +
-            "\"version\" TEXT NOT NULL, " +
-            "\"timestamp\" TEXT NOT NULL " +
+            "\"total_results\" VARCHAR NOT NULL, " +
+            "\"format\" VARCHAR NOT NULL, " +
+            "\"api_version\" VARCHAR NOT NULL, " +
+            "\"last_timestamp\" VARCHAR NOT NULL " +
             ");";
 
-    public PgTableOperationsDao(IDataSource<Connection> conn) {
-        this.conn = conn.getConnection();
+    public PgTableOperationsDao(IDataSource<Connection> dataSource) {
+        this.conn = dataSource.getConnection();
     }
 
     public void buildCveTable() {
