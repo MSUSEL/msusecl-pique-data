@@ -1,6 +1,6 @@
 package service;
 
-import businessObjects.HTTPMethod;
+import businessObjects.interfaces.HTTPMethod;
 import businessObjects.NvdRequest;
 import businessObjects.NvdResponse;
 import businessObjects.cve.CVEResponse;
@@ -28,11 +28,12 @@ public final class NvdApiService {
      * @return Cve object from NVD response
      */
     public Cve handleGetCveFromNvd(String cveId) {
-        NvdRequest request = new NvdRequest(HTTPMethod.GET, Constants.NVD_CVE_URI, useDefaultHeaders(), new ParameterBuilder().addParameter(NvdConstants.CVE_ID, cveId).build());
-        NvdResponse response = request.executeRequest();
-        CVEResponse cveResponse = response.getCveResponse();
-
-        return cveResponseProcessor.extractSingleCve(cveResponse);
+        NvdRequest request = new NvdRequest(HTTPMethod.GET,
+                Constants.NVD_CVE_URI,
+                useDefaultHeaders(),
+                new ParameterBuilder().addParameter(NvdConstants.CVE_ID, cveId).build());
+        CVEResponse response = performApiCall(request);
+        return cveResponseProcessor.extractSingleCve(response);
     }
 
     /**
@@ -49,15 +50,15 @@ public final class NvdApiService {
         int cveCount = startIndex + 1;
 
         for (int i = startIndex; i < cveCount; i += Constants.NVD_MAX_PAGE_SIZE) {
-            ParameterBuilder parameterBuilder = new ParameterBuilder();
 
-            NvdRequest request = new NvdRequest(HTTPMethod.GET, Constants.NVD_CVE_URI, useDefaultHeaders(), buildPaginateParams(i, resultsPerPage, parameterBuilder));
-            NvdResponse response = request.executeRequest();
-            CVEResponse cveResponse = response.getCveResponse();
-
-            cveCount = cveResponseProcessor.extractTotalResults(cveResponse);
-            List<Cve> cves = cveResponseProcessor.extractAllCves(cveResponse);
-            NvdMirrorMetaData nvdMirrorMetaData = cveResponseProcessor.formatNvdMetaData(cveResponse);
+            NvdRequest request = new NvdRequest(HTTPMethod.GET,
+                    Constants.NVD_CVE_URI,
+                    useDefaultHeaders(),
+                    buildPaginateParams(i, resultsPerPage, parameterBuilder));
+            CVEResponse response = performApiCall(request);
+            cveCount = cveResponseProcessor.extractTotalResults(response);
+            List<Cve> cves = cveResponseProcessor.extractAllCves(response);
+            NvdMirrorMetaData nvdMirrorMetaData = cveResponseProcessor.formatNvdMetaData(response);
 
             bulkDao.insertMany(cves);
             insertMetaData(nvdMirrorMetaData, metadataDao, startIndex, cveCount, true);
@@ -108,12 +109,23 @@ public final class NvdApiService {
                 .build();
     }
 
-    private List<NameValuePair> buildUpdateParams(int index, String lastModStartDate, String lastModEndDate, ParameterBuilder parameterBuilder) {
+    private List<NameValuePair> buildUpdateP9arams(int index, String lastModStartDate, String lastModEndDate, ParameterBuilder parameterBuilder) {
         buildPaginateParams(index, Constants.NVD_MAX_PAGE_SIZE, parameterBuilder);
         return parameterBuilder
                 .addParameter(NvdConstants.LAST_MOD_START_DATE, lastModStartDate)
                 .addParameter(NvdConstants.LAST_MOD_END_DATE, lastModEndDate)
                 .build();
+    }
+
+    private NvdRequest createRequest() {
+        ParameterBuilder parameterBuilder = new ParameterBuilder();
+
+
+    }
+
+    private CVEResponse performApiCall(NvdRequest request) {
+        NvdResponse response = request.executeRequest();
+        return response.getCveResponse();
     }
 
     private void handleSleep(int startIndex, int count) {

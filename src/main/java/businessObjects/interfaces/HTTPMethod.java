@@ -1,4 +1,4 @@
-package businessObjects;
+package businessObjects.interfaces;
 
 public interface HTTPMethod {
     String GET = "GET";

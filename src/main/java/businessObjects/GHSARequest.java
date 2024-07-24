@@ -1,6 +1,8 @@
 package businessObjects;
 
 import businessObjects.baseClasses.BaseRequest;
+import businessObjects.baseClasses.BaseResponse;
+import businessObjects.interfaces.IRequest;
 import common.Constants;
 import handlers.JsonResponseHandler;
 import handlers.SecurityAdvisoryMarshaller;
@@ -20,7 +22,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 
-public final class GHSARequest extends BaseRequest {
+public final class GHSARequest extends BaseRequest implements IRequest {
     private static final Logger LOGGER = LoggerFactory.getLogger(GHSARequest.class);
     private final JsonResponseHandler handler = new JsonResponseHandler();
     private final String query;
@@ -31,7 +33,7 @@ public final class GHSARequest extends BaseRequest {
     }
 
     @Override
-    public GHSAResponse executeRequest() {
+    public BaseResponse executeRequest() {
         return executeGHSARequest();
     }
 

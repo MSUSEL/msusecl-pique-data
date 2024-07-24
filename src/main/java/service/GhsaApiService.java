@@ -3,7 +3,7 @@ package service;
 import businessObjects.GHSARequest;
 import businessObjects.GHSAResponse;
 import businessObjects.GraphQlQueries;
-import businessObjects.HTTPMethod;
+import businessObjects.interfaces.HTTPMethod;
 import businessObjects.ghsa.SecurityAdvisory;
 import common.Constants;
 import common.HeaderBuilder;
