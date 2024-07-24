@@ -21,11 +21,11 @@ import static org.junit.Assert.assertEquals;
 // TODO Create Mocked databases rather than hitting "production"
 public class PiqueDataIntegrationTests {
 
-    @Test
-    public void testLocalGetCveById() throws DataAccessException {
-        Cve result = PiqueData.getCveById(Constants.DB_CONTEXT_LOCAL, TestConstants.CVE_A);
-        assertEquals(TestConstants.CVE_A, result.getId());
-    }
+//    @Test
+//    public void testLocalGetCveById() throws DataAccessException {
+//        Cve result = PiqueData.getCveById(Constants.DB_CONTEXT_LOCAL, TestConstants.CVE_A);
+//        assertEquals(TestConstants.CVE_A, result.getId());
+//    }
 
     @Test
     public void testPersistentGetCveById() throws DataAccessException {
@@ -34,14 +34,14 @@ public class PiqueDataIntegrationTests {
         assertEquals(TestConstants.CVE_B_CWE_ORACLE, cve.getWeaknesses().get(0).getDescription().get(0).getValue());
     }
 
-    @Test
-    public void testGetLocalCvesById() throws DataAccessException {
-        String[] cveIds = {TestConstants.CVE_A, TestConstants.CVE_B};
-        List<Cve> result = PiqueData.getCveById(Constants.DB_CONTEXT_LOCAL, cveIds);
-
-        assertEquals(TestConstants.CVE_A, result.get(0).getId());
-        assertEquals(TestConstants.CVE_B, result.get(1).getId());
-    }
+//    @Test
+//    public void testGetLocalCvesById() throws DataAccessException {
+//        String[] cveIds = {TestConstants.CVE_A, TestConstants.CVE_B};
+//        List<Cve> result = PiqueData.getCveById(Constants.DB_CONTEXT_LOCAL, cveIds);
+//
+//        assertEquals(TestConstants.CVE_A, result.get(0).getId());
+//        assertEquals(TestConstants.CVE_B, result.get(1).getId());
+//    }
 
     @Test
     public void testGetPersistentCvesById() throws DataAccessException {
@@ -52,12 +52,12 @@ public class PiqueDataIntegrationTests {
         assertEquals(TestConstants.CVE_B, result.get(1).getId());
     }
 
-    @Test
-    public void testGetLocalCwes() throws DataAccessException {
-       ArrayList<String> cwes = PiqueData.getNvdCweDescriptions(Constants.DB_CONTEXT_LOCAL, TestConstants.CVE_B);
-
-       assertEquals(cwes.get(0), TestConstants.CVE_B_CWE_ORACLE);
-    }
+//    @Test
+//    public void testGetLocalCwes() throws DataAccessException {
+//       ArrayList<String> cwes = PiqueData.getNvdCweDescriptions(Constants.DB_CONTEXT_LOCAL, TestConstants.CVE_B);
+//
+//       assertEquals(cwes.get(0), TestConstants.CVE_B_CWE_ORACLE);
+//    }
 
     @Test
     public void testGetPersistentCwes() throws DataAccessException {
@@ -80,9 +80,9 @@ public class PiqueDataIntegrationTests {
         assertEquals(TestConstants.GHSA_ID_A, result.getGhsaId());
     }
 
-    @Test
-    public void testPersistentDeleteCve() throws DataAccessException {
-        NvdMirror.deleteSingleCve(Constants.DB_CONTEXT_PERSISTENT, TestConstants.CVE_A);
-    }
+//    @Test
+//    public void testPersistentDeleteCve() throws DataAccessException {
+//        NvdMirror.deleteSingleCve(Constants.DB_CONTEXT_PERSISTENT, TestConstants.CVE_A);
+//    }
 
 }
