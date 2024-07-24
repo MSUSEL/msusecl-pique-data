@@ -169,6 +169,19 @@ class ExampleClass {
 
 -----------------
 
+### A Note on Exception Handling
+
+The PiqueData library uses two custom checked exceptions. 
+`DataAccessException` is thrown when there is an error interacting with a database.  `ApiCallException` is thrown when there is an error
+interacting with a third-party API.  Because these are both checked exceptions, the user must handle them when calling certain methods 
+from PiqueData. This gives the user the option to either stop or continue application execution in the event of an error retrieving 
+data. 
+
+
+
+-----------------
+
+
 ### More info
 For a complete picture of available methods, it is recommended to read through the PiqueData and NvdMirror classes in the 
 `presentation` package. The methods and classes are extensively documented there. In subsequent releases, this will be 
