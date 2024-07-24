@@ -8,7 +8,9 @@ import persistence.IDataSource;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 public final class PostgresBulkCveDao implements IBulkDao<Cve> {
@@ -38,8 +40,32 @@ public final class PostgresBulkCveDao implements IBulkDao<Cve> {
     }
 
     @Override
-    public Cve[] fetchMany(String[] entities) {
-        return new Cve[0];
+    public List<Cve> fetchMany(String[] entities) throws DataAccessException {
+        String base = "SELECT details FROM nvd.cve WHERE cve_id IN (";
+        StringBuilder idListBuilder = new StringBuilder();
+        try {
+            for (int i = 0; i < entities.length; i++) {
+                idListBuilder.append("'").append(entities[i]).append("'");
+                if (i < entities.length - 1) {
+                    idListBuilder.append(", ");
+                }
+            }
+            idListBuilder.append(");");
+            String idList = idListBuilder.toString();
+            String sql = base + idList;
+            PreparedStatement statement = conn.prepareStatement(sql);
+            ResultSet rs = statement.executeQuery();
+
+            List<Cve> result = new ArrayList<>();
+            while (rs.next()) {
+                result.add(marshaller.unmarshalJson(rs.getString("details")));
+            }
+
+            return result;
+
+        } catch (SQLException e) {
+            throw new DataAccessException(e);
+        }
     }
 
     @Override

@@ -4,11 +4,11 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public final class JsonResponseHandler implements ResponseHandler<String> {
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonResponseHandler.class);

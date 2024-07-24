@@ -3,7 +3,6 @@ package handlers;
 import businessObjects.cve.CVEResponse;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

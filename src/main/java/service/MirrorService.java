@@ -6,7 +6,9 @@ import persistence.IBulkDao;
 import persistence.IDao;
 import persistence.IMetaDataDao;
 import exceptions.DataAccessException;
-import presentation.CveResponseProcessor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public final class MirrorService {
     private final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
@@ -17,14 +19,14 @@ public final class MirrorService {
         return dao.fetchById(cveId);
     }
 
-    public Cve[] handleGetCveById(String dbContext, String[] cveIds) throws DataAccessException {
+    public List<Cve> handleGetCveById(String dbContext, String[] cveIds) throws DataAccessException {
         IBulkDao<Cve> dao = dbContextResolver.resolveBulkDao(dbContext);
         return dao.fetchMany(cveIds);
     }
 
-    public String[] handleGetCwes(String dbContext, String cveId) throws DataAccessException {
+    public ArrayList<String> handleGetNvdCweDescriptions(String dbContext, String cveId) throws DataAccessException {
         Cve cve = handleGetCveById(dbContext, cveId);
-        return cveResponseProcessor.extractCwes(cve);
+        return cveResponseProcessor.extractCweDescriptions(cve);
     }
 
     public NvdMirrorMetaData handleGetCurrentMetaData(String dbContext) throws DataAccessException {
@@ -40,8 +42,5 @@ public final class MirrorService {
     public void handleDeleteSingleCve(String dbContext, String cveId) throws DataAccessException {
         IDao<Cve> dao = dbContextResolver.resolveCveDao(dbContext);
         dao.delete(cveId);
-    }
-
-    public void handleInsertMetaData(String dbContext) {
     }
 }

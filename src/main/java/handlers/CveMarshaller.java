@@ -3,7 +3,6 @@ package handlers;
 import businessObjects.cve.Cve;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-
 import common.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

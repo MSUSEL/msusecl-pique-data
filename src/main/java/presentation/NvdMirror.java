@@ -8,7 +8,6 @@ import exceptions.DataAccessException;
 import service.NvdApiService;
 import service.MirrorService;
 
-import java.sql.SQLException;
 import java.time.Instant;
 
 /**
@@ -40,9 +39,5 @@ public final class NvdMirror {
 
     public static void deleteSingleCve(String dbContext, String cveId) throws DataAccessException {
         mirrorService.handleDeleteSingleCve(dbContext, cveId);
-    }
-
-    public static void insertMetaData(String dbContext) {
-        mirrorService.handleInsertMetaData(dbContext);
     }
 }
