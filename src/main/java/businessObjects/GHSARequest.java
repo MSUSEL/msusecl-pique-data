@@ -1,7 +1,6 @@
 package businessObjects;
 
 import businessObjects.baseClasses.BaseRequest;
-import businessObjects.baseClasses.BaseResponse;
 import businessObjects.interfaces.IRequest;
 import common.Constants;
 import handlers.JsonResponseHandler;
@@ -33,7 +32,7 @@ public final class GHSARequest extends BaseRequest implements IRequest {
     }
 
     @Override
-    public BaseResponse executeRequest() {
+    public GHSAResponse executeRequest() {
         return executeGHSARequest();
     }
 
