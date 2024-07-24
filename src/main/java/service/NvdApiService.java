@@ -14,17 +14,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import persistence.IBulkDao;
 import persistence.IMetaDataDao;
-import presentation.CveResponseProcessor;
 
 import java.util.List;
-import java.util.Properties;
 
 public final class NvdApiService {
     private static final Logger LOGGER = LoggerFactory.getLogger(NvdApiService.class);
     private final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
     private final DbContextResolver dbContextResolver = new DbContextResolver();
-    private final Properties prop = DataUtilityProperties.getProperties();
-    private final String apiKey = Utils.getAuthToken(prop.getProperty(Constants.NVD_API_KEY_PATH));
 
     /**
      * Calls to NVD CVE2.0 API filtering results to single CVE
@@ -64,7 +60,7 @@ public final class NvdApiService {
             NvdMirrorMetaData nvdMirrorMetaData = cveResponseProcessor.formatNvdMetaData(cveResponse);
 
             bulkDao.insertMany(cves);
-            conditionallyInsertMetaData(nvdMirrorMetaData, metadataDao, startIndex, cveCount);
+            insertMetaData(nvdMirrorMetaData, metadataDao, startIndex, cveCount, true);
             handleSleep(startIndex, cveCount);
         }
     }
@@ -96,13 +92,13 @@ public final class NvdApiService {
             NvdMirrorMetaData nvdMirrorMetaData = cveResponseProcessor.formatNvdMetaData(cveResponse);
 
             bulkDao.insertMany(cves);
-            conditionallyInsertMetaData(nvdMirrorMetaData, metadataDao, startIndex, totalResults);
+            insertMetaData(nvdMirrorMetaData, metadataDao, startIndex, totalResults, false);
             handleSleep(startIndex, totalResults);
         }
     }
 
     private Header[] useDefaultHeaders() {
-        return new HeaderBuilder().addHeader(NvdConstants.API_KEY, apiKey).build();
+        return new HeaderBuilder().addHeader(NvdConstants.API_KEY, System.getenv("NVD_KEY")).build();
     }
 
     private List<NameValuePair> buildPaginateParams(int index, int resultsPerPage, ParameterBuilder parameterBuilder) {
@@ -131,8 +127,12 @@ public final class NvdApiService {
         }
     }
 
-    private void conditionallyInsertMetaData(NvdMirrorMetaData metaData, IMetaDataDao<NvdMirrorMetaData> metaDataDao, int startIndex, int count) throws DataAccessException {
-        if (startIndex == count - 1) {
+    private void insertMetaData(NvdMirrorMetaData metaData, IMetaDataDao<NvdMirrorMetaData> metaDataDao, int startIndex, int count, boolean conditional) throws DataAccessException {
+        if(conditional) {
+            if (startIndex == count - 1) {
+                metaDataDao.updateMetaData(metaData);
+            }
+        } else {
             metaDataDao.updateMetaData(metaData);
         }
     }

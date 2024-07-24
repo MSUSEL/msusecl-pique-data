@@ -8,6 +8,9 @@ import service.GhsaApiService;
 import service.NvdApiService;
 import service.MirrorService;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * PiqueData serves as the primary class for interacting with this library. It provides static methods to work
  * with common data needs in Pique wrappers. These methods are designed to work with multiple database contexts.
@@ -19,12 +22,9 @@ import service.MirrorService;
  * of MongoDB Community Edition and mirrors the NVD there. Again, more information can be found in the Persistence layer
  * Readme.
  *
- * This class is extensible. If these methods are insufficient for your PIQUE wrapper, feel free to create a derived
- * class in your wrapper. If you do extend this class, you will also need to extend the appropriate class in the
- * service layer. Please call the service layer, rather than data access objects from this class and any extensions.
- * Although this library is designed to be extensible, if this class does not provide for your data needs,
- * please speak with Ryan Cummings in the Software Engineering and Cybersecurity Lab. This utility should include all
- * common use cases for data access in the lab.
+ * If this class does not provide you with the calls you want to make, please speak with Ryan Cummings in the Software
+ * Engineering and Cybersecurity Lab. This utility should include most common use cases for data access in the lab. New
+ * functionality will be added as needed.
  */
 public class PiqueData {
     protected static final MirrorService mirrorService = new MirrorService();
@@ -49,7 +49,7 @@ public class PiqueData {
      * @return Returns an array of CVE objects corresponding to the provided cveIds
      * @throws DataAccessException
      */
-    public static Cve[] getCveById(String dbContext, String[] cveIds) throws DataAccessException {
+    public static List<Cve> getCveById(String dbContext, String[] cveIds) throws DataAccessException {
         return mirrorService.handleGetCveById(dbContext, cveIds);
     }
 
@@ -60,8 +60,8 @@ public class PiqueData {
      * @return String array of CWEs
      * @throws DataAccessException
      */
-    public static String[] getCwes(String dbContext, String cveId) throws DataAccessException{
-        return mirrorService.handleGetCwes(dbContext, cveId);
+    public static ArrayList<String> getNvdCweDescriptions(String dbContext, String cveId) throws DataAccessException{
+        return mirrorService.handleGetNvdCweDescriptions(dbContext, cveId);
     }
 
     /**
@@ -70,9 +70,8 @@ public class PiqueData {
      * method exists to create direct access to the NVD with a single command.
      * @param cveId This is the official cveId from the NVD
      * @return Requested Cve object
-     * @throws ApiCallException
      */
-    public static Cve getCveFromNvd(String cveId) throws ApiCallException {
+    public static Cve getCveFromNvd(String cveId) {
         return nvdApiService.handleGetCveFromNvd(cveId);
     }
 
@@ -86,6 +85,10 @@ public class PiqueData {
      */
     public static SecurityAdvisory getGhsa(String ghsaId) throws ApiCallException {
         return ghsaApiService.handleGetGhsa(ghsaId);
+    }
+
+    public static ArrayList<String> getCweIdsFromGhsa(String ghsaId) throws ApiCallException {
+        return ghsaApiService.handleGetCweIdsFromGhsa(ghsaId);
     }
 
 }

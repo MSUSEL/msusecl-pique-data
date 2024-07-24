@@ -4,8 +4,6 @@ import businessObjects.ghsa.CweNode;
 import businessObjects.ghsa.Cwes;
 import businessObjects.ghsa.SecurityAdvisory;
 import common.Constants;
-import common.Utils;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,7 +48,7 @@ public final class SecurityAdvisoryMarshaller implements IJsonMarshaller<Securit
         ArrayList<CweNode> nodes = new ArrayList<>();
         try {
             JSONArray jsonNodes = response.optJSONObject("cwes").optJSONArray("nodes");
-            for(int i = 0; i < jsonNodes.length(); i++) {
+            for (int i = 0; i < jsonNodes.length(); i++) {
                 CweNode cweNode = new CweNode();
                 cweNode.setCweId(jsonNodes.optJSONObject(i).getString("cweId"));
                 nodes.add(cweNode);
