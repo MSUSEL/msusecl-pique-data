@@ -1,6 +1,6 @@
 package service;
 
-import businessObjects.interfaces.HTTPMethod;
+import businessObjects.NvdRequestBuilder;
 import businessObjects.NvdRequest;
 import businessObjects.NvdResponse;
 import businessObjects.cve.CVEResponse;
@@ -8,8 +8,6 @@ import businessObjects.cve.Cve;
 import businessObjects.cve.NvdMirrorMetaData;
 import common.*;
 import exceptions.DataAccessException;
-import org.apache.http.Header;
-import org.apache.http.NameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import persistence.IBulkDao;
@@ -28,11 +26,9 @@ public final class NvdApiService {
      * @return Cve object from NVD response
      */
     public Cve handleGetCveFromNvd(String cveId) {
-        NvdRequest request = new NvdRequest(HTTPMethod.GET,
-                Constants.NVD_CVE_URI,
-                useDefaultHeaders(),
-                new ParameterBuilder().addParameter(NvdConstants.CVE_ID, cveId).build());
+        NvdRequest request = new NvdRequestBuilder().withCveId(cveId).build();
         CVEResponse response = performApiCall(request);
+
         return cveResponseProcessor.extractSingleCve(response);
     }
 
@@ -41,31 +37,18 @@ public final class NvdApiService {
      * This is primarily used to build the SECL's NVD mirror
      *
      * @param dbContext defines database context (currently SECL's postgres NVD Mirror)
-     * @param startIndex Where in the index of CVEs should the NVD begin returning paginated results
-     * @param resultsPerPage Total number of results per call - typically the max number of 2000
      */
-    public void handleGetPaginatedCves(String dbContext, int startIndex, int resultsPerPage) throws DataAccessException {
-        IBulkDao<Cve> bulkDao = dbContextResolver.resolveBulkDao(dbContext);
-        IMetaDataDao<NvdMirrorMetaData> metadataDao = dbContextResolver.resolveMetaDataDao(dbContext);
-        int cveCount = startIndex + 1;
+    public void handleBuildMirror(String dbContext) throws DataAccessException {
+        int cveCount = 1;
 
-        for (int i = startIndex; i < cveCount; i += Constants.NVD_MAX_PAGE_SIZE) {
-
-            NvdRequest request = new NvdRequest(HTTPMethod.GET,
-                    Constants.NVD_CVE_URI,
-                    useDefaultHeaders(),
-                    buildPaginateParams(i, resultsPerPage, parameterBuilder));
-            CVEResponse response = performApiCall(request);
-            cveCount = cveResponseProcessor.extractTotalResults(response);
-            List<Cve> cves = cveResponseProcessor.extractAllCves(response);
-            NvdMirrorMetaData nvdMirrorMetaData = cveResponseProcessor.formatNvdMetaData(response);
-
-            bulkDao.insertMany(cves);
-            insertMetaData(nvdMirrorMetaData, metadataDao, startIndex, cveCount, true);
-            handleSleep(startIndex, cveCount);
+        for (int i = 0; i < cveCount; i += Constants.NVD_MAX_PAGE_SIZE) {
+            CVEResponse response = performApiCall(
+                    new NvdRequestBuilder().withFullMirrorDefaults(Integer.toString(i)).build());
+            cveCount = setCveCount(i, response);
+            persistData(dbContext, response, i, cveCount);
+            handleSleep(i, cveCount);
         }
     }
-
 
     /**
      * Handles updating the SECL NVD Mirror
@@ -82,9 +65,12 @@ public final class NvdApiService {
         int totalResults = startIndex + 1;
 
         for (int i = startIndex; i < totalResults; i += Constants.NVD_MAX_PAGE_SIZE) {
-            ParameterBuilder parameterBuilder = new ParameterBuilder();
-
-            NvdRequest request = new NvdRequest(HTTPMethod.GET, Constants.NVD_CVE_URI, useDefaultHeaders(), buildUpdateParams(i, lastModStartDate, lastModEndDate, parameterBuilder));
+            NvdRequest request = new NvdRequestBuilder()
+                    .withApiKey(System.getenv("NVD_KEY"))
+                    .withStartIndex(Integer.toString(i))
+                    .withResultsPerPage(Integer.toString(Constants.NVD_MAX_PAGE_SIZE))
+                    .withLastModStartEndDates(lastModStartDate, lastModEndDate)
+                    .build();
             NvdResponse response = request.executeRequest();
             CVEResponse cveResponse = response.getCveResponse();
 
@@ -98,34 +84,32 @@ public final class NvdApiService {
         }
     }
 
-    private Header[] useDefaultHeaders() {
-        return new HeaderBuilder().addHeader(NvdConstants.API_KEY, System.getenv("NVD_KEY")).build();
-    }
-
-    private List<NameValuePair> buildPaginateParams(int index, int resultsPerPage, ParameterBuilder parameterBuilder) {
-        return parameterBuilder
-                .addParameter(NvdConstants.START_INDEX, Integer.toString(index))
-                .addParameter(NvdConstants.RESULTS_PER_PAGE, Integer.toString(resultsPerPage))
-                .build();
-    }
-
-    private List<NameValuePair> buildUpdateP9arams(int index, String lastModStartDate, String lastModEndDate, ParameterBuilder parameterBuilder) {
-        buildPaginateParams(index, Constants.NVD_MAX_PAGE_SIZE, parameterBuilder);
-        return parameterBuilder
-                .addParameter(NvdConstants.LAST_MOD_START_DATE, lastModStartDate)
-                .addParameter(NvdConstants.LAST_MOD_END_DATE, lastModEndDate)
-                .build();
-    }
-
-    private NvdRequest createRequest() {
-        ParameterBuilder parameterBuilder = new ParameterBuilder();
-
-
-    }
-
     private CVEResponse performApiCall(NvdRequest request) {
         NvdResponse response = request.executeRequest();
         return response.getCveResponse();
+    }
+
+    private int setCveCount(int loopIndex, CVEResponse response) {
+        return loopIndex == 0
+                ? cveResponseProcessor.extractTotalResults(response)
+                : 0;
+    }
+
+    private void persistData(String dbContext, CVEResponse response, int loopIndex, int cveCount) throws DataAccessException {
+        persistCveDetails(dbContext, response);
+        if(loopIndex == cveCount - 1) {
+            persistMetadata(dbContext, response);
+        }
+    }
+
+    private void persistCveDetails(String dbContext, CVEResponse response) throws DataAccessException {
+        IBulkDao<Cve> dao = dbContextResolver.resolveBulkDao(dbContext);
+        dao.insertMany(cveResponseProcessor.extractAllCves(response));
+    }
+
+    private void persistMetadata(String dbContext, CVEResponse response) throws DataAccessException {
+        IMetaDataDao<NvdMirrorMetaData> dao = dbContextResolver.resolveMetaDataDao(dbContext);
+        dao.updateMetaData(cveResponseProcessor.formatNvdMetaData(response));
     }
 
     private void handleSleep(int startIndex, int count) {
@@ -138,15 +122,4 @@ public final class NvdApiService {
             throw new RuntimeException(e);
         }
     }
-
-    private void insertMetaData(NvdMirrorMetaData metaData, IMetaDataDao<NvdMirrorMetaData> metaDataDao, int startIndex, int count, boolean conditional) throws DataAccessException {
-        if(conditional) {
-            if (startIndex == count - 1) {
-                metaDataDao.updateMetaData(metaData);
-            }
-        } else {
-            metaDataDao.updateMetaData(metaData);
-        }
-    }
-
 }

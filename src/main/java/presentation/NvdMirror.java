@@ -20,7 +20,7 @@ public final class NvdMirror {
     private static final MirrorService mirrorService = new MirrorService();
 
     public static void buildNvdMirror(String dbContext) throws DataAccessException {
-        nvdApiService.handleGetPaginatedCves(dbContext, Constants.DEFAULT_START_INDEX, Constants.NVD_MAX_PAGE_SIZE);
+        nvdApiService.handleBuildMirror(dbContext);
     }
 
     public static void updateNvdMirror(String dbContext) throws DataAccessException, ApiCallException {
