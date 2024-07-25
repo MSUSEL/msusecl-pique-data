@@ -17,7 +17,6 @@ import static org.junit.Assert.assertEquals;
  */
 
 // TODO test edge cases and create more robust asserts
-// TODO separate local and persistent tests.
 // TODO Create Mocked databases rather than hitting "production"
 public class PiqueDataIntegrationTests {
 
@@ -67,7 +66,7 @@ public class PiqueDataIntegrationTests {
     }
 
     @Test
-    public void testGetCveFromNvd() {
+    public void testGetCveFromNvd() throws ApiCallException {
         Cve result = PiqueData.getCveFromNvd(TestConstants.CVE_A);
 
         assertEquals(TestConstants.CVE_A, result.getId());

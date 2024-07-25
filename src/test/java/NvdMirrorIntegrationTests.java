@@ -23,12 +23,12 @@ import java.sql.Connection;
 public class NvdMirrorIntegrationTests {
 
     @Test
-    public void testBuildLocalNvdMirror() throws DataAccessException {
+    public void testBuildLocalNvdMirror() throws DataAccessException, ApiCallException {
         NvdMirror.buildNvdMirror(Constants.DB_CONTEXT_LOCAL);
     }
 
     @Test
-    public void testBuildPersistentNvdMirror() throws DataAccessException {
+    public void testBuildPersistentNvdMirror() throws DataAccessException, ApiCallException {
         NvdMirror.buildNvdMirror(Constants.DB_CONTEXT_PERSISTENT);
     }
 

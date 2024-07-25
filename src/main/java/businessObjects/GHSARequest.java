@@ -66,7 +66,7 @@ public final class GHSARequest extends BaseRequest implements IRequest {
 
     private URI buildUri() {
         try {
-            return new URIBuilder(baseURI).build();
+            return new URIBuilder(baseUri).build();
         } catch (URISyntaxException e) {
             LOGGER.error(Constants.URI_BUILD_FAILURE_MESSAGE, e);
             throw new RuntimeException(e);
