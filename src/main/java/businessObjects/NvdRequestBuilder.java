@@ -153,6 +153,7 @@ public class NvdRequestBuilder {
 
     public NvdRequestBuilder withFullMirrorDefaults(String startIndex) {
         parameterBuilder.addParameter(NvdConstants.START_INDEX, startIndex)
+                .addParameter(NvdConstants.API_KEY, Constants.NVD_API_KEY)
                 .addParameter(NvdConstants.RESULTS_PER_PAGE, Integer.toString(Constants.NVD_MAX_PAGE_SIZE));
         return this;
     }
