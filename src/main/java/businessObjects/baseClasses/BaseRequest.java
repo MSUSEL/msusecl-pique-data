@@ -10,15 +10,13 @@ import java.util.List;
  */
 public abstract class BaseRequest {
     protected String httpMethod;
-    protected String baseURI;
+    protected String baseUri;
     protected Header[] headers;
     protected List<NameValuePair> params;
 
     public BaseRequest(String httpMethod, String baseURI, Header[] headers) {
         this.httpMethod = httpMethod;
-        this.baseURI = baseURI;
+        this.baseUri = baseURI;
         this.headers = headers;
     }
-
-    public abstract BaseResponse executeRequest();
 }

@@ -1,6 +1,7 @@
 package businessObjects;
 
 import businessObjects.baseClasses.BaseRequest;
+import businessObjects.interfaces.IRequest;
 import common.Constants;
 import handlers.JsonResponseHandler;
 import handlers.SecurityAdvisoryMarshaller;
@@ -20,7 +21,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 
-public final class GHSARequest extends BaseRequest {
+public final class GHSARequest extends BaseRequest implements IRequest {
     private static final Logger LOGGER = LoggerFactory.getLogger(GHSARequest.class);
     private final JsonResponseHandler handler = new JsonResponseHandler();
     private final String query;
@@ -65,7 +66,7 @@ public final class GHSARequest extends BaseRequest {
 
     private URI buildUri() {
         try {
-            return new URIBuilder(baseURI).build();
+            return new URIBuilder(baseUri).build();
         } catch (URISyntaxException e) {
             LOGGER.error(Constants.URI_BUILD_FAILURE_MESSAGE, e);
             throw new RuntimeException(e);
