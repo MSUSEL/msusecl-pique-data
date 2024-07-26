@@ -3,7 +3,7 @@ package service;
 import businessObjects.GHSARequest;
 import businessObjects.GHSAResponse;
 import businessObjects.GraphQlQueries;
-import businessObjects.HTTPMethod;
+import businessObjects.interfaces.HTTPMethod;
 import businessObjects.ghsa.SecurityAdvisory;
 import common.Constants;
 import common.HeaderBuilder;
@@ -29,7 +29,7 @@ public class GhsaApiService {
                 HTTPMethod.POST,
                 Constants.GHSA_URI,
                 headerBuilder.addHeader(CONTENT_TYPE, APP_JSON)
-                        .addHeader(AUTHORIZATION, String.format("Bearer %s", System.getenv("NVD_KEY")))
+                        .addHeader(AUTHORIZATION, String.format("Bearer %s", Constants.NVD_API_KEY))
                         .build(),
                 formatQueryBody(ghsaId));
         GHSAResponse ghsaResponse = ghsaRequest.executeRequest();
