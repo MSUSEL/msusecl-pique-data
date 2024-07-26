@@ -71,7 +71,7 @@ public class PiqueData {
      * @param cveId This is the official cveId from the NVD
      * @return Requested Cve object
      */
-    public static Cve getCveFromNvd(String cveId) {
+    public static Cve getCveFromNvd(String cveId) throws ApiCallException {
         return nvdApiService.handleGetCveFromNvd(cveId);
     }
 
@@ -90,5 +90,4 @@ public class PiqueData {
     public static ArrayList<String> getCweIdsFromGhsa(String ghsaId) throws ApiCallException {
         return ghsaApiService.handleGetCweIdsFromGhsa(ghsaId);
     }
-
 }
