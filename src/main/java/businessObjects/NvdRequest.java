@@ -1,10 +1,13 @@
 package businessObjects;
 
 import businessObjects.baseClasses.BaseRequest;
-import businessObjects.cve.CVEResponse;
-import com.sun.corba.se.impl.orbutil.closure.Constant;
+import businessObjects.interfaces.HTTPMethod;
+import businessObjects.interfaces.IRequest;
 import common.Constants;
-import handlers.IJsonMarshaller;
+import common.HeaderBuilder;
+import common.NvdConstants;
+import common.ParameterBuilder;
+import exceptions.ApiCallException;
 import handlers.JsonResponseHandler;
 import handlers.NvdCveMarshaller;
 
@@ -27,30 +30,25 @@ import java.util.List;
  * Inherits from Request and is used to execute GET requests against
  * the National Vulnerabilities Database
  */
-public final class NvdRequest extends BaseRequest {
+public final class NvdRequest extends BaseRequest implements IRequest {
     private static final Logger LOGGER = LoggerFactory.getLogger(NvdRequest.class);
+    private final List<NameValuePair> params;
 
-    public NvdRequest(String httpMethod, String baseURI, Header[] headers, List<NameValuePair> params) {
-        super(httpMethod, baseURI, headers);
+    public NvdRequest(String httpMethod, String baseUri, Header[] headers, List<NameValuePair> params) {
+        super(httpMethod, baseUri, headers);
         this.params = params;
     }
-
-    // if using this class as a template to extend Request functionality, overloaded constructors providing
-    // options for POST/PUT etc. requests could go here. However, for the NVD, GET is likely all that will be offered.
 
     /**
      * Executes the API request and handles the result
      * @return the requested NvdResponse object
      */
     @Override
-    public NvdResponse executeRequest() {
-        // the NVD only offers HTTP GET endpoints so this class only implements executeGetRequest()
-        // For different extensions of the Request superclass you might have a switch statement based on the
-        // httpMethod param along with other private execute methods. e.g. executePostRequest(), executeDeleteRequest() etc.
+    public NvdResponse executeRequest() throws ApiCallException {
         return executeGetRequest();
     }
 
-    private NvdResponse executeGetRequest() {
+    private NvdResponse executeGetRequest() throws ApiCallException {
         HttpGet request = new HttpGet();
         URI uri = buildUri();
         request.setURI(uri);
@@ -61,32 +59,37 @@ public final class NvdRequest extends BaseRequest {
 
     private URI buildUri() {
         try {
-            return new URIBuilder(baseURI).addParameters(params).build();
+            return new URIBuilder(baseUri).addParameters(params).build();
         } catch (URISyntaxException e) {
             LOGGER.error(Constants.URI_BUILD_FAILURE_MESSAGE, e);
             throw new RuntimeException(e);
         }
     }
 
-    private NvdResponse makeHttpCall(HttpGet request) {
-        NvdResponse nvdResponse = new NvdResponse();
+    private NvdResponse makeHttpCall(HttpGet request) throws ApiCallException {
 
         try (CloseableHttpClient client = HttpClients.createDefault();
              CloseableHttpResponse response = client.execute(request)) {
-
-            int status = response.getStatusLine().getStatusCode();
-            if (status >= 200 && status < 300) {
-                String json = new JsonResponseHandler().handleResponse(response);
-                nvdResponse.setCveResponse(new NvdCveMarshaller().unmarshalJson(json));
-                nvdResponse.setStatus(status);
-            } else {
-                LOGGER.info(Constants.RESPONSE_STATUS_MESSAGE, status);
-                throw new IOException(Constants.REQUEST_EXECUTION_FAILURE_MESSAGE + response.getStatusLine());
-            }
+            return processHttpResponse(response);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new ApiCallException(e);
         }
-        return nvdResponse;
+    }
+
+    private NvdResponse processHttpResponse(CloseableHttpResponse response) throws IOException {
+        NvdResponse nvdResponse = new NvdResponse();
+        int status = response.getStatusLine().getStatusCode();
+
+        if (status >= 200 && status < 300) {
+            String json = new JsonResponseHandler().handleResponse(response);
+            nvdResponse.setCveResponse(new NvdCveMarshaller().unmarshalJson(json));
+            nvdResponse.setStatus(status);
+
+            return nvdResponse;
+        } else {
+            LOGGER.info(Constants.RESPONSE_STATUS_MESSAGE, status);
+            throw new IOException(Constants.REQUEST_EXECUTION_FAILURE_MESSAGE + response.getStatusLine());
+        }
     }
 }
 
