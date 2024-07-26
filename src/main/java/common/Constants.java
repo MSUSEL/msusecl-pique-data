@@ -19,4 +19,5 @@ public final class Constants {
     public static final String RESPONSE_STATUS_MESSAGE = "Response Status: {}";
     public static final String REQUEST_EXECUTION_FAILURE_MESSAGE = "Failed to execute request: ";
     public static final String MALFORMED_JSON_SYNTAX_MESSAGE = "Incorrect JSON syntax - uable to parse to object";
+    public static final String NVD_API_KEY = System.getenv("NVD_KEY");
 }
