@@ -1,12 +1,7 @@
 package businessObjects;
 
 import businessObjects.baseClasses.BaseRequest;
-import businessObjects.interfaces.HTTPMethod;
-import businessObjects.interfaces.IRequest;
 import common.Constants;
-import common.HeaderBuilder;
-import common.NvdConstants;
-import common.ParameterBuilder;
 import exceptions.ApiCallException;
 import handlers.JsonResponseHandler;
 import handlers.NvdCveMarshaller;
@@ -30,13 +25,11 @@ import java.util.List;
  * Inherits from Request and is used to execute GET requests against
  * the National Vulnerabilities Database
  */
-public final class NvdRequest extends BaseRequest implements IRequest {
+public final class NvdRequest extends BaseRequest {
     private static final Logger LOGGER = LoggerFactory.getLogger(NvdRequest.class);
-    private final List<NameValuePair> params;
 
     public NvdRequest(String httpMethod, String baseUri, Header[] headers, List<NameValuePair> params) {
-        super(httpMethod, baseUri, headers);
-        this.params = params;
+        super(httpMethod, baseUri, headers, params);
     }
 
     /**
@@ -77,15 +70,11 @@ public final class NvdRequest extends BaseRequest implements IRequest {
     }
 
     private NvdResponse processHttpResponse(CloseableHttpResponse response) throws IOException {
-        NvdResponse nvdResponse = new NvdResponse();
         int status = response.getStatusLine().getStatusCode();
 
         if (status >= 200 && status < 300) {
             String json = new JsonResponseHandler().handleResponse(response);
-            nvdResponse.setCveResponse(new NvdCveMarshaller().unmarshalJson(json));
-            nvdResponse.setStatus(status);
-
-            return nvdResponse;
+            return new NvdResponse(new NvdCveMarshaller().unmarshalJson(json), status);
         } else {
             LOGGER.info(Constants.RESPONSE_STATUS_MESSAGE, status);
             throw new IOException(Constants.REQUEST_EXECUTION_FAILURE_MESSAGE + response.getStatusLine());

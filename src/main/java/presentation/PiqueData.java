@@ -1,12 +1,12 @@
 package presentation;
 
+import businessObjects.GHSAResponse;
 import businessObjects.cve.Cve;
+import businessObjects.cve.CveEntity;
 import businessObjects.ghsa.SecurityAdvisory;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
-import service.GhsaApiService;
-import service.NvdApiService;
-import service.MirrorService;
+import service.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,43 +27,46 @@ import java.util.List;
  * functionality will be added as needed.
  */
 public class PiqueData {
-    protected final MirrorService mirrorService = new MirrorService();
-    protected final NvdApiService nvdApiService = new NvdApiService();
-    protected final GhsaApiService ghsaApiService = new GhsaApiService();
+    protected final INvdMirrorService mirrorService;
+    protected final IApiService<CveEntity> nvdApiService;
+    protected final IApiService<SecurityAdvisory> ghsaApiService;
+    protected final CveResponseProcessor cveResponseProcessor;
 
-    public PiqueData()
+    public PiqueData(IApiService<CveEntity> nvdApiService, IApiService<SecurityAdvisory> ghsaApiService, INvdMirrorService mirrorService, CveResponseProcessor cveResponseProcessor) {
+        this.nvdApiService = nvdApiService;
+        this.ghsaApiService = ghsaApiService;
+        this.mirrorService = mirrorService;
+        this.cveResponseProcessor = cveResponseProcessor;
+    }
 
     /**
      * Gets a cve from the specified database. (switching on dbContext) This does NOT call the NVD
-     * @param dbContext local or persistent
      * @param cveId This is the official cveId from the NVD
      * @return Returns a Cve object corresponding to the provided cveId
      * @throws DataAccessException
      */
-    public Cve getCveById(String dbContext, String cveId) throws DataAccessException {
-        return mirrorService.handleGetCveById(dbContext, cveId);
+    public Cve getCve(String cveId) throws DataAccessException {
+        return mirrorService.handleGetCveById(cveId);
     }
 
     /**
      * Returns a list of Cve objects from the specified database.
-     * @param dbContext local or persistent
      * @param cveIds String array of cveIds
      * @return Returns an array of CVE objects corresponding to the provided cveIds
      * @throws DataAccessException
      */
-    public List<Cve> getCveById(String dbContext, String[] cveIds) throws DataAccessException {
-        return mirrorService.handleGetCveById(dbContext, cveIds);
+    public List<Cve> getCve(List<String> cveIds) throws DataAccessException {
+        return mirrorService.handleGetCveById(cveIds);
     }
 
     /**
      * Returns, from the specified database, a list of CWEs associated with the provided cveId
-     * @param dbContext local or persistent
      * @param cveId This is the official cveId from the NVD
      * @return String array of CWEs
      * @throws DataAccessException
      */
-    public ArrayList<String> getNvdCweDescriptions(String dbContext, String cveId) throws DataAccessException{
-        return mirrorService.handleGetNvdCweDescriptions(dbContext, cveId);
+    public List<String> getNvdCweDescriptions(String cveId) throws DataAccessException{
+        return mirrorService.handleGetNvdCweDescriptions(cveId);
     }
 
     /**
@@ -74,7 +77,7 @@ public class PiqueData {
      * @return Requested Cve object
      */
     public Cve getCveFromNvd(String cveId) throws ApiCallException {
-        return nvdApiService.handleGetCveFromNvd(cveId);
+        return cveResponseProcessor.extractSingleCve(nvdApiService.handleGetEntity(cveId));
     }
 
     /**
@@ -86,7 +89,7 @@ public class PiqueData {
      * @throws ApiCallException
      */
     public SecurityAdvisory getGhsa(String ghsaId) throws ApiCallException {
-        return ghsaApiService.handleGetGhsa(ghsaId);
+        return ghsaApiService.handleGetEntity(ghsaId);
     }
 
     public ArrayList<String> getCweIdsFromGhsa(String ghsaId) throws ApiCallException {

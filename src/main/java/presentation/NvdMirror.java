@@ -4,7 +4,6 @@ import businessObjects.cve.Cve;
 import businessObjects.cve.NvdMirrorMetaData;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
-import service.NvdApiService;
 import service.MirrorService;
 import service.NvdMirrorManager;
 

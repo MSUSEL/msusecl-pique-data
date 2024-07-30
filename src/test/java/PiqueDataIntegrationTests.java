@@ -21,14 +21,14 @@ import static org.junit.Assert.assertEquals;
 public class PiqueDataIntegrationTests {
 
     @Test
-    public void testLocalGetCveById() throws DataAccessException {
-        Cve result = PiqueData.getCveById(Constants.DB_CONTEXT_LOCAL, TestConstants.CVE_A);
+    public void testLocalGetCve() throws DataAccessException {
+        Cve result = PiqueData.getCve(Constants.DB_CONTEXT_LOCAL, TestConstants.CVE_A);
         assertEquals(TestConstants.CVE_A, result.getId());
     }
 
     @Test
-    public void testPersistentGetCveById() throws DataAccessException {
-        Cve cve = PiqueData.getCveById(Constants.DB_CONTEXT_PERSISTENT, TestConstants.CVE_B);
+    public void testPersistentGetCve() throws DataAccessException {
+        Cve cve = PiqueData.getCve(Constants.DB_CONTEXT_PERSISTENT, TestConstants.CVE_B);
         assertEquals(TestConstants.CVE_B, cve.getId());
         assertEquals(TestConstants.CVE_B_CWE_ORACLE, cve.getWeaknesses().get(0).getDescription().get(0).getValue());
     }
@@ -36,7 +36,7 @@ public class PiqueDataIntegrationTests {
     @Test
     public void testGetLocalCvesById() throws DataAccessException {
         String[] cveIds = {TestConstants.CVE_A, TestConstants.CVE_B};
-        List<Cve> result = PiqueData.getCveById(Constants.DB_CONTEXT_LOCAL, cveIds);
+        List<Cve> result = PiqueData.getCve(Constants.DB_CONTEXT_LOCAL, cveIds);
 
         assertEquals(TestConstants.CVE_A, result.get(0).getId());
         assertEquals(TestConstants.CVE_B, result.get(1).getId());
@@ -45,7 +45,7 @@ public class PiqueDataIntegrationTests {
     @Test
     public void testGetPersistentCvesById() throws DataAccessException {
         String[] cveIds = {TestConstants.CVE_A, TestConstants.CVE_B};
-        List<Cve> result = PiqueData.getCveById(Constants.DB_CONTEXT_PERSISTENT, cveIds);
+        List<Cve> result = PiqueData.getCve(Constants.DB_CONTEXT_PERSISTENT, cveIds);
 
         assertEquals(TestConstants.CVE_A, result.get(0).getId());
         assertEquals(TestConstants.CVE_B, result.get(1).getId());

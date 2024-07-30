@@ -25,19 +25,19 @@ public class CveResponseProcessor {
         return cwes;
     }
 
-    public Cve extractSingleCve(CVEResponse cveResponse) {
-        return cveResponse.getVulnerabilities().get(0).getCve();
+    public Cve extractSingleCve(CveEntity cveEntity) {
+        return cveEntity.getVulnerabilities().get(0).getCve();
     }
 
-    public int extractTotalResults(CVEResponse cveResponse) {
-        return cveResponse.getTotalResults();
+    public int extractTotalResults(CveEntity cveEntity) {
+        return cveEntity.getTotalResults();
     }
 
-    public ArrayList<Vulnerability> extractVulnerabilities(CVEResponse cveResponse) {
-        return cveResponse.getVulnerabilities();
+    public ArrayList<Vulnerability> extractVulnerabilities(CveEntity cveEntity) {
+        return cveEntity.getVulnerabilities();
     }
 
-    public NvdMirrorMetaData formatNvdMetaData(CVEResponse response) {
+    public NvdMirrorMetaData formatNvdMetaData(CveEntity response) {
         NvdMirrorMetaData metaData = new NvdMirrorMetaData();
         metaData.setId(Constants.MONGO_NVD_METADATA_ID);
         metaData.setTotalResults(Integer.toString(response.getTotalResults()));
@@ -48,8 +48,8 @@ public class CveResponseProcessor {
         return metaData;
     }
 
-    public List<Cve> extractAllCves(CVEResponse cveResponse) {
-        ArrayList<Vulnerability> vulnerabilities = extractVulnerabilities(cveResponse);
+    public List<Cve> extractAllCves(CveEntity cveEntity) {
+        ArrayList<Vulnerability> vulnerabilities = extractVulnerabilities(cveEntity);
         List<Cve> cves = new ArrayList<>();
 
         for (Vulnerability vulnerability : vulnerabilities) {

@@ -1,29 +1,36 @@
 package service;
 
-import businessObjects.NvdRequestBuilder;
 import businessObjects.NvdRequest;
-import businessObjects.cve.CVEResponse;
-import businessObjects.cve.Cve;
+import businessObjects.NvdRequestBuilder;
+import businessObjects.NvdResponse;
+import businessObjects.cve.CveEntity;
 import common.*;
 import exceptions.ApiCallException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class NvdApiService {
+public final class NvdApiService implements IApiService<CveEntity> {
     private static final Logger LOGGER = LoggerFactory.getLogger(NvdApiService.class);
-    private final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
+    private final CveResponseProcessor cveResponseProcessor;
 
+    public NvdApiService(CveResponseProcessor cveResponseProcessor) {
+        this.cveResponseProcessor = cveResponseProcessor;
+    }
     /**
      * Calls to NVD CVE2.0 API filtering results to single CVE
-     * @param cveId the cveId of the CVE in question
+     * @param id the cveId of the CVE in question
      * @return Cve object from NVD response
      */
-    public Cve handleGetCveFromNvd(String cveId) throws ApiCallException {
-        return cveResponseProcessor.extractSingleCve(
-                performApiCall(new NvdRequestBuilder().withApiKey(Constants.NVD_API_KEY).withCveId(cveId).build()));
+    public CveEntity handleGetEntity(String id) throws ApiCallException {
+        return new NvdRequestBuilder()
+                .withApiKey(Constants.NVD_API_KEY)
+                .withCveId(id)
+                .build().executeRequest().getEntity();
     }
 
-    public CVEResponse performApiCall(NvdRequest request) throws ApiCallException {
-        return request.executeRequest().getCveResponse();
+    public <T> T extractResponseField(String fieldName) {
+        return cveResponseProcessor.extract(fieldName);
+        throws InvalidArgumentExcpetion(e);
     }
+
 }

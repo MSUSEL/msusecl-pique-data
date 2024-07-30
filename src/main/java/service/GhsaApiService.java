@@ -20,7 +20,7 @@ public class GhsaApiService {
     private static final Logger LOGGER = LoggerFactory.getLogger(GhsaApiService.class);
     private final HeaderBuilder headerBuilder = new HeaderBuilder();
 
-    public SecurityAdvisory handleGetGhsa(String ghsaId) throws ApiCallException {
+    public SecurityAdvisory handleGetEntity(String ghsaId) throws ApiCallException {
         String CONTENT_TYPE = "Content-Type";
         String APP_JSON = "application/json";
         String AUTHORIZATION = "Authorization";
@@ -43,7 +43,7 @@ public class GhsaApiService {
     }
 
     public ArrayList<String> handleGetCweIdsFromGhsa(String ghsaId) throws ApiCallException {
-        SecurityAdvisory advisory = handleGetGhsa(ghsaId);
+        SecurityAdvisory advisory = handleGetEntity(ghsaId);
         return new GhsaResponseProcessor().extractCweIds(advisory);
     }
 

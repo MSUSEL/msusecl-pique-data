@@ -10,36 +10,42 @@ import exceptions.DataAccessException;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class MirrorService {
+public final class MirrorService implements INvdMirrorService{
     private final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
     private final DbContextResolver dbContextResolver = new DbContextResolver();
 
-    public Cve handleGetCveById(String dbContext, String cveId) throws DataAccessException {
-        IDao<Cve> dao = dbContextResolver.resolveCveDao(dbContext);
+    @Override
+    public Cve handleGetCveById(String cveId) throws DataAccessException {
+        IDao<Cve> dao = dbContextResolver.resolveCveDao();
         return dao.fetchById(cveId);
     }
 
-    public List<Cve> handleGetCveById(String dbContext, String[] cveIds) throws DataAccessException {
-        IBulkDao<Cve> dao = dbContextResolver.resolveBulkDao(dbContext);
+    @Override
+    public List<Cve> handleGetCveById(List<String> cveIds) throws DataAccessException {
+        IBulkDao<Cve> dao = dbContextResolver.resolveBulkDao();
         return dao.fetchMany(cveIds);
     }
 
-    public ArrayList<String> handleGetNvdCweDescriptions(String dbContext, String cveId) throws DataAccessException {
-        Cve cve = handleGetCveById(dbContext, cveId);
+    @Override
+    public ArrayList<String> handleGetNvdCweDescriptions(String cveId) throws DataAccessException {
+        Cve cve = handleGetCveById(cveId);
         return cveResponseProcessor.extractCweDescriptions(cve);
     }
 
-    public NvdMirrorMetaData handleGetCurrentMetaData(String dbContext) throws DataAccessException {
-        IMetaDataDao<NvdMirrorMetaData> dao = dbContextResolver.resolveMetaDataDao(dbContext);
+    @Override
+    public NvdMirrorMetaData handleGetCurrentMetaData() throws DataAccessException {
+        IMetaDataDao<NvdMirrorMetaData> dao = dbContextResolver.resolveMetaDataDao();
         return dao.fetchMetaData();
     }
 
-    public void handleInsertSingleCve(String dbContext, Cve cve) throws DataAccessException {
-        IDao<Cve> dao = dbContextResolver.resolveCveDao(dbContext);
+    @Override
+    public void handleInsertSingleCve(Cve cve) throws DataAccessException {
+        IDao<Cve> dao = dbContextResolver.resolveCveDao();
         dao.insert(cve);
     }
 
-    public void handleDeleteSingleCve(String dbContext, String cveId) throws DataAccessException {
+    @Override
+    public void handleDeleteSingleCve(String cveId) throws DataAccessException {
         IDao<Cve> dao = dbContextResolver.resolveCveDao(dbContext);
         dao.delete(cveId);
     }
