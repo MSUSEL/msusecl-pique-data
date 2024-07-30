@@ -27,9 +27,11 @@ import java.util.List;
  * functionality will be added as needed.
  */
 public class PiqueData {
-    protected static final MirrorService mirrorService = new MirrorService();
-    protected static final NvdApiService nvdApiService = new NvdApiService();
-    protected static final GhsaApiService ghsaApiService = new GhsaApiService();
+    protected final MirrorService mirrorService = new MirrorService();
+    protected final NvdApiService nvdApiService = new NvdApiService();
+    protected final GhsaApiService ghsaApiService = new GhsaApiService();
+
+    public PiqueData()
 
     /**
      * Gets a cve from the specified database. (switching on dbContext) This does NOT call the NVD
@@ -38,7 +40,7 @@ public class PiqueData {
      * @return Returns a Cve object corresponding to the provided cveId
      * @throws DataAccessException
      */
-    public static Cve getCveById(String dbContext, String cveId) throws DataAccessException {
+    public Cve getCveById(String dbContext, String cveId) throws DataAccessException {
         return mirrorService.handleGetCveById(dbContext, cveId);
     }
 
@@ -49,7 +51,7 @@ public class PiqueData {
      * @return Returns an array of CVE objects corresponding to the provided cveIds
      * @throws DataAccessException
      */
-    public static List<Cve> getCveById(String dbContext, String[] cveIds) throws DataAccessException {
+    public List<Cve> getCveById(String dbContext, String[] cveIds) throws DataAccessException {
         return mirrorService.handleGetCveById(dbContext, cveIds);
     }
 
@@ -60,7 +62,7 @@ public class PiqueData {
      * @return String array of CWEs
      * @throws DataAccessException
      */
-    public static ArrayList<String> getNvdCweDescriptions(String dbContext, String cveId) throws DataAccessException{
+    public ArrayList<String> getNvdCweDescriptions(String dbContext, String cveId) throws DataAccessException{
         return mirrorService.handleGetNvdCweDescriptions(dbContext, cveId);
     }
 
@@ -71,7 +73,7 @@ public class PiqueData {
      * @param cveId This is the official cveId from the NVD
      * @return Requested Cve object
      */
-    public static Cve getCveFromNvd(String cveId) throws ApiCallException {
+    public Cve getCveFromNvd(String cveId) throws ApiCallException {
         return nvdApiService.handleGetCveFromNvd(cveId);
     }
 
@@ -83,11 +85,11 @@ public class PiqueData {
      * @return Returns a SecurityAdvisory object optimized for use in the SBOM wrapper
      * @throws ApiCallException
      */
-    public static SecurityAdvisory getGhsa(String ghsaId) throws ApiCallException {
+    public SecurityAdvisory getGhsa(String ghsaId) throws ApiCallException {
         return ghsaApiService.handleGetGhsa(ghsaId);
     }
 
-    public static ArrayList<String> getCweIdsFromGhsa(String ghsaId) throws ApiCallException {
+    public ArrayList<String> getCweIdsFromGhsa(String ghsaId) throws ApiCallException {
         return ghsaApiService.handleGetCweIdsFromGhsa(ghsaId);
     }
 }
