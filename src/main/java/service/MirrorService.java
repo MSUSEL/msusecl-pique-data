@@ -11,8 +11,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class MirrorService implements INvdMirrorService{
-    private final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
-    private final DbContextResolver dbContextResolver = new DbContextResolver();
+    private final CveResponseProcessor cveResponseProcessor;
+    private final IDao cveDao;
+    private final IDao bulkCveDao;
+    private final IDao metadataDao;
+
+    public MirrorService(CveResponseProcessor cveResponseProcessor, IDao cveDao, IDao bulkCveDao, IDao metadataDao) {
+        this.cveResponseProcessor = cveResponseProcessor;
+        this.cveDao = cveDao;
+        this.bulkCveDao = bulkCveDao;
+        this.metadataDao = metadataDao;
+    }
 
     @Override
     public Cve handleGetCveById(String cveId) throws DataAccessException {

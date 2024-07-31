@@ -18,7 +18,11 @@ import java.util.ArrayList;
 
 public class GhsaApiService {
     private static final Logger LOGGER = LoggerFactory.getLogger(GhsaApiService.class);
-    private final HeaderBuilder headerBuilder = new HeaderBuilder();
+    private final HeaderBuilder headerBuilder;
+
+    public GhsaApiService(HeaderBuilder headerBuilder) {
+        this.headerBuilder = headerBuilder;
+    }
 
     public SecurityAdvisory handleGetEntity(String ghsaId) throws ApiCallException {
         String CONTENT_TYPE = "Content-Type";

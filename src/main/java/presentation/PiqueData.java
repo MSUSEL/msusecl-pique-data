@@ -4,8 +4,11 @@ import businessObjects.GHSAResponse;
 import businessObjects.cve.Cve;
 import businessObjects.cve.CveEntity;
 import businessObjects.ghsa.SecurityAdvisory;
+import com.mongodb.client.MongoClient;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
+import persistence.DataSource;
+import persistence.IDataSource;
 import service.*;
 
 import java.util.ArrayList;
@@ -27,12 +30,12 @@ import java.util.List;
  * functionality will be added as needed.
  */
 public class PiqueData {
+    protected final NvdApiService nvdApiService;
+    protected final GhsaApiService ghsaApiService;
     protected final INvdMirrorService mirrorService;
-    protected final IApiService<CveEntity> nvdApiService;
-    protected final IApiService<SecurityAdvisory> ghsaApiService;
     protected final CveResponseProcessor cveResponseProcessor;
 
-    public PiqueData(IApiService<CveEntity> nvdApiService, IApiService<SecurityAdvisory> ghsaApiService, INvdMirrorService mirrorService, CveResponseProcessor cveResponseProcessor) {
+    public PiqueData(NvdApiService nvdApiService, GhsaApiService ghsaApiService, INvdMirrorService mirrorService, CveResponseProcessor cveResponseProcessor) {
         this.nvdApiService = nvdApiService;
         this.ghsaApiService = ghsaApiService;
         this.mirrorService = mirrorService;

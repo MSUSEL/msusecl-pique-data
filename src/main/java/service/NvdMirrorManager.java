@@ -7,7 +7,7 @@ import businessObjects.cve.NvdMirrorMetaData;
 import common.Constants;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
-import handlers.NvdCveMarshaller;
+import handlers.CveMarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import persistence.IBulkDao;
@@ -20,12 +20,16 @@ import java.nio.file.Path;
 import java.util.stream.Stream;
 
 public class NvdMirrorManager {
-    private final NvdApiService nvdApiService = new NvdApiService();
-    private final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
-    private final DbContextResolver dbContextResolver = new DbContextResolver();
+    private final NvdApiService nvdApiService;
+    private final CveResponseProcessor cveResponseProcessor;
+    private final CveMarshaller nvdCveMarshaller;
     private static final Logger LOGGER = LoggerFactory.getLogger(NvdMirrorManager.class);
-    private final NvdCveMarshaller nvdCveMarshaller = new NvdCveMarshaller();
 
+    public NvdMirrorManager(NvdApiService nvdApiService, CveResponseProcessor cveResponseProcessor, CveMarshaller cveMarshaller) {
+        this.nvdApiService = nvdApiService;
+        this.cveResponseProcessor = cveResponseProcessor;
+        this.nvdCveMarshaller = cveMarshaller;
+    }
     /**
      * Gets CVEs in bulk from the NVD and stores them in the given database context.
      *

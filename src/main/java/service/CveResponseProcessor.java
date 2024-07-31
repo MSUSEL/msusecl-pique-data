@@ -58,4 +58,9 @@ public class CveResponseProcessor {
 
         return cves;
     }
+
+    // TODO throw IllegalArgumentException
+    public <T> T extract(String fieldName) {
+
+    }
 }
