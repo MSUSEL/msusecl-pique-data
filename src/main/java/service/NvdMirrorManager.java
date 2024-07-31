@@ -8,77 +8,81 @@ import common.Constants;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
 import handlers.CveMarshaller;
+import handlers.IJsonMarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import persistence.IBulkDao;
+import persistence.IDao;
 import persistence.IMetaDataDao;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.stream.Stream;
 
 public class NvdMirrorManager {
     private final NvdApiService nvdApiService;
     private final CveResponseProcessor cveResponseProcessor;
-    private final CveMarshaller nvdCveMarshaller;
+    private final IJsonMarshaller<Cve> nvdCveMarshaller;
+    private final IDao<Cve> cveDao;
+    private final IDao<NvdMirrorMetaData> metadataDao;
     private static final Logger LOGGER = LoggerFactory.getLogger(NvdMirrorManager.class);
 
-    public NvdMirrorManager(NvdApiService nvdApiService, CveResponseProcessor cveResponseProcessor, CveMarshaller cveMarshaller) {
+    public NvdMirrorManager(NvdApiService nvdApiService, CveResponseProcessor cveResponseProcessor, IJsonMarshaller<Cve> cveMarshaller, IDao<Cve> cveDao) {
         this.nvdApiService = nvdApiService;
         this.cveResponseProcessor = cveResponseProcessor;
         this.nvdCveMarshaller = cveMarshaller;
+        this.cveDao = cveDao;
     }
+
     /**
      * Gets CVEs in bulk from the NVD and stores them in the given database context.
-     *
-     * @param dbContext defines database context (currently SECL's postgres NVD Mirror)
      */
-    public void handleBuildMirror(String dbContext) throws DataAccessException, ApiCallException {
+    public void handleBuildMirror()throws DataAccessException, ApiCallException {
         int cveCount = 1;
 
         for (int i = Constants.DEFAULT_START_INDEX; i < cveCount; i += Constants.NVD_MAX_PAGE_SIZE) {
-            CveEntity response = nvdApiService.performApiCall(
-                    new NvdRequestBuilder().withFullMirrorDefaults(Integer.toString(i)).build())
+            CveEntity response = new NvdRequestBuilder()
+                    .withFullMirrorDefaults(Integer.toString(i))
+                    .build()
+                    .executeRequest()
                     .getEntity();
             cveCount = resetCveCount(cveCount, response);
-            persistPaginatedData(dbContext, response, i, cveCount);
+            persistPaginatedData(response, i, cveCount);
             handleSleep(i, cveCount);   // avoids hitting NVD rate limits
         }
     }
 
     /**
      * Handles updating the SECL NVD Mirror
-     * @param dbContext defines database context (currently SECL's postgres
-     *                  NVD Mirror or local containerized mongodb instance)
      * @param lastModStartDate Timestamp of previous call to NVD CVE API to update SECL mirror
      * @param lastModEndDate Typically it is the current time - but provides the upper bound to the time window
      *                       from which to pull updates
      */
-    public void handleUpdateNvdMirror(String dbContext, String lastModStartDate, String lastModEndDate) throws DataAccessException, ApiCallException {
+    public void handleUpdateNvdMirror(String lastModStartDate, String lastModEndDate) throws DataAccessException, ApiCallException {
         CveEntity response = new NvdRequestBuilder()
                         .withApiKey(Constants.NVD_API_KEY)
                         .withLastModStartEndDates(lastModStartDate, lastModEndDate)
                         .build()
                 .executeRequest()
                 .getEntity();
-        persistMetadata(dbContext, response);
-        persistCveDetails(dbContext, response);
+        persistMetadata(response);
+        persistCveDetails(response);
     }
 
     /**
      * Handles building a full or partial NVD mirror from a json file.
      * The file must be structured in exactly the same format as a CveResponse
-     * @param dbContext defines database context (currently SECL's postgres
      *                  NVD Mirror or local containerized mongodb instance)
      * @param filepath Path to the json file formatted as a CveResponse
      * @throws DataAccessException
      */
-    public void handleBuildMirrorFromJsonFile(String dbContext, Path filepath) throws DataAccessException {
+    public void handleBuildMirrorFromJsonFile(Path filepath) throws DataAccessException {
         CveEntity fileContents = processFile(filepath);
-        persistMetadata(dbContext, fileContents);
-        persistCveDetails(dbContext, fileContents);
+        persistMetadata(fileContents);
+        persistCveDetails(fileContents);
     }
 
     private int resetCveCount(int cveCount, CveEntity response) {
@@ -87,21 +91,19 @@ public class NvdMirrorManager {
                 : cveCount;
     }
 
-    private void persistPaginatedData(String dbContext, CveEntity response, int loopIndex, int cveCount) throws DataAccessException {
-        persistCveDetails(dbContext, response);
+    private void persistPaginatedData(CveEntity response, int loopIndex, int cveCount) throws DataAccessException {
+        persistCveDetails(response);
         if(loopIndex == cveCount - 1) {
-            persistMetadata(dbContext, response);
+            persistMetadata(response);
         }
     }
 
-    private void persistCveDetails(String dbContext, CveEntity response) throws DataAccessException {
-        IBulkDao<Cve> dao = dbContextResolver.resolveBulkDao(dbContext);
-        dao.insertMany(cveResponseProcessor.extractAllCves(response));
+    private void persistCveDetails(CveEntity response) throws DataAccessException {
+        cveDao.insert(cveResponseProcessor.extractAllCves(response));
     }
 
-    private void persistMetadata(String dbContext, CveEntity response) throws DataAccessException {
-        IMetaDataDao<NvdMirrorMetaData> dao = dbContextResolver.resolveMetaDataDao(dbContext);
-        dao.updateMetaData(cveResponseProcessor.formatNvdMetaData(response));
+    private void persistMetadata(CveEntity response) throws DataAccessException {
+        metadataDao.update(Collections.singletonList(cveResponseProcessor.formatNvdMetaData(response)));
     }
 
     private void handleSleep(int startIndex, int cveCount) {

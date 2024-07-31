@@ -4,7 +4,7 @@ import businessObjects.baseClasses.BaseRequest;
 import common.Constants;
 import exceptions.ApiCallException;
 import handlers.JsonResponseHandler;
-import handlers.NvdCveMarshaller;
+import handlers.CveEntityMarshaller;
 
 import org.apache.http.Header;
 import org.apache.http.NameValuePair;
@@ -74,7 +74,7 @@ public final class NvdRequest extends BaseRequest {
 
         if (status >= 200 && status < 300) {
             String json = new JsonResponseHandler().handleResponse(response);
-            return new NvdResponse(new NvdCveMarshaller().unmarshalJson(json), status);
+            return new NvdResponse(new CveEntityMarshaller().unmarshalJson(json), status);
         } else {
             LOGGER.info(Constants.RESPONSE_STATUS_MESSAGE, status);
             throw new IOException(Constants.REQUEST_EXECUTION_FAILURE_MESSAGE + response.getStatusLine());

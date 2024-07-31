@@ -1,14 +1,9 @@
 package presentation;
 
-import businessObjects.GHSAResponse;
 import businessObjects.cve.Cve;
-import businessObjects.cve.CveEntity;
 import businessObjects.ghsa.SecurityAdvisory;
-import com.mongodb.client.MongoClient;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
-import persistence.DataSource;
-import persistence.IDataSource;
 import service.*;
 
 import java.util.ArrayList;

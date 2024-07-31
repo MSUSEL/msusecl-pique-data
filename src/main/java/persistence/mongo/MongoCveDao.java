@@ -1,6 +1,7 @@
 package persistence.mongo;
 
 import businessObjects.cve.Cve;
+import common.Constants;
 import handlers.CveMarshaller;
 import handlers.IJsonMarshaller;
 
@@ -9,12 +10,18 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 
+import org.apache.commons.lang3.NotImplementedException;
 import persistence.IDao;
 
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import persistence.IDataSource;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 
 public final class MongoCveDao implements IDao<Cve> {
@@ -30,22 +37,22 @@ public final class MongoCveDao implements IDao<Cve> {
     }
 
     @Override
-    public Cve fetchById(String id) {
-        Cve cve = new Cve();
-        Document retrievedDoc = vulnerabilities.find(Filters.eq("id", id)).first();
-        if (retrievedDoc != null) {
-            cve = cveDetailsMarshaller.unmarshalJson(retrievedDoc.toJson());
+    public List<Cve> fetch(List<String> ids) {
+        List<Cve> results;
+
+        if (ids.size() > 1) {
+            results = performBulkFetch(ids);
         } else {
-            LOGGER.info("Requested data is not in the collection");
+            results = performFetch(ids.get(0));
         }
 
-        return cve;
+        return results;
     }
 
     @Override
-    public void insert(Cve cve) {
-        String cveDetails = cveDetailsMarshaller.marshalJson(cve);
-        Document filter = new Document("id", cve.getId());
+    public void insert(List<Cve> cve) {
+        String cveDetails = cveDetailsMarshaller.marshalJson(cve.get(0));
+        Document filter = new Document("id", cve.get(0).getId());
         long documentCount = vulnerabilities.countDocuments(filter);
         System.out.println(documentCount);
 
@@ -59,12 +66,35 @@ public final class MongoCveDao implements IDao<Cve> {
     }
 
     @Override
-    public void update(Cve cveDetails) {
-
+    public void update(List<Cve> cveDetails) {
+        throw new NotImplementedException(Constants.METHOD_NOT_IMPLEMENTED_MESSAGE);
     }
 
     @Override
-    public void delete(String cveId) {
-
+    public void delete(List<String> cveId) {
+        throw new NotImplementedException(Constants.METHOD_NOT_IMPLEMENTED_MESSAGE);
     }
+
+    private List<Cve> performBulkFetch(List<String> ids) {
+        List<Cve> results = new ArrayList<>();
+
+        for (String id : ids) {
+            results.add(performFetch(id).get(0));
+        }
+
+        return results;
+    }
+
+    private List<Cve> performFetch(String id) {
+        Cve cve = new Cve();
+        Document retrievedDoc = vulnerabilities.find(Filters.eq("id", id)).first();
+        if (retrievedDoc != null) {
+            cve = cveDetailsMarshaller.unmarshalJson(retrievedDoc.toJson());
+        } else {
+            LOGGER.info("Requested data is not in the collection");
+        }
+
+        return Collections.singletonList(cve);
+    }
+
 }

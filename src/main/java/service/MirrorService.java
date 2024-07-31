@@ -2,37 +2,32 @@ package service;
 
 import businessObjects.cve.Cve;
 import businessObjects.cve.NvdMirrorMetaData;
-import persistence.IBulkDao;
 import persistence.IDao;
-import persistence.IMetaDataDao;
 import exceptions.DataAccessException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public final class MirrorService implements INvdMirrorService{
     private final CveResponseProcessor cveResponseProcessor;
-    private final IDao cveDao;
-    private final IDao bulkCveDao;
-    private final IDao metadataDao;
+    private final IDao<Cve> cveDao;
+    private final IDao<NvdMirrorMetaData> metadataDao;
 
-    public MirrorService(CveResponseProcessor cveResponseProcessor, IDao cveDao, IDao bulkCveDao, IDao metadataDao) {
+    public MirrorService(CveResponseProcessor cveResponseProcessor, IDao<Cve> cveDao, IDao<NvdMirrorMetaData> metadataDao) {
         this.cveResponseProcessor = cveResponseProcessor;
         this.cveDao = cveDao;
-        this.bulkCveDao = bulkCveDao;
         this.metadataDao = metadataDao;
     }
 
     @Override
     public Cve handleGetCveById(String cveId) throws DataAccessException {
-        IDao<Cve> dao = dbContextResolver.resolveCveDao();
-        return dao.fetchById(cveId);
+        return cveDao.fetch(Collections.singletonList(cveId)).get(0);
     }
 
     @Override
     public List<Cve> handleGetCveById(List<String> cveIds) throws DataAccessException {
-        IBulkDao<Cve> dao = dbContextResolver.resolveBulkDao();
-        return dao.fetchMany(cveIds);
+        return cveDao.fetch(cveIds);
     }
 
     @Override
@@ -43,19 +38,16 @@ public final class MirrorService implements INvdMirrorService{
 
     @Override
     public NvdMirrorMetaData handleGetCurrentMetaData() throws DataAccessException {
-        IMetaDataDao<NvdMirrorMetaData> dao = dbContextResolver.resolveMetaDataDao();
-        return dao.fetchMetaData();
+        return metadataDao.fetch(Collections.singletonList("1")).get(0);
     }
 
     @Override
     public void handleInsertSingleCve(Cve cve) throws DataAccessException {
-        IDao<Cve> dao = dbContextResolver.resolveCveDao();
-        dao.insert(cve);
+        cveDao.insert(Collections.singletonList(cve));
     }
 
     @Override
     public void handleDeleteSingleCve(String cveId) throws DataAccessException {
-        IDao<Cve> dao = dbContextResolver.resolveCveDao(dbContext);
-        dao.delete(cveId);
+        cveDao.delete(Collections.singletonList(cveId));
     }
 }

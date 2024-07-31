@@ -23,30 +23,29 @@ public final class NvdMirror {
         this.nvdMirrorManager = nvdMirrorManager;
     }
 
-    public void buildNvdMirror(String dbContext) throws DataAccessException, ApiCallException {
-        nvdMirrorManager.handleBuildMirror(dbContext);
+    public void buildNvdMirror() throws DataAccessException, ApiCallException {
+        nvdMirrorManager.handleBuildMirror();
     }
 
-    public void updateNvdMirror(String dbContext) throws DataAccessException, ApiCallException {
+    public void updateNvdMirror() throws DataAccessException, ApiCallException {
         nvdMirrorManager.handleUpdateNvdMirror(
-                dbContext,
-                mirrorService.handleGetCurrentMetaData(dbContext).getTimestamp(),
+                mirrorService.handleGetCurrentMetaData().getTimestamp(),
                 Instant.now().toString());
     }
 
-    public NvdMirrorMetaData getMetaData(String dbContext) throws DataAccessException {
-        return mirrorService.handleGetCurrentMetaData(dbContext);
+    public NvdMirrorMetaData getMetaData() throws DataAccessException {
+        return mirrorService.handleGetCurrentMetaData();
     }
 
-    public void insertSingleCve(String dbContext, Cve cve) throws DataAccessException {
-        mirrorService.handleInsertSingleCve(dbContext, cve);
+    public void insertSingleCve(Cve cve) throws DataAccessException {
+        mirrorService.handleInsertSingleCve(cve);
     }
 
-    public void deleteSingleCve(String dbContext, String cveId) throws DataAccessException {
-        mirrorService.handleDeleteSingleCve(dbContext, cveId);
+    public void deleteSingleCve(String cveId) throws DataAccessException {
+        mirrorService.handleDeleteSingleCve(cveId);
     }
 
-    public void buildMirrorFromJsonFile(String dbContext, Path filepath) throws DataAccessException {
-        nvdMirrorManager.handleBuildMirrorFromJsonFile(dbContext, filepath);
+    public void buildMirrorFromJsonFile(Path filepath) throws DataAccessException {
+        nvdMirrorManager.handleBuildMirrorFromJsonFile(filepath);
     }
 }
