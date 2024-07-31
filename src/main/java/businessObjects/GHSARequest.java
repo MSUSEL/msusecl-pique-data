@@ -1,12 +1,16 @@
 package businessObjects;
 
 import businessObjects.baseClasses.BaseRequest;
+import businessObjects.ghsa.SecurityAdvisory;
 import businessObjects.interfaces.IRequest;
 import common.Constants;
+import exceptions.ApiCallException;
+import handlers.JsonMarshallerFactory;
 import handlers.JsonResponseHandler;
-import handlers.SecurityAdvisoryMarshaller;
 
 import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
@@ -20,48 +24,29 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 public final class GHSARequest extends BaseRequest implements IRequest {
     private static final Logger LOGGER = LoggerFactory.getLogger(GHSARequest.class);
     private final JsonResponseHandler handler = new JsonResponseHandler();
     private final String query;
 
-    public GHSARequest(String httpMethod, String baseURI, Header[] headers, String query) {
-        super(httpMethod, baseURI, headers);
+    public GHSARequest(String httpMethod, String baseURI, Header[] headers, List<NameValuePair> params, String query) {
+        super(httpMethod, baseURI, headers, params);
         this.query = query;
     }
 
     @Override
-    public GHSAResponse executeRequest() {
+    public GHSAResponse executeRequest() throws ApiCallException {
         return executeGHSARequest();
     }
 
-    // TODO fix the awkward error handling here
-    private GHSAResponse executeGHSARequest() {
+    private GHSAResponse executeGHSARequest() throws ApiCallException {
         URI uri;
-        GHSAResponse ghsaResponse = new GHSAResponse();
-        SecurityAdvisoryMarshaller securityAdvisoryMarshaler = new SecurityAdvisoryMarshaller();
 
         uri = buildUri();
         HttpPost request = formatRequest(uri);
-
-        try (CloseableHttpClient client = HttpClients.createDefault();
-             CloseableHttpResponse response = client.execute(request)) {
-
-            int status = response.getStatusLine().getStatusCode();
-            if (status >= 200 && status < 300) {
-                String json = handler.handleResponse(response);
-                ghsaResponse.setSecurityAdvisory(securityAdvisoryMarshaler.unmarshalJson(json));
-                ghsaResponse.setStatus(status);
-            } else {
-                LOGGER.info(Constants.RESPONSE_STATUS_MESSAGE, status);
-                throw new IOException(Constants.REQUEST_EXECUTION_FAILURE_MESSAGE + response.getStatusLine());
-            }
-        } catch ( IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return ghsaResponse;
+        return makeHttpCall(request);
     }
 
     private URI buildUri() {
@@ -73,6 +58,31 @@ public final class GHSARequest extends BaseRequest implements IRequest {
         }
     }
 
+    private GHSAResponse makeHttpCall(HttpPost request) throws ApiCallException {
+        try (CloseableHttpClient client = HttpClients.createDefault();
+             CloseableHttpResponse response = client.execute(request)) {
+            return processHttpResponse(response);
+        } catch ( IOException e) {
+            throw new ApiCallException(e);
+        }
+    }
+
+    private GHSAResponse processHttpResponse(HttpResponse response) throws IOException {
+        int status = response.getStatusLine().getStatusCode();
+
+        if (status >= 200 && status < 300) {
+            String json = handler.handleResponse(response);
+            return new GHSAResponse(
+                    (SecurityAdvisory) new JsonMarshallerFactory(SecurityAdvisory.class)
+                            .getMarshaller()
+                            .unmarshalJson(json),
+                    status);
+        } else {
+            LOGGER.info(Constants.RESPONSE_STATUS_MESSAGE, status);
+            throw new IOException(Constants.REQUEST_EXECUTION_FAILURE_MESSAGE + response.getStatusLine());
+        }
+    }
+
     private HttpPost formatRequest(URI uri) {
         HttpPost request = new HttpPost();
         request.setURI(uri);
@@ -81,4 +91,5 @@ public final class GHSARequest extends BaseRequest implements IRequest {
 
         return request;
     }
+
 }

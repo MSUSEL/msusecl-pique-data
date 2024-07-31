@@ -19,6 +19,7 @@ public final class NvdApiService {
         return new NvdRequestBuilder()
                 .withApiKey(Constants.NVD_API_KEY)
                 .withCveId(id)
-                .build().executeRequest().getEntity();
+                .build()
+                .executeRequest().getEntity();
     }
 }

@@ -4,8 +4,8 @@ import businessObjects.cve.Cve;
 import com.mongodb.client.MongoClient;
 import common.Constants;
 import common.HeaderBuilder;
-import handlers.CveMarshaller;
 import handlers.IJsonMarshaller;
+import handlers.JsonMarshallerFactory;
 import persistence.IDataSource;
 import persistence.mongo.MongoConnectionManager;
 import persistence.mongo.MongoCveDao;
@@ -24,7 +24,7 @@ public class PiqueDataFactory {
     private final IDataSource<Connection> pgDataSource = new PostgresConnectionManager();
     private final IDataSource<MongoClient> mongoDataSource = new MongoConnectionManager();
     private final String dbContext = System.getenv("DB_CONTEXT");
-    private final IJsonMarshaller<Cve> cveMarshaller = new CveMarshaller();
+    private final IJsonMarshaller cveMarshaller = new JsonMarshallerFactory(Cve.class).getMarshaller();
 
     public PiqueData getPiqueData() {
         PiqueData piqueData;
@@ -34,7 +34,6 @@ public class PiqueDataFactory {
                     ghsaApiService,
                     instantiatePgMirrorService(),
                     cveResponseProcessor);
-
         } else if (dbContext.equals(Constants.DB_CONTEXT_LOCAL)) {
             piqueData = new PiqueData(
                     nvdApiService,
@@ -62,7 +61,11 @@ public class PiqueDataFactory {
     }
 
     private NvdMirrorManager instantiateNvdMirrorManager() {
-        return new NvdMirrorManager(nvdApiService, cveResponseProcessor, cveMarshaller);
+        return new NvdMirrorManager(
+                cveResponseProcessor,
+                cveMarshaller,
+                new PostgresCveDao(pgDataSource, cveMarshaller),
+                new PostgresMetaDataDao(pgDataSource));
     }
 
     private MirrorService instantiatePgMirrorService() {

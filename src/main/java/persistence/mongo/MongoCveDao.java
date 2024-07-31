@@ -2,7 +2,6 @@ package persistence.mongo;
 
 import businessObjects.cve.Cve;
 import common.Constants;
-import handlers.CveMarshaller;
 import handlers.IJsonMarshaller;
 
 import com.mongodb.client.MongoClient;
@@ -19,21 +18,20 @@ import org.slf4j.LoggerFactory;
 import persistence.IDataSource;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 
 public final class MongoCveDao implements IDao<Cve> {
     private final MongoCollection<Document> vulnerabilities;
-    private final IJsonMarshaller<Cve> cveDetailsMarshaller;
+    private final IJsonMarshaller marshaller;
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoCveDao.class);
 
-    public MongoCveDao(IDataSource<MongoClient> dataSource, IJsonMarshaller<Cve> cveDetailsMarshaller) {
+    public MongoCveDao(IDataSource<MongoClient> dataSource, IJsonMarshaller marshaller) {
         MongoClient client = dataSource.getConnection();
         MongoDatabase db = client.getDatabase("nvdMirror");
         this.vulnerabilities = db.getCollection("vulnerabilities");
-        this.cveDetailsMarshaller = cveDetailsMarshaller;
+        this.marshaller = marshaller;
     }
 
     @Override
@@ -51,7 +49,7 @@ public final class MongoCveDao implements IDao<Cve> {
 
     @Override
     public void insert(List<Cve> cve) {
-        String cveDetails = cveDetailsMarshaller.marshalJson(cve.get(0));
+        String cveDetails = marshaller.marshalJson(cve.get(0));
         Document filter = new Document("id", cve.get(0).getId());
         long documentCount = vulnerabilities.countDocuments(filter);
         System.out.println(documentCount);
@@ -89,7 +87,7 @@ public final class MongoCveDao implements IDao<Cve> {
         Cve cve = new Cve();
         Document retrievedDoc = vulnerabilities.find(Filters.eq("id", id)).first();
         if (retrievedDoc != null) {
-            cve = cveDetailsMarshaller.unmarshalJson(retrievedDoc.toJson());
+            cve = (Cve) marshaller.unmarshalJson(retrievedDoc.toJson());
         } else {
             LOGGER.info("Requested data is not in the collection");
         }

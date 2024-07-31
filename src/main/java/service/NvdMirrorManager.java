@@ -7,13 +7,10 @@ import businessObjects.cve.NvdMirrorMetaData;
 import common.Constants;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
-import handlers.CveMarshaller;
 import handlers.IJsonMarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import persistence.IBulkDao;
 import persistence.IDao;
-import persistence.IMetaDataDao;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -23,32 +20,30 @@ import java.util.Collections;
 import java.util.stream.Stream;
 
 public class NvdMirrorManager {
-    private final NvdApiService nvdApiService;
     private final CveResponseProcessor cveResponseProcessor;
-    private final IJsonMarshaller<Cve> nvdCveMarshaller;
+    private final IJsonMarshaller cveMarshaller;
     private final IDao<Cve> cveDao;
     private final IDao<NvdMirrorMetaData> metadataDao;
     private static final Logger LOGGER = LoggerFactory.getLogger(NvdMirrorManager.class);
 
-    public NvdMirrorManager(NvdApiService nvdApiService, CveResponseProcessor cveResponseProcessor, IJsonMarshaller<Cve> cveMarshaller, IDao<Cve> cveDao) {
-        this.nvdApiService = nvdApiService;
+    public NvdMirrorManager(CveResponseProcessor cveResponseProcessor, IJsonMarshaller cveMarshaller, IDao<Cve> cveDao, IDao<NvdMirrorMetaData> metadataDao) {
         this.cveResponseProcessor = cveResponseProcessor;
-        this.nvdCveMarshaller = cveMarshaller;
+        this.cveMarshaller = cveMarshaller;
         this.cveDao = cveDao;
+        this.metadataDao = metadataDao;
     }
 
     /**
      * Gets CVEs in bulk from the NVD and stores them in the given database context.
      */
-    public void handleBuildMirror()throws DataAccessException, ApiCallException {
+    public void handleBuildMirror() throws DataAccessException, ApiCallException {
         int cveCount = 1;
 
         for (int i = Constants.DEFAULT_START_INDEX; i < cveCount; i += Constants.NVD_MAX_PAGE_SIZE) {
             CveEntity response = new NvdRequestBuilder()
                     .withFullMirrorDefaults(Integer.toString(i))
                     .build()
-                    .executeRequest()
-                    .getEntity();
+                    .executeRequest().getEntity();
             cveCount = resetCveCount(cveCount, response);
             persistPaginatedData(response, i, cveCount);
             handleSleep(i, cveCount);   // avoids hitting NVD rate limits
@@ -66,8 +61,7 @@ public class NvdMirrorManager {
                         .withApiKey(Constants.NVD_API_KEY)
                         .withLastModStartEndDates(lastModStartDate, lastModEndDate)
                         .build()
-                .executeRequest()
-                .getEntity();
+                .executeRequest().getEntity();
         persistMetadata(response);
         persistCveDetails(response);
     }
@@ -93,7 +87,7 @@ public class NvdMirrorManager {
 
     private void persistPaginatedData(CveEntity response, int loopIndex, int cveCount) throws DataAccessException {
         persistCveDetails(response);
-        if(loopIndex == cveCount - 1) {
+        if (loopIndex == cveCount - 1) {
             persistMetadata(response);
         }
     }
@@ -119,7 +113,7 @@ public class NvdMirrorManager {
 
     private CveEntity processFile(Path filepath) {
         String json = readJsonFile(filepath);
-        return nvdCveMarshaller.unmarshalJson(json);
+        return (CveEntity) cveMarshaller.unmarshalJson(json);
     }
 
     private String readJsonFile(Path filepath) {

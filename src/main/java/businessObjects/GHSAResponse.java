@@ -8,5 +8,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public final class GHSAResponse extends BaseResponse {
-    private SecurityAdvisory securityAdvisory;
+    private final SecurityAdvisory entity;
+
+    public GHSAResponse(SecurityAdvisory entity, int status) {
+        this.entity = entity;
+        this.status = status;
+    }
 }

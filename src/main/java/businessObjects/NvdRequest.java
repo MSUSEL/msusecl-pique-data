@@ -1,10 +1,11 @@
 package businessObjects;
 
 import businessObjects.baseClasses.BaseRequest;
+import businessObjects.cve.CveEntity;
 import common.Constants;
 import exceptions.ApiCallException;
+import handlers.JsonMarshallerFactory;
 import handlers.JsonResponseHandler;
-import handlers.CveEntityMarshaller;
 
 import org.apache.http.Header;
 import org.apache.http.NameValuePair;
@@ -60,7 +61,6 @@ public final class NvdRequest extends BaseRequest {
     }
 
     private NvdResponse makeHttpCall(HttpGet request) throws ApiCallException {
-
         try (CloseableHttpClient client = HttpClients.createDefault();
              CloseableHttpResponse response = client.execute(request)) {
             return processHttpResponse(response);
@@ -74,7 +74,10 @@ public final class NvdRequest extends BaseRequest {
 
         if (status >= 200 && status < 300) {
             String json = new JsonResponseHandler().handleResponse(response);
-            return new NvdResponse(new CveEntityMarshaller().unmarshalJson(json), status);
+            return new NvdResponse(
+                    (CveEntity) new JsonMarshallerFactory(CveEntity.class)
+                            .getMarshaller()
+                            .unmarshalJson(json), status);
         } else {
             LOGGER.info(Constants.RESPONSE_STATUS_MESSAGE, status);
             throw new IOException(Constants.REQUEST_EXECUTION_FAILURE_MESSAGE + response.getStatusLine());
