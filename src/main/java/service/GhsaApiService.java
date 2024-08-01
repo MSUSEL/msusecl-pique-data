@@ -17,21 +17,17 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-
 
 public class GhsaApiService {
     private static final Logger LOGGER = LoggerFactory.getLogger(GhsaApiService.class);
     private final HeaderBuilder headerBuilder;
-    private final ParameterBuilder parameterBuilder;
 
-    public GhsaApiService(HeaderBuilder headerBuilder, ParameterBuilder parameterBuilder) {
+    public GhsaApiService(HeaderBuilder headerBuilder) {
         this.headerBuilder = headerBuilder;
-        this.parameterBuilder = parameterBuilder;
     }
 
     // TODO Fix params parameter (Yes I know that's confusing) with paramaterBuilder
-    public SecurityAdvisory handleGetEntity(String ghsaId, List<NameValuePair> params) throws ApiCallException {
+    public SecurityAdvisory handleGetEntity(String ghsaId) throws ApiCallException {
         String CONTENT_TYPE = "Content-Type";
         String APP_JSON = "application/json";
         String AUTHORIZATION = "Authorization";
@@ -42,12 +38,11 @@ public class GhsaApiService {
                 headerBuilder.addHeader(CONTENT_TYPE, APP_JSON)
                         .addHeader(AUTHORIZATION, String.format("Bearer %s", Constants.NVD_API_KEY))
                         .build(),
-                params,
                 formatQueryBody(ghsaId));
         GHSAResponse ghsaResponse = ghsaRequest.executeRequest();
 
         int status = ghsaResponse.getStatus();
-        if (status == 200) {
+        if (status >= 200 && status < 300) {
             return ghsaResponse.getEntity();
         } else {
             throw new ApiCallException(status);

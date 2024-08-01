@@ -31,8 +31,8 @@ public final class GHSARequest extends BaseRequest implements IRequest {
     private final JsonResponseHandler handler = new JsonResponseHandler();
     private final String query;
 
-    public GHSARequest(String httpMethod, String baseURI, Header[] headers, List<NameValuePair> params, String query) {
-        super(httpMethod, baseURI, headers, params);
+    public GHSARequest(String httpMethod, String baseURI, Header[] headers, String query) {
+        super(httpMethod, baseURI, headers);
         this.query = query;
     }
 

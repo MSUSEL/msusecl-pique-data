@@ -23,6 +23,12 @@ public abstract class BaseRequest implements IRequest {
         this.params = params;
     }
 
+    public BaseRequest(String httpMethod, String baseUri, Header[] headers) {
+        this.httpMethod = httpMethod;
+        this.baseUri = baseUri;
+        this.headers = headers;
+    }
+
     @Override
     public abstract BaseResponse executeRequest() throws ApiCallException;
 }
