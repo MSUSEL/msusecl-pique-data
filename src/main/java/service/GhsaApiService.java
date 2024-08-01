@@ -21,12 +21,13 @@ import java.util.List;
 public class GhsaApiService {
     private static final Logger LOGGER = LoggerFactory.getLogger(GhsaApiService.class);
     private final HeaderBuilder headerBuilder;
+    private final GhsaResponseProcessor ghsaResponseProcessor;
 
-    public GhsaApiService(HeaderBuilder headerBuilder) {
+    public GhsaApiService(HeaderBuilder headerBuilder, GhsaResponseProcessor ghsaResponseProcessor) {
         this.headerBuilder = headerBuilder;
+        this.ghsaResponseProcessor = ghsaResponseProcessor;
     }
 
-    // TODO Fix params parameter (Yes I know that's confusing) with paramaterBuilder
     public SecurityAdvisory handleGetEntity(String ghsaId) throws ApiCallException {
         String CONTENT_TYPE = "Content-Type";
         String APP_JSON = "application/json";
@@ -51,7 +52,7 @@ public class GhsaApiService {
 
     public ArrayList<String> handleGetCweIdsFromGhsa(String ghsaId) throws ApiCallException {
         SecurityAdvisory advisory = handleGetEntity(ghsaId);
-        return new GhsaResponseProcessor().extractCweIds(advisory);
+        return ghsaResponseProcessor.extractCweIds(advisory);
     }
 
     // TODO replace the following methods with dedicated GraphQL library

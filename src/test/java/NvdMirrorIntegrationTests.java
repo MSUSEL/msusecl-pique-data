@@ -4,14 +4,18 @@ import common.Constants;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
 import org.junit.Test;
+import persistence.IDao;
 import persistence.IDataSource;
 import persistence.IMetaDataDao;
 import persistence.postgreSQL.PostgresConnectionManager;
 import persistence.postgreSQL.PostgresMetaDataDao;
 import presentation.NvdMirror;
 import presentation.PiqueData;
+import presentation.PiqueDataFactory;
 
 import java.sql.Connection;
+import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * IMPORTANT!
@@ -21,35 +25,38 @@ import java.sql.Connection;
 
 // TODO mock database to test methods
 public class NvdMirrorIntegrationTests {
+    private final PiqueDataFactory piqueDataFactory = new PiqueDataFactory();
+    private final PiqueData piqueData = piqueDataFactory.getPiqueData();
+    private final NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
 
     @Test
     public void testBuildLocalNvdMirror() throws DataAccessException, ApiCallException {
-        NvdMirror.buildNvdMirror(Constants.DB_CONTEXT_LOCAL);
+        nvdMirror.buildNvdMirror();
     }
 
     @Test
     public void testBuildPersistentNvdMirror() throws DataAccessException, ApiCallException {
-        NvdMirror.buildNvdMirror(Constants.DB_CONTEXT_PERSISTENT);
+        nvdMirror.buildNvdMirror();
     }
 
     @Test
     public void testUpdateLocalNvdMirror() throws DataAccessException, ApiCallException {
-        NvdMirror.updateNvdMirror(Constants.DB_CONTEXT_LOCAL);
+        nvdMirror.updateNvdMirror();
     }
 
     @Test
     public void testUpdatePersistent() throws DataAccessException, ApiCallException {
-        NvdMirror.updateNvdMirror(Constants.DB_CONTEXT_PERSISTENT);
+        nvdMirror.updateNvdMirror();
     }
 
     @Test
     public void testGetLocalMetaData() throws DataAccessException {
-        NvdMirrorMetaData metaData = NvdMirror.getMetaData(Constants.DB_CONTEXT_LOCAL);
+        NvdMirrorMetaData metaData = nvdMirror.getMetaData();
     }
 
     @Test
     public void testGetPersistentMetaData() throws DataAccessException {
-        NvdMirrorMetaData metaData = NvdMirror.getMetaData(Constants.DB_CONTEXT_PERSISTENT);
+        NvdMirrorMetaData metaData = nvdMirror.getMetaData();
         System.out.println(metaData.getId());
         System.out.println(metaData.getTotalResults());
         System.out.println(metaData.getFormat());
@@ -60,27 +67,27 @@ public class NvdMirrorIntegrationTests {
     @Test
     public void testLocalInsertSingleCve() throws DataAccessException {
         // TODO replace this with mocked Cve object
-        Cve cve = PiqueData.getCve(Constants.DB_CONTEXT_LOCAL, TestConstants.CVE_A);
-        NvdMirror.insertSingleCve(Constants.DB_CONTEXT_LOCAL, cve);
+        Cve cve = piqueData.getCve(TestConstants.CVE_A);
+        nvdMirror.insertSingleCve(cve);
     }
 
     @Test
     public void testPersistentInsertSingleCve() throws DataAccessException {
         // TODO replace this with mocked Cve object
-        Cve cve = PiqueData.getCve(Constants.DB_CONTEXT_LOCAL, TestConstants.CVE_A);
-        NvdMirror.insertSingleCve(Constants.DB_CONTEXT_PERSISTENT, cve);
+        Cve cve = piqueData.getCve(TestConstants.CVE_A);
+        nvdMirror.insertSingleCve(cve);
     }
 
     @Test
     public void testGetCveFromMirror() throws DataAccessException {
-        Cve cve = PiqueData.getCve(Constants.DB_CONTEXT_PERSISTENT, TestConstants.CVE_A);
+        Cve cve = piqueData.getCve(TestConstants.CVE_A);
         System.out.println(cve.getId());
     }
 
     @Test
     public void testInsertMetaData() throws DataAccessException {
         IDataSource<Connection> dataSource = new PostgresConnectionManager();
-        IMetaDataDao<NvdMirrorMetaData> dao = new PostgresMetaDataDao(dataSource);
+        IDao<NvdMirrorMetaData> dao = new PostgresMetaDataDao(dataSource);
         NvdMirrorMetaData metaData = new NvdMirrorMetaData();
         metaData.setTimestamp("2024-07-07T23:26:08.260");
         metaData.setId("1");
@@ -88,6 +95,6 @@ public class NvdMirrorIntegrationTests {
         metaData.setTotalResults("255980");
         metaData.setFormat("NVD_CVE");
 
-        dao.updateMetaData(metaData);
+        dao.update(Collections.singletonList(metaData));
     }
 }

@@ -1,3 +1,4 @@
+import businessObjects.GraphQlQueries;
 import businessObjects.cve.Cve;
 import businessObjects.ghsa.SecurityAdvisory;
 import common.Constants;
@@ -23,6 +24,7 @@ import static org.junit.Assert.assertEquals;
 public class PiqueDataIntegrationTests {
     private final PiqueDataFactory piqueDataFactory = new PiqueDataFactory();
     private final PiqueData piqueData = piqueDataFactory.getPiqueData();
+    private final NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
 
     @Test
     public void testLocalGetCve() throws DataAccessException {
@@ -64,27 +66,32 @@ public class PiqueDataIntegrationTests {
 
     @Test
     public void testGetPersistentCwes() throws DataAccessException {
-        ArrayList<String> cwes = piqueData.getNvdCweDescriptions(TestConstants.CVE_B);
+        List<String> cwes = piqueData.getNvdCweDescriptions(TestConstants.CVE_B);
 
         assertEquals(cwes.get(0), TestConstants.CVE_B_CWE_ORACLE);
     }
 
     @Test
     public void testGetCveFromNvd() throws ApiCallException {
-        Cve result = PiqueData.getCveFromNvd(TestConstants.CVE_A);
+        Cve result = piqueData.getCveFromNvd(TestConstants.CVE_A);
 
         assertEquals(TestConstants.CVE_A, result.getId());
     }
 
     @Test
     public void testGetGHSA() throws ApiCallException {
-        SecurityAdvisory result = PiqueData.getGhsa(TestConstants.GHSA_ID_A);
+        SecurityAdvisory result = piqueData.getGhsa(TestConstants.GHSA_ID_A);
 
         assertEquals(TestConstants.GHSA_ID_A, result.getGhsaId());
     }
 
     @Test
     public void testPersistentDeleteCve() throws DataAccessException {
-        NvdMirror.deleteSingleCve(Constants.DB_CONTEXT_PERSISTENT, TestConstants.CVE_A);
+        nvdMirror.deleteSingleCve(TestConstants.CVE_A);
+    }
+
+    @Test
+    public void testGetCweIdsFromGhsa() throws ApiCallException {
+        piqueData.getCweIdsFromGhsa(TestConstants.GHSA_ID_A);
     }
 }

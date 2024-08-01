@@ -19,7 +19,7 @@ import java.sql.Connection;
 
 public class PiqueDataFactory {
     private final NvdApiService nvdApiService = new NvdApiService();
-    private final GhsaApiService ghsaApiService = new GhsaApiService(new HeaderBuilder());
+    private final GhsaApiService ghsaApiService = new GhsaApiService(new HeaderBuilder(), new GhsaResponseProcessor());
     private final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
     private final IDataSource<Connection> pgDataSource = new PostgresConnectionManager();
     private final IDataSource<MongoClient> mongoDataSource = new MongoConnectionManager();
