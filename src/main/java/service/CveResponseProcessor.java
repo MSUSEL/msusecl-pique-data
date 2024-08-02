@@ -6,10 +6,6 @@ import common.Constants;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * This is a convenience class to avoid littering the code
- * with lots of .get chains.
- */
 public class CveResponseProcessor {
 
     public ArrayList<String> extractCweDescriptions(Cve cve) {

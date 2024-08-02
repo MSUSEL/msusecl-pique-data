@@ -91,7 +91,7 @@ public class PiqueDataFactory {
     private MirrorService instantiateMongoMirrorService() {
         return new MirrorService(
                 cveResponseProcessor,
-                new MongoCveDao(mongoDataSource, cveMarshaller),
+                new MongoCveDao(mongoDataSource, cveEntityMarshaller),
                 new MongoMetaDataDao(mongoDataSource));
     }
 }

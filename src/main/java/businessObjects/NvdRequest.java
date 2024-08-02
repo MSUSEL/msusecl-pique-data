@@ -52,7 +52,8 @@ public final class NvdRequest extends BaseRequest {
     }
 
     private NvdResponse executeGetRequest() throws ApiCallException {
-        HttpGet request = new HttpGet(buildUri());
+        HttpGet request = new HttpGet();
+        request.setURI(buildUri());
         request.setHeaders(headers);
 
         return makeHttpCall(request);
