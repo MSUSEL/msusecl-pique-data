@@ -1,4 +1,4 @@
-package common;
+package persistence;
 
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;

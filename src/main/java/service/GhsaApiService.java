@@ -3,28 +3,23 @@ package service;
 import businessObjects.GHSARequest;
 import businessObjects.GHSAResponse;
 import businessObjects.GraphQlQueries;
-import businessObjects.interfaces.HTTPMethod;
+import businessObjects.HTTPMethod;
 import businessObjects.ghsa.SecurityAdvisory;
 import common.Constants;
-import common.HeaderBuilder;
-import common.ParameterBuilder;
+import persistence.HeaderBuilder;
 import exceptions.ApiCallException;
-import org.apache.http.NameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class GhsaApiService {
     private static final Logger LOGGER = LoggerFactory.getLogger(GhsaApiService.class);
-    private final HeaderBuilder headerBuilder;
     private final GhsaResponseProcessor ghsaResponseProcessor;
 
-    public GhsaApiService(HeaderBuilder headerBuilder, GhsaResponseProcessor ghsaResponseProcessor) {
-        this.headerBuilder = headerBuilder;
+    public GhsaApiService(GhsaResponseProcessor ghsaResponseProcessor) {
         this.ghsaResponseProcessor = ghsaResponseProcessor;
     }
 
@@ -36,8 +31,8 @@ public class GhsaApiService {
         GHSARequest ghsaRequest = new GHSARequest(
                 HTTPMethod.POST,
                 Constants.GHSA_URI,
-                headerBuilder.addHeader(CONTENT_TYPE, APP_JSON)
-                        .addHeader(AUTHORIZATION, String.format("Bearer %s", Constants.NVD_API_KEY))
+                new HeaderBuilder().addHeader(CONTENT_TYPE, APP_JSON)
+                        .addHeader(AUTHORIZATION, String.format("Bearer %s", System.getenv("GITHUB_PAT")))
                         .build(),
                 formatQueryBody(ghsaId));
         GHSAResponse ghsaResponse = ghsaRequest.executeRequest();

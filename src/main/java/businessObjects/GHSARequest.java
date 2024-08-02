@@ -2,7 +2,6 @@ package businessObjects;
 
 import businessObjects.baseClasses.BaseRequest;
 import businessObjects.ghsa.SecurityAdvisory;
-import businessObjects.interfaces.IRequest;
 import common.Constants;
 import exceptions.ApiCallException;
 import handlers.JsonMarshallerFactory;
@@ -10,7 +9,6 @@ import handlers.JsonResponseHandler;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
@@ -24,7 +22,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 
 public final class GHSARequest extends BaseRequest implements IRequest {
     private static final Logger LOGGER = LoggerFactory.getLogger(GHSARequest.class);
@@ -42,11 +39,7 @@ public final class GHSARequest extends BaseRequest implements IRequest {
     }
 
     private GHSAResponse executeGHSARequest() throws ApiCallException {
-        URI uri;
-
-        uri = buildUri();
-        HttpPost request = formatRequest(uri);
-        return makeHttpCall(request);
+        return makeHttpCall(formatRequest(buildUri()));
     }
 
     private URI buildUri() {
@@ -61,7 +54,9 @@ public final class GHSARequest extends BaseRequest implements IRequest {
     private GHSAResponse makeHttpCall(HttpPost request) throws ApiCallException {
         try (CloseableHttpClient client = HttpClients.createDefault();
              CloseableHttpResponse response = client.execute(request)) {
+
             return processHttpResponse(response);
+
         } catch ( IOException e) {
             throw new ApiCallException(e);
         }
@@ -71,11 +66,10 @@ public final class GHSARequest extends BaseRequest implements IRequest {
         int status = response.getStatusLine().getStatusCode();
 
         if (status >= 200 && status < 300) {
-            String json = handler.handleResponse(response);
             return new GHSAResponse(
                     (SecurityAdvisory) new JsonMarshallerFactory(SecurityAdvisory.class)
                             .getMarshaller()
-                            .unmarshalJson(json),
+                            .unmarshalJson(handler.handleResponse(response)),
                     status);
         } else {
             LOGGER.info(Constants.RESPONSE_STATUS_MESSAGE, status);
@@ -84,8 +78,7 @@ public final class GHSARequest extends BaseRequest implements IRequest {
     }
 
     private HttpPost formatRequest(URI uri) {
-        HttpPost request = new HttpPost();
-        request.setURI(uri);
+        HttpPost request = new HttpPost(uri);
         request.setHeaders(headers);
         request.setEntity(new StringEntity(query, StandardCharsets.UTF_8));
 

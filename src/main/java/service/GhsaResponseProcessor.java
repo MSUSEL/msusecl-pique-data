@@ -11,15 +11,15 @@ import java.util.List;
 public final class GhsaResponseProcessor {
     // Methods to handle raw GHSA Response object
     public ArrayList<CweNode> extractCweNodes(GHSAResponse ghsaResponse) {
-        return ghsaResponse.getSecurityAdvisory().getCwes().getNodes();
+        return ghsaResponse.getEntity().getCwes().getNodes();
     }
 
     public String extractGhsaId(GHSAResponse ghsaResponse) {
-        return ghsaResponse.getSecurityAdvisory().getGhsaId();
+        return ghsaResponse.getEntity().getGhsaId();
     }
 
     public String extractSummary(GHSAResponse ghsaResponse) {
-        return ghsaResponse.getSecurityAdvisory().getSummary();
+        return ghsaResponse.getEntity().getSummary();
     }
 
     // methods to extract fields from Security Advisories

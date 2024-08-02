@@ -1,6 +1,6 @@
 package businessObjects.baseClasses;
 
-import businessObjects.interfaces.IRequest;
+import businessObjects.IRequest;
 import exceptions.ApiCallException;
 import org.apache.http.Header;
 import org.apache.http.NameValuePair;

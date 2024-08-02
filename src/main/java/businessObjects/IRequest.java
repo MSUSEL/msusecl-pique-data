@@ -1,4 +1,4 @@
-package businessObjects.interfaces;
+package businessObjects;
 import businessObjects.baseClasses.BaseResponse;
 import exceptions.ApiCallException;
 

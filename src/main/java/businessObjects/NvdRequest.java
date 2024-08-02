@@ -4,11 +4,11 @@ import businessObjects.baseClasses.BaseRequest;
 import businessObjects.cve.CveEntity;
 import common.Constants;
 import exceptions.ApiCallException;
-import handlers.JsonMarshallerFactory;
-import handlers.JsonResponseHandler;
+import handlers.IJsonMarshaller;
 
 import org.apache.http.Header;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
@@ -28,9 +28,18 @@ import java.util.List;
  */
 public final class NvdRequest extends BaseRequest {
     private static final Logger LOGGER = LoggerFactory.getLogger(NvdRequest.class);
+    private final ResponseHandler<String> jsonResponseHandler;
+    private final IJsonMarshaller cveEntityMarshaller;
 
-    public NvdRequest(String httpMethod, String baseUri, Header[] headers, List<NameValuePair> params) {
+    public NvdRequest(String httpMethod,
+                      String baseUri,
+                      Header[] headers,
+                      List<NameValuePair> params,
+                      ResponseHandler<String> jsonResponseHandler,
+                      IJsonMarshaller cveMarshaller) {
         super(httpMethod, baseUri, headers, params);
+        this.jsonResponseHandler = jsonResponseHandler;
+        this.cveEntityMarshaller = cveMarshaller;
     }
 
     /**
@@ -43,9 +52,7 @@ public final class NvdRequest extends BaseRequest {
     }
 
     private NvdResponse executeGetRequest() throws ApiCallException {
-        HttpGet request = new HttpGet();
-        URI uri = buildUri();
-        request.setURI(uri);
+        HttpGet request = new HttpGet(buildUri());
         request.setHeaders(headers);
 
         return makeHttpCall(request);
@@ -73,11 +80,9 @@ public final class NvdRequest extends BaseRequest {
         int status = response.getStatusLine().getStatusCode();
 
         if (status >= 200 && status < 300) {
-            String json = new JsonResponseHandler().handleResponse(response);
             return new NvdResponse(
-                    (CveEntity) new JsonMarshallerFactory(CveEntity.class)
-                            .getMarshaller()
-                            .unmarshalJson(json), status);
+                    (CveEntity) cveEntityMarshaller.unmarshalJson(jsonResponseHandler.handleResponse(response)),
+                    status);
         } else {
             LOGGER.info(Constants.RESPONSE_STATUS_MESSAGE, status);
             throw new IOException(Constants.REQUEST_EXECUTION_FAILURE_MESSAGE + response.getStatusLine());

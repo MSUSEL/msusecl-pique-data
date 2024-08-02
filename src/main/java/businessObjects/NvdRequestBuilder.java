@@ -1,18 +1,26 @@
 package businessObjects;
 
-import businessObjects.interfaces.HTTPMethod;
 import common.Constants;
-import common.HeaderBuilder;
+import persistence.HeaderBuilder;
 import common.NvdConstants;
-import common.ParameterBuilder;
+import persistence.ParameterBuilder;
+import handlers.IJsonMarshaller;
 import org.apache.http.Header;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ResponseHandler;
 
 import java.util.List;
 
 public class NvdRequestBuilder {
     private final ParameterBuilder parameterBuilder = new ParameterBuilder();
     private final HeaderBuilder headerBuilder = new HeaderBuilder();
+    private final ResponseHandler<String> jsonResponseHandler;
+    private final IJsonMarshaller cveEntityMarshaller;
+
+    public NvdRequestBuilder(ResponseHandler<String> jsonResponseHandler, IJsonMarshaller cveMarshaller) {
+        this.jsonResponseHandler = jsonResponseHandler;
+        this.cveEntityMarshaller = cveMarshaller;
+    }
 
     public NvdRequestBuilder withCveId(String cveId) {
         parameterBuilder.addParameter(NvdConstants.CVE_ID, cveId);
@@ -162,6 +170,6 @@ public class NvdRequestBuilder {
         List<NameValuePair> params = parameterBuilder.build();
         Header[] headers = headerBuilder.build();
 
-        return new NvdRequest(HTTPMethod.GET, Constants.NVD_CVE_URI, headers, params);
+        return new NvdRequest(HTTPMethod.GET, Constants.NVD_CVE_URI, headers, params, jsonResponseHandler, cveEntityMarshaller);
     }
 }

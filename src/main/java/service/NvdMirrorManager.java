@@ -8,6 +8,7 @@ import common.Constants;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
 import handlers.IJsonMarshaller;
+import org.apache.http.client.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import persistence.IDao;
@@ -21,14 +22,20 @@ import java.util.stream.Stream;
 
 public class NvdMirrorManager {
     private final CveResponseProcessor cveResponseProcessor;
-    private final IJsonMarshaller cveMarshaller;
+    private final ResponseHandler<String> jsonResponseHandler;
+    private final IJsonMarshaller cveEntityMarshaller;
     private final IDao<Cve> cveDao;
     private final IDao<NvdMirrorMetaData> metadataDao;
     private static final Logger LOGGER = LoggerFactory.getLogger(NvdMirrorManager.class);
 
-    public NvdMirrorManager(CveResponseProcessor cveResponseProcessor, IJsonMarshaller cveMarshaller, IDao<Cve> cveDao, IDao<NvdMirrorMetaData> metadataDao) {
+    public NvdMirrorManager(CveResponseProcessor cveResponseProcessor,
+                            ResponseHandler<String> jsonResponseHandler,
+                            IJsonMarshaller cveEntityMarshaller,
+                            IDao<Cve> cveDao,
+                            IDao<NvdMirrorMetaData> metadataDao) {
         this.cveResponseProcessor = cveResponseProcessor;
-        this.cveMarshaller = cveMarshaller;
+        this.jsonResponseHandler = jsonResponseHandler;
+        this.cveEntityMarshaller = cveEntityMarshaller;
         this.cveDao = cveDao;
         this.metadataDao = metadataDao;
     }
@@ -40,12 +47,11 @@ public class NvdMirrorManager {
         int cveCount = 1;
 
         for (int i = Constants.DEFAULT_START_INDEX; i < cveCount; i += Constants.NVD_MAX_PAGE_SIZE) {
-            CveEntity response = new NvdRequestBuilder()
+            CveEntity response = new NvdRequestBuilder(jsonResponseHandler, cveEntityMarshaller)
                     .withFullMirrorDefaults(Integer.toString(i))
                     .build()
                     .executeRequest().getEntity();
-            cveCount = resetCveCount(cveCount, response);
-            persistPaginatedData(response, i, cveCount);
+            persistPaginatedData(response, i, resetCveCount(cveCount, response));
             handleSleep(i, cveCount);   // avoids hitting NVD rate limits
         }
     }
@@ -57,7 +63,7 @@ public class NvdMirrorManager {
      *                       from which to pull updates
      */
     public void handleUpdateNvdMirror(String lastModStartDate, String lastModEndDate) throws DataAccessException, ApiCallException {
-        CveEntity response = new NvdRequestBuilder()
+        CveEntity response = new NvdRequestBuilder(jsonResponseHandler, cveEntityMarshaller)
                         .withApiKey(Constants.NVD_API_KEY)
                         .withLastModStartEndDates(lastModStartDate, lastModEndDate)
                         .build()
@@ -112,8 +118,7 @@ public class NvdMirrorManager {
     }
 
     private CveEntity processFile(Path filepath) {
-        String json = readJsonFile(filepath);
-        return (CveEntity) cveMarshaller.unmarshalJson(json);
+        return (CveEntity) cveEntityMarshaller.unmarshalJson(readJsonFile(filepath));
     }
 
     private String readJsonFile(Path filepath) {

@@ -19,10 +19,10 @@ import persistence.IDataSource;
 // TODO move functionality to stored procedures
 public final class PostgresCveDao implements IDao<Cve> {
     private final Connection conn;
-    private final IJsonMarshaller<Cve> cveDetailsMarshaller;
+    private final IJsonMarshaller cveDetailsMarshaller;
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresCveDao.class);
 
-    public PostgresCveDao(IDataSource<Connection> dataSource, IJsonMarshaller<Cve> cveMarshaller) {
+    public PostgresCveDao(IDataSource<Connection> dataSource, IJsonMarshaller cveMarshaller) {
         this.cveDetailsMarshaller = cveMarshaller;
         this.conn = dataSource.getConnection();
     }
@@ -102,7 +102,7 @@ public final class PostgresCveDao implements IDao<Cve> {
             ResultSet rs = statement.executeQuery();
             List<Cve> result = new ArrayList<>();
             while (rs.next()) {
-                result.add(cveDetailsMarshaller.unmarshalJson(rs.getString("details")));
+                result.add((Cve) cveDetailsMarshaller.unmarshalJson(rs.getString("details")));
             }
 
             return result;
@@ -121,7 +121,7 @@ public final class PostgresCveDao implements IDao<Cve> {
 
             if (rs.next()) {
                 String result = rs.getString("details");
-                return Collections.singletonList(cveDetailsMarshaller.unmarshalJson(result));
+                return Collections.singletonList((Cve) cveDetailsMarshaller.unmarshalJson(result));
             } else {
                 LOGGER.info(Constants.DB_QUERY_NO_RESULTS);
                 throw new DataAccessException(Constants.DB_QUERY_NO_RESULTS);

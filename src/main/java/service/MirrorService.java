@@ -32,8 +32,7 @@ public final class MirrorService implements INvdMirrorService{
 
     @Override
     public ArrayList<String> handleGetNvdCweDescriptions(String cveId) throws DataAccessException {
-        Cve cve = handleGetCveById(cveId);
-        return cveResponseProcessor.extractCweDescriptions(cve);
+        return cveResponseProcessor.extractCweDescriptions(handleGetCveById(cveId));
     }
 
     @Override

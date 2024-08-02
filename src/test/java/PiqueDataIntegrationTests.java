@@ -1,5 +1,7 @@
 import businessObjects.GraphQlQueries;
+import businessObjects.NvdRequestBuilder;
 import businessObjects.cve.Cve;
+import businessObjects.cve.CveEntity;
 import businessObjects.ghsa.SecurityAdvisory;
 import common.Constants;
 import exceptions.ApiCallException;
@@ -80,9 +82,11 @@ public class PiqueDataIntegrationTests {
 
     @Test
     public void testGetGHSA() throws ApiCallException {
-        SecurityAdvisory result = piqueData.getGhsa(TestConstants.GHSA_ID_A);
+        SecurityAdvisory result1 = piqueData.getGhsa(TestConstants.GHSA_ID_A);
+        SecurityAdvisory result2 = piqueData.getGhsa(TestConstants.GHSA_ID_B);
 
-        assertEquals(TestConstants.GHSA_ID_A, result.getGhsaId());
+        assertEquals(TestConstants.GHSA_ID_B, result2.getGhsaId());
+        assertEquals(TestConstants.GHSA_ID_A, result1.getGhsaId());
     }
 
     @Test
@@ -93,5 +97,16 @@ public class PiqueDataIntegrationTests {
     @Test
     public void testGetCweIdsFromGhsa() throws ApiCallException {
         piqueData.getCweIdsFromGhsa(TestConstants.GHSA_ID_A);
+    }
+
+    @Test
+    public void testCustomRequestBuilder() throws ApiCallException {
+        CveEntity entity = piqueDataFactory.getNvdRequestBuilder()
+                .withApiKey(System.getenv("NVD_KEY"))
+                .withCpeName("cpe:2.3:a:eric_allman:sendmail:5.58:*:*:*:*:*:*:*")
+                .build().executeRequest().getEntity();
+
+        assertEquals(TestConstants.CVE_A, entity.getVulnerabilities().get(0).getCve().getId());
+
     }
 }
