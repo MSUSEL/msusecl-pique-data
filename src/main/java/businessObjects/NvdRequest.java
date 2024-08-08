@@ -29,17 +29,17 @@ import java.util.List;
 public final class NvdRequest extends BaseRequest {
     private static final Logger LOGGER = LoggerFactory.getLogger(NvdRequest.class);
     private final ResponseHandler<String> jsonResponseHandler;
-    private final IJsonMarshaller cveEntityMarshaller;
+    private final IJsonMarshaller<CveEntity> cveEntityMarshaller;
 
     public NvdRequest(String httpMethod,
                       String baseUri,
                       Header[] headers,
                       List<NameValuePair> params,
                       ResponseHandler<String> jsonResponseHandler,
-                      IJsonMarshaller cveMarshaller) {
+                      IJsonMarshaller<CveEntity> cveEntityMarshaller) {
         super(httpMethod, baseUri, headers, params);
         this.jsonResponseHandler = jsonResponseHandler;
-        this.cveEntityMarshaller = cveMarshaller;
+        this.cveEntityMarshaller = cveEntityMarshaller;
     }
 
     /**
@@ -82,7 +82,7 @@ public final class NvdRequest extends BaseRequest {
 
         if (status >= 200 && status < 300) {
             return new NvdResponse(
-                    (CveEntity) cveEntityMarshaller.unmarshalJson(jsonResponseHandler.handleResponse(response)),
+                    cveEntityMarshaller.unmarshalJson(jsonResponseHandler.handleResponse(response)),
                     status);
         } else {
             LOGGER.info(Constants.RESPONSE_STATUS_MESSAGE, status);

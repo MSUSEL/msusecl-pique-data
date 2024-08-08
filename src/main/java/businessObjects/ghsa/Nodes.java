@@ -5,6 +5,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public final class CweNode {
+public final class Nodes {
     private String cweId;
 }

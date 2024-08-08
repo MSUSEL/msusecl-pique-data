@@ -4,7 +4,9 @@ import businessObjects.cve.*;
 import common.Constants;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CveResponseProcessor {
 
@@ -45,7 +47,7 @@ public class CveResponseProcessor {
     }
 
     public List<Cve> extractAllCves(CveEntity cveEntity) {
-        ArrayList<Vulnerability> vulnerabilities = extractVulnerabilities(cveEntity);
+        List<Vulnerability> vulnerabilities = extractVulnerabilities(cveEntity);
         List<Cve> cves = new ArrayList<>();
 
         for (Vulnerability vulnerability : vulnerabilities) {
@@ -53,5 +55,13 @@ public class CveResponseProcessor {
         }
 
         return cves;
+    }
+
+    public Map<String, Metrics> extractCvssScores(List<Cve> cves) {
+        Map<String, Metrics> processedMetrics = new HashMap<>();
+        for (Cve cve : cves) {
+            processedMetrics.put(cve.getId(), cve.getMetrics());
+        }
+        return processedMetrics;
     }
 }

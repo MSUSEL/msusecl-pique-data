@@ -3,13 +3,12 @@ package presentation;
 import businessObjects.NvdRequestBuilder;
 import businessObjects.cve.Cve;
 import businessObjects.cve.CveEntity;
-import businessObjects.cve.NvdMirrorMetaData;
+import businessObjects.ghsa.SecurityAdvisory;
 import com.mongodb.client.MongoClient;
 import common.Constants;
 import handlers.IJsonMarshaller;
 import handlers.JsonMarshallerFactory;
 import handlers.JsonResponseHandler;
-import persistence.IDao;
 import persistence.IDataSource;
 import persistence.mongo.MongoConnectionManager;
 import persistence.mongo.MongoCveDao;
@@ -22,17 +21,24 @@ import service.*;
 import java.sql.Connection;
 
 public class PiqueDataFactory {
-    private final IJsonMarshaller cveMarshaller = new JsonMarshallerFactory(Cve.class).getMarshaller();
-    private final IJsonMarshaller cveEntityMarshaller = new JsonMarshallerFactory(CveEntity.class).getMarshaller();
+    private final JsonMarshallerFactory jsonMarshallerFactory = new JsonMarshallerFactory();
+    private final IJsonMarshaller<Cve> cveMarshaller = jsonMarshallerFactory.getCveMarshaller();
+    private final IJsonMarshaller<CveEntity> cveEntityMarshaller = jsonMarshallerFactory.getCveEntityMarshaller();
+    private final IJsonMarshaller<SecurityAdvisory> securityAdvisoryMarshaller = jsonMarshallerFactory.getSecurityAdvisoryMarshaller();
     private final JsonResponseHandler jsonResponseHandler = new JsonResponseHandler();
     private final NvdApiService nvdApiService = new NvdApiService(jsonResponseHandler, cveEntityMarshaller);
-    private final GhsaApiService ghsaApiService = new GhsaApiService(new GhsaResponseProcessor());
+    private final GhsaApiService ghsaApiService = new GhsaApiService(new GhsaResponseProcessor(), securityAdvisoryMarshaller);
     private final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
-    private final IDataSource<Connection> pgDataSource = new PostgresConnectionManager();
     private final IDataSource<MongoClient> mongoDataSource = new MongoConnectionManager();
-    private final IDao<Cve> postgresCveDao = new PostgresCveDao(pgDataSource, cveMarshaller);
-    private final IDao<NvdMirrorMetaData> postgresMetaDataDao = new PostgresMetaDataDao(pgDataSource);
-    private final String dbContext = System.getenv("DB_CONTEXT");
+    private final CredentialService credentialService = new CredentialService();
+    private final String dbContext = credentialService.getDbContext();
+    private IDataSource<Connection> pgDataSource;
+
+    public PiqueDataFactory() {
+        if (dbContext.equals(Constants.DB_CONTEXT_PERSISTENT)) {
+            this.pgDataSource = new PostgresConnectionManager(credentialService);
+        }
+    }
 
     public PiqueData getPiqueData() {
         PiqueData piqueData;
@@ -58,9 +64,9 @@ public class PiqueDataFactory {
     public NvdMirror getNvdMirror() {
         NvdMirror nvdMirror;
         if (dbContext.equals(Constants.DB_CONTEXT_PERSISTENT)) {
-            nvdMirror = new NvdMirror(instantiatePgMirrorService(), instantiateNvdMirrorManager());
+            nvdMirror = new NvdMirror(instantiatePgMirrorService(), instantiatePgNvdMirrorManager());
         } else if (dbContext.equals(Constants.DB_CONTEXT_LOCAL)) {
-            nvdMirror = new NvdMirror(instantiateMongoMirrorService(), instantiateNvdMirrorManager());
+            nvdMirror = new NvdMirror(instantiateMongoMirrorService(), instantiateMongoNvdMirrorManager());
         } else {
             throw new IllegalArgumentException(Constants.DB_CONTEXT_ENV_VAR_ERROR_MESSAGE);
         }
@@ -72,13 +78,22 @@ public class PiqueDataFactory {
         return new NvdRequestBuilder(jsonResponseHandler, cveEntityMarshaller);
     }
 
-    private NvdMirrorManager instantiateNvdMirrorManager() {
+    private NvdMirrorManager instantiatePgNvdMirrorManager() {
         return new NvdMirrorManager(
                 cveResponseProcessor,
                 jsonResponseHandler,
-                cveMarshaller,
-                postgresCveDao,
-                postgresMetaDataDao);
+                cveEntityMarshaller,
+                new PostgresCveDao(pgDataSource, cveEntityMarshaller),
+                new PostgresMetaDataDao(pgDataSource));
+    }
+
+    private NvdMirrorManager instantiateMongoNvdMirrorManager() {
+        return new NvdMirrorManager(
+                cveResponseProcessor,
+                jsonResponseHandler,
+                cveEntityMarshaller,
+                new MongoCveDao(mongoDataSource, cveMarshaller),
+                new MongoMetaDataDao(mongoDataSource));
     }
 
     private MirrorService instantiatePgMirrorService() {
@@ -91,7 +106,7 @@ public class PiqueDataFactory {
     private MirrorService instantiateMongoMirrorService() {
         return new MirrorService(
                 cveResponseProcessor,
-                new MongoCveDao(mongoDataSource, cveEntityMarshaller),
+                new MongoCveDao(mongoDataSource, cveMarshaller),
                 new MongoMetaDataDao(mongoDataSource));
     }
 }

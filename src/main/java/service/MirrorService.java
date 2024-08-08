@@ -1,6 +1,7 @@
 package service;
 
 import businessObjects.cve.Cve;
+import businessObjects.cve.Metrics;
 import businessObjects.cve.NvdMirrorMetaData;
 import persistence.IDao;
 import exceptions.DataAccessException;
@@ -8,6 +9,7 @@ import exceptions.DataAccessException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public final class MirrorService implements INvdMirrorService{
     private final CveResponseProcessor cveResponseProcessor;
@@ -49,4 +51,15 @@ public final class MirrorService implements INvdMirrorService{
     public void handleDeleteSingleCve(String cveId) throws DataAccessException {
         cveDao.delete(Collections.singletonList(cveId));
     }
+
+    @Override
+    public Map<String, Metrics> handleGetCvssMetrics(List<String> cveIds) throws DataAccessException {
+        List<Cve> cves = handleGetCveById(cveIds);
+        return cveResponseProcessor.extractCvssScores(cves);
+    }
+
+//    @Override
+//    public String handleDumpNvdToJson() {
+//        return cveDao.dump();
+//    }
 }

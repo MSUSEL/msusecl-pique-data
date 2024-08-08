@@ -2,11 +2,14 @@ package businessObjects;
 
 import businessObjects.baseClasses.BaseRequest;
 import businessObjects.ghsa.SecurityAdvisory;
+import com.google.gson.Gson;
 import common.Constants;
 import exceptions.ApiCallException;
+import handlers.IJsonMarshaller;
 import handlers.JsonMarshallerFactory;
 import handlers.JsonResponseHandler;
 
+import handlers.SecurityAdvisoryMarshaller;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -27,10 +30,12 @@ public final class GHSARequest extends BaseRequest implements IRequest {
     private static final Logger LOGGER = LoggerFactory.getLogger(GHSARequest.class);
     private final JsonResponseHandler handler = new JsonResponseHandler();
     private final String query;
+    private final IJsonMarshaller<SecurityAdvisory> marshaller;
 
-    public GHSARequest(String httpMethod, String baseURI, Header[] headers, String query) {
+    public GHSARequest(String httpMethod, String baseURI, Header[] headers, String query, IJsonMarshaller<SecurityAdvisory> marshaller) {
         super(httpMethod, baseURI, headers);
         this.query = query;
+        this.marshaller = marshaller;
     }
 
     @Override
@@ -64,12 +69,9 @@ public final class GHSARequest extends BaseRequest implements IRequest {
 
     private GHSAResponse processHttpResponse(HttpResponse response) throws IOException {
         int status = response.getStatusLine().getStatusCode();
-
         if (status >= 200 && status < 300) {
             return new GHSAResponse(
-                    (SecurityAdvisory) new JsonMarshallerFactory(SecurityAdvisory.class)
-                            .getMarshaller()
-                            .unmarshalJson(handler.handleResponse(response)),
+                    marshaller.unmarshalJson(handler.handleResponse(response)),
                     status);
         } else {
             LOGGER.info(Constants.RESPONSE_STATUS_MESSAGE, status);
@@ -84,5 +86,4 @@ public final class GHSARequest extends BaseRequest implements IRequest {
 
         return request;
     }
-
 }

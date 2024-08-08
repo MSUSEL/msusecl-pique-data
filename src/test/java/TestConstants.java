@@ -7,4 +7,5 @@ public class TestConstants {
 
     public static final String CVE_A_CWE_ORACLE = "NVD-CWE-Other";
     public static final String CVE_B_CWE_ORACLE = "NVD-CWE-noinfo";
+    public static final String GHSA_CWE_A_ORACLE = "CWE-201";
 }

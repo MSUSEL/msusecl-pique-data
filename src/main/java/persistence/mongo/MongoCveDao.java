@@ -1,7 +1,11 @@
 package persistence.mongo;
 
 import businessObjects.cve.Cve;
+import com.mongodb.MongoBulkWriteException;
+import com.mongodb.client.model.InsertOneModel;
+import com.mongodb.client.model.WriteModel;
 import common.Constants;
+import exceptions.DataAccessException;
 import handlers.IJsonMarshaller;
 
 import com.mongodb.client.MongoClient;
@@ -47,19 +51,13 @@ public final class MongoCveDao implements IDao<Cve> {
         return results;
     }
 
+    // TODO deal with empty cve list?
     @Override
-    public void insert(List<Cve> cve) {
-        String cveDetails = marshaller.marshalJson(cve.get(0));
-        Document filter = new Document("id", cve.get(0).getId());
-        long documentCount = vulnerabilities.countDocuments(filter);
-        System.out.println(documentCount);
-
-        if (documentCount == 0) {
-            vulnerabilities.insertOne(Document.parse(cveDetails));
+    public void insert(List<Cve> cves) throws DataAccessException {
+        if (cves.size() == 1) {
+            performSingleInsert(cves);
         } else {
-            // TODO apply update operation? or error out?
-            LOGGER.info("Document already exists");
-            System.out.println("Document already exists");
+            performBulkInsert(cves);
         }
     }
 
@@ -93,6 +91,32 @@ public final class MongoCveDao implements IDao<Cve> {
         }
 
         return Collections.singletonList(cve);
+    }
+
+    private void performSingleInsert(List<Cve> cves) throws DataAccessException {
+        String cveDetails = marshaller.marshalJson(cves.get(0));
+        Document filter = new Document("id", cves.get(0).getId());
+        long documentCount = vulnerabilities.countDocuments(filter);
+        System.out.println(documentCount);
+
+        if(vulnerabilities.countDocuments(filter) == 0) {
+            vulnerabilities.insertOne(Document.parse(cveDetails));
+        } else {
+            LOGGER.info("Document already exists");
+            throw new DataAccessException("Document already exists");
+        }
+    }
+
+    private void performBulkInsert(List<Cve> cves) throws DataAccessException {
+        List<WriteModel<Document>> bulkDocuments = new ArrayList<>();
+        try {
+            for (Cve cve : cves) {
+                bulkDocuments.add(new InsertOneModel<>(Document.parse(marshaller.marshalJson(cve))));
+            }
+            vulnerabilities.bulkWrite(bulkDocuments);
+        } catch (MongoBulkWriteException e) {
+            throw new DataAccessException(e);
+        }
     }
 
 }

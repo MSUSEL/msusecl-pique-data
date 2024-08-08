@@ -9,9 +9,9 @@ import org.apache.http.client.ResponseHandler;
 
 public final class NvdApiService {
     private final ResponseHandler<String> jsonResponseHandler;
-    private final IJsonMarshaller cveEntityMarshaller;
+    private final IJsonMarshaller<CveEntity> cveEntityMarshaller;
 
-    public NvdApiService(ResponseHandler<String> jsonResponseHandler, IJsonMarshaller cveEntityMarshaller) {
+    public NvdApiService(ResponseHandler<String> jsonResponseHandler, IJsonMarshaller<CveEntity> cveEntityMarshaller) {
         this.jsonResponseHandler = jsonResponseHandler;
         this.cveEntityMarshaller = cveEntityMarshaller;
     }

@@ -12,6 +12,7 @@ import persistence.postgreSQL.PostgresMetaDataDao;
 import presentation.NvdMirror;
 import presentation.PiqueData;
 import presentation.PiqueDataFactory;
+import service.CredentialService;
 
 import java.sql.Connection;
 import java.util.Arrays;
@@ -86,7 +87,7 @@ public class NvdMirrorIntegrationTests {
 
     @Test
     public void testInsertMetaData() throws DataAccessException {
-        IDataSource<Connection> dataSource = new PostgresConnectionManager();
+        IDataSource<Connection> dataSource = new PostgresConnectionManager(new CredentialService());
         IDao<NvdMirrorMetaData> dao = new PostgresMetaDataDao(dataSource);
         NvdMirrorMetaData metaData = new NvdMirrorMetaData();
         metaData.setTimestamp("2024-07-07T23:26:08.260");

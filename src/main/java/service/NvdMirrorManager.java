@@ -23,14 +23,14 @@ import java.util.stream.Stream;
 public class NvdMirrorManager {
     private final CveResponseProcessor cveResponseProcessor;
     private final ResponseHandler<String> jsonResponseHandler;
-    private final IJsonMarshaller cveEntityMarshaller;
+    private final IJsonMarshaller<CveEntity> cveEntityMarshaller;
     private final IDao<Cve> cveDao;
     private final IDao<NvdMirrorMetaData> metadataDao;
     private static final Logger LOGGER = LoggerFactory.getLogger(NvdMirrorManager.class);
 
     public NvdMirrorManager(CveResponseProcessor cveResponseProcessor,
                             ResponseHandler<String> jsonResponseHandler,
-                            IJsonMarshaller cveEntityMarshaller,
+                            IJsonMarshaller<CveEntity> cveEntityMarshaller,
                             IDao<Cve> cveDao,
                             IDao<NvdMirrorMetaData> metadataDao) {
         this.cveResponseProcessor = cveResponseProcessor;
@@ -51,7 +51,8 @@ public class NvdMirrorManager {
                     .withFullMirrorDefaults(Integer.toString(i))
                     .build()
                     .executeRequest().getEntity();
-            persistPaginatedData(response, i, resetCveCount(cveCount, response));
+            cveCount = resetCveCount(cveCount, response);
+            persistPaginatedData(response, i, cveCount);
             handleSleep(i, cveCount);   // avoids hitting NVD rate limits
         }
     }
@@ -118,7 +119,7 @@ public class NvdMirrorManager {
     }
 
     private CveEntity processFile(Path filepath) {
-        return (CveEntity) cveEntityMarshaller.unmarshalJson(readJsonFile(filepath));
+        return cveEntityMarshaller.unmarshalJson(readJsonFile(filepath));
     }
 
     private String readJsonFile(Path filepath) {

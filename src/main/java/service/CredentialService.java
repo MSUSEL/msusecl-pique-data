@@ -5,7 +5,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class PostgresCredentialService {
+public class CredentialService {
+    private String dbContext = System.getenv("DB_CONTEXT");
     private String driver = System.getenv("PG_DRIVER");
     private String hostname = System.getenv("PG_HOSTNAME");
     private String port = System.getenv("PG_PORT");

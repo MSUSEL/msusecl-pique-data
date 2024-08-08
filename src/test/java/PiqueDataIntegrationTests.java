@@ -1,9 +1,7 @@
-import businessObjects.GraphQlQueries;
-import businessObjects.NvdRequestBuilder;
 import businessObjects.cve.Cve;
 import businessObjects.cve.CveEntity;
+import businessObjects.cve.Metrics;
 import businessObjects.ghsa.SecurityAdvisory;
-import common.Constants;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
 import org.junit.Test;
@@ -14,6 +12,7 @@ import presentation.PiqueDataFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
@@ -61,14 +60,14 @@ public class PiqueDataIntegrationTests {
 
     @Test
     public void testGetLocalCwes() throws DataAccessException {
-       List<String> cwes = piqueData.getNvdCweDescriptions(TestConstants.CVE_B);
+       List<String> cwes = piqueData.getCweDescriptions(TestConstants.CVE_B);
 
        assertEquals(cwes.get(0), TestConstants.CVE_B_CWE_ORACLE);
     }
 
     @Test
     public void testGetPersistentCwes() throws DataAccessException {
-        List<String> cwes = piqueData.getNvdCweDescriptions(TestConstants.CVE_B);
+        List<String> cwes = piqueData.getCweDescriptions(TestConstants.CVE_B);
 
         assertEquals(cwes.get(0), TestConstants.CVE_B_CWE_ORACLE);
     }
@@ -85,8 +84,8 @@ public class PiqueDataIntegrationTests {
         SecurityAdvisory result1 = piqueData.getGhsa(TestConstants.GHSA_ID_A);
         SecurityAdvisory result2 = piqueData.getGhsa(TestConstants.GHSA_ID_B);
 
-        assertEquals(TestConstants.GHSA_ID_B, result2.getGhsaId());
         assertEquals(TestConstants.GHSA_ID_A, result1.getGhsaId());
+        assertEquals(TestConstants.GHSA_ID_B, result2.getGhsaId());
     }
 
     @Test
@@ -96,7 +95,8 @@ public class PiqueDataIntegrationTests {
 
     @Test
     public void testGetCweIdsFromGhsa() throws ApiCallException {
-        piqueData.getCweIdsFromGhsa(TestConstants.GHSA_ID_A);
+        List<String> cweIds = piqueData.getCweIdsFromGhsa(TestConstants.GHSA_ID_A);
+        assertEquals(TestConstants.GHSA_CWE_A_ORACLE, cweIds.get(0));
     }
 
     @Test
@@ -107,6 +107,11 @@ public class PiqueDataIntegrationTests {
                 .build().executeRequest().getEntity();
 
         assertEquals(TestConstants.CVE_A, entity.getVulnerabilities().get(0).getCve().getId());
+    }
 
+    @Test
+    public void testGetCvssScores() throws DataAccessException {
+        List<String> cveIds = Arrays.asList(TestConstants.CVE_A, TestConstants.CVE_B);
+        Map<String, Metrics> data = piqueData.getCvssMetrics(cveIds);
     }
 }

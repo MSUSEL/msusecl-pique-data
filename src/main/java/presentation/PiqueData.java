@@ -1,6 +1,7 @@
 package presentation;
 
 import businessObjects.cve.Cve;
+import businessObjects.cve.Metrics;
 import businessObjects.ghsa.SecurityAdvisory;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
@@ -8,6 +9,7 @@ import service.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * PiqueData serves as the primary class for interacting with this library. It provides static methods to work
@@ -63,7 +65,7 @@ public class PiqueData {
      * @return String array of CWEs
      * @throws DataAccessException
      */
-    public List<String> getNvdCweDescriptions(String cveId) throws DataAccessException{
+    public List<String> getCweDescriptions(String cveId) throws DataAccessException{
         return mirrorService.handleGetNvdCweDescriptions(cveId);
     }
 
@@ -93,4 +95,12 @@ public class PiqueData {
     public ArrayList<String> getCweIdsFromGhsa(String ghsaId) throws ApiCallException {
         return ghsaApiService.handleGetCweIdsFromGhsa(ghsaId);
     }
+
+    public Map<String, Metrics> getCvssMetrics(List<String> cveIds) throws DataAccessException {
+        return mirrorService.handleGetCvssMetrics(cveIds);
+    }
+
+//    public String dumpNvdToJson() throws DataAccessException {
+//        return mirrorService.handleDumpNvdToJson();
+//    }
 }
