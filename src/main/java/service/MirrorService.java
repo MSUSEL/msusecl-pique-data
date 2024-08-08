@@ -58,8 +58,8 @@ public final class MirrorService implements INvdMirrorService{
         return cveResponseProcessor.extractCvssScores(cves);
     }
 
-//    @Override
-//    public String handleDumpNvdToJson() {
-//        return cveDao.dump();
-//    }
+    @Override
+    public String handleDumpNvdToJson() {
+        return cveDao.dump();
+    }
 }
