@@ -57,9 +57,4 @@ public final class MirrorService implements INvdMirrorService{
         List<Cve> cves = handleGetCveById(cveIds);
         return cveResponseProcessor.extractCvssScores(cves);
     }
-
-    @Override
-    public String handleDumpNvdToJson() {
-        return cveDao.dump();
-    }
 }

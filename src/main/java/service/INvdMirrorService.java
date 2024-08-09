@@ -16,5 +16,4 @@ public interface INvdMirrorService {
     void handleInsertSingleCve(Cve cve) throws DataAccessException;
     void handleDeleteSingleCve(String cveId) throws DataAccessException;
     Map<String, Metrics> handleGetCvssMetrics(List<String> cveIds) throws DataAccessException;
-    String handleDumpNvdToJson();
 }

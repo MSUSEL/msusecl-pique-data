@@ -1,6 +1,8 @@
+import businessObjects.NvdRequest;
 import businessObjects.cve.Cve;
 import businessObjects.cve.CveEntity;
 import businessObjects.cve.Metrics;
+import businessObjects.cve.NvdMirrorMetaData;
 import businessObjects.ghsa.SecurityAdvisory;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
@@ -113,5 +115,11 @@ public class PiqueDataIntegrationTests {
     public void testGetCvssScores() throws DataAccessException {
         List<String> cveIds = Arrays.asList(TestConstants.CVE_A, TestConstants.CVE_B);
         Map<String, Metrics> data = piqueData.getCvssMetrics(cveIds);
+    }
+
+    @Test
+    public void testMarshalMetadataToJson() throws DataAccessException {
+        NvdMirrorMetaData metadata = nvdMirror.getMetaData();
+
     }
 }
