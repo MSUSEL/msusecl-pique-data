@@ -4,12 +4,10 @@ import businessObjects.cve.*;
 import common.Constants;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-/**
- * This is a convenience class to avoid littering the code
- * with lots of .get chains.
- */
 public class CveResponseProcessor {
 
     public ArrayList<String> extractCweDescriptions(Cve cve) {
@@ -25,19 +23,19 @@ public class CveResponseProcessor {
         return cwes;
     }
 
-    public Cve extractSingleCve(CVEResponse cveResponse) {
-        return cveResponse.getVulnerabilities().get(0).getCve();
+    public Cve extractSingleCve(CveEntity cveEntity) {
+        return cveEntity.getVulnerabilities().get(0).getCve();
     }
 
-    public int extractTotalResults(CVEResponse cveResponse) {
-        return cveResponse.getTotalResults();
+    public int extractTotalResults(CveEntity cveEntity) {
+        return cveEntity.getTotalResults();
     }
 
-    public ArrayList<Vulnerability> extractVulnerabilities(CVEResponse cveResponse) {
-        return cveResponse.getVulnerabilities();
+    public ArrayList<Vulnerability> extractVulnerabilities(CveEntity cveEntity) {
+        return cveEntity.getVulnerabilities();
     }
 
-    public NvdMirrorMetaData formatNvdMetaData(CVEResponse response) {
+    public NvdMirrorMetaData formatNvdMetaData(CveEntity response) {
         NvdMirrorMetaData metaData = new NvdMirrorMetaData();
         metaData.setId(Constants.MONGO_NVD_METADATA_ID);
         metaData.setTotalResults(Integer.toString(response.getTotalResults()));
@@ -48,8 +46,8 @@ public class CveResponseProcessor {
         return metaData;
     }
 
-    public List<Cve> extractAllCves(CVEResponse cveResponse) {
-        ArrayList<Vulnerability> vulnerabilities = extractVulnerabilities(cveResponse);
+    public List<Cve> extractAllCves(CveEntity cveEntity) {
+        List<Vulnerability> vulnerabilities = extractVulnerabilities(cveEntity);
         List<Cve> cves = new ArrayList<>();
 
         for (Vulnerability vulnerability : vulnerabilities) {
@@ -57,5 +55,13 @@ public class CveResponseProcessor {
         }
 
         return cves;
+    }
+
+    public Map<String, Metrics> extractCvssScores(List<Cve> cves) {
+        Map<String, Metrics> processedMetrics = new HashMap<>();
+        for (Cve cve : cves) {
+            processedMetrics.put(cve.getId(), cve.getMetrics());
+        }
+        return processedMetrics;
     }
 }

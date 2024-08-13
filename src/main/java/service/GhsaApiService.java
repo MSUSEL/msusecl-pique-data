@@ -3,10 +3,11 @@ package service;
 import businessObjects.GHSARequest;
 import businessObjects.GHSAResponse;
 import businessObjects.GraphQlQueries;
-import businessObjects.interfaces.HTTPMethod;
+import businessObjects.HTTPMethod;
 import businessObjects.ghsa.SecurityAdvisory;
 import common.Constants;
-import common.HeaderBuilder;
+import handlers.IJsonMarshaller;
+import persistence.HeaderBuilder;
 import exceptions.ApiCallException;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,12 +16,17 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 
-
 public class GhsaApiService {
     private static final Logger LOGGER = LoggerFactory.getLogger(GhsaApiService.class);
-    private final HeaderBuilder headerBuilder = new HeaderBuilder();
+    private final GhsaResponseProcessor ghsaResponseProcessor;
+    private final IJsonMarshaller<SecurityAdvisory> marshaller;
 
-    public SecurityAdvisory handleGetGhsa(String ghsaId) throws ApiCallException {
+    public GhsaApiService(GhsaResponseProcessor ghsaResponseProcessor, IJsonMarshaller<SecurityAdvisory> marshaller) {
+        this.ghsaResponseProcessor = ghsaResponseProcessor;
+        this.marshaller = marshaller;
+    }
+
+    public SecurityAdvisory handleGetEntity(String ghsaId) throws ApiCallException {
         String CONTENT_TYPE = "Content-Type";
         String APP_JSON = "application/json";
         String AUTHORIZATION = "Authorization";
@@ -28,23 +34,25 @@ public class GhsaApiService {
         GHSARequest ghsaRequest = new GHSARequest(
                 HTTPMethod.POST,
                 Constants.GHSA_URI,
-                headerBuilder.addHeader(CONTENT_TYPE, APP_JSON)
-                        .addHeader(AUTHORIZATION, String.format("Bearer %s", Constants.NVD_API_KEY))
+                new HeaderBuilder()
+                        .addHeader(CONTENT_TYPE, APP_JSON)
+                        .addHeader(AUTHORIZATION, String.format("Bearer %s", System.getenv("GITHUB_PAT")))
                         .build(),
-                formatQueryBody(ghsaId));
+                formatQueryBody(ghsaId),
+                marshaller);
         GHSAResponse ghsaResponse = ghsaRequest.executeRequest();
 
         int status = ghsaResponse.getStatus();
-        if (status == 200) {
-            return ghsaResponse.getSecurityAdvisory();
+        if (status >= 200 && status < 300) {
+            return ghsaResponse.getEntity();
         } else {
             throw new ApiCallException(status);
         }
     }
 
     public ArrayList<String> handleGetCweIdsFromGhsa(String ghsaId) throws ApiCallException {
-        SecurityAdvisory advisory = handleGetGhsa(ghsaId);
-        return new GhsaResponseProcessor().extractCweIds(advisory);
+        SecurityAdvisory advisory = handleGetEntity(ghsaId);
+        return ghsaResponseProcessor.extractCweIds(advisory);
     }
 
     // TODO replace the following methods with dedicated GraphQL library

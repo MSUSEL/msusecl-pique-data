@@ -10,13 +10,15 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.InsertOneModel;
 import com.mongodb.client.model.WriteModel;
 
+import exceptions.DataAccessException;
 import handlers.IJsonMarshaller;
+import org.apache.commons.lang3.NotImplementedException;
 import org.bson.conversions.Bson;
-import persistence.IBulkDao;
 
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import persistence.IDao;
 import persistence.IDataSource;
 
 import java.util.ArrayList;
@@ -32,20 +34,19 @@ import static com.mongodb.assertions.Assertions.assertNotNull;
  * Please use the MongoCveDao class for inserting into / updating
  * a subset of cves in the NVD.
  */
-public final class MongoBulkCveDao implements IBulkDao<Cve> {
-    private final MongoClient client;
+public final class MongoBulkCveDao implements IDao<Cve> {
     private final MongoCollection<Document> vulnerabilities;
-    private final IJsonMarshaller<Cve> cveMarshaller;
+    private final IJsonMarshaller cveMarshaller;
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoBulkCveDao.class);
 
-    public MongoBulkCveDao(IDataSource<MongoClient> dataSource, IJsonMarshaller<Cve> cveMarshaller) {
-        this.client = dataSource.getConnection();
+    public MongoBulkCveDao(IDataSource<MongoClient> dataSource, IJsonMarshaller cveMarshaller) {
+        MongoClient client = dataSource.getConnection();
         this.vulnerabilities = client.getDatabase("nvdMirror").getCollection("vulnerabilities");
         this.cveMarshaller = cveMarshaller;
     }
 
     @Override
-    public void insertMany(List<Cve> cves) {
+    public void insert(List<Cve> cves) {
         List<WriteModel<Document>> bulkOperations = new ArrayList<>();
 
         try {
@@ -60,21 +61,23 @@ public final class MongoBulkCveDao implements IBulkDao<Cve> {
     }
 
     @Override
-    public List<Cve> fetchMany(String[] cveIds) {
-        assertNotNull(client);
-        List<String> idList = Arrays.asList(cveIds);
-        Bson filter = Filters.in("id", idList);
+    public void update(List<Cve> cves) throws DataAccessException {
+        throw new NotImplementedException("Not implemented");
+    }
+
+    @Override
+    public void delete(List<String> cveIds) throws DataAccessException {
+        throw new NotImplementedException("Not implemented");
+    }
+
+    public List<Cve> fetch(List<String> cveIds) {
+        Bson filter = Filters.in("id", cveIds);
         MongoIterable<Document> documents = vulnerabilities.find(filter);
         List<Cve> cves = new ArrayList<>();
         for(Document document : documents) {
             String json = document.toJson();
-            cves.add(cveMarshaller.unmarshalJson(json));
+            cves.add((Cve) cveMarshaller.unmarshalJson(json));
         }
         return cves;
-    }
-
-    @Override
-    public Cve[] fetchAll() {
-        return new Cve[0];
     }
 }

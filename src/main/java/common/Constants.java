@@ -20,4 +20,6 @@ public final class Constants {
     public static final String REQUEST_EXECUTION_FAILURE_MESSAGE = "Failed to execute request: ";
     public static final String MALFORMED_JSON_SYNTAX_MESSAGE = "Incorrect JSON syntax - uable to parse to object";
     public static final String NVD_API_KEY = System.getenv("NVD_KEY");
+    public static final String DB_CONTEXT_ENV_VAR_ERROR_MESSAGE = "The DB_CONTEXT environment variable must be set to either 'persistent' or 'local.";
+    public static final String METHOD_NOT_IMPLEMENTED_MESSAGE = "This method is not implemented";
 }

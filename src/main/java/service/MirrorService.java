@@ -1,46 +1,60 @@
 package service;
 
 import businessObjects.cve.Cve;
+import businessObjects.cve.Metrics;
 import businessObjects.cve.NvdMirrorMetaData;
-import persistence.IBulkDao;
 import persistence.IDao;
-import persistence.IMetaDataDao;
 import exceptions.DataAccessException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
-public final class MirrorService {
-    private final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
-    private final DbContextResolver dbContextResolver = new DbContextResolver();
+public final class MirrorService implements INvdMirrorService{
+    private final CveResponseProcessor cveResponseProcessor;
+    private final IDao<Cve> cveDao;
+    private final IDao<NvdMirrorMetaData> metadataDao;
 
-    public Cve handleGetCveById(String dbContext, String cveId) throws DataAccessException {
-        IDao<Cve> dao = dbContextResolver.resolveCveDao(dbContext);
-        return dao.fetchById(cveId);
+    public MirrorService(CveResponseProcessor cveResponseProcessor, IDao<Cve> cveDao, IDao<NvdMirrorMetaData> metadataDao) {
+        this.cveResponseProcessor = cveResponseProcessor;
+        this.cveDao = cveDao;
+        this.metadataDao = metadataDao;
     }
 
-    public List<Cve> handleGetCveById(String dbContext, String[] cveIds) throws DataAccessException {
-        IBulkDao<Cve> dao = dbContextResolver.resolveBulkDao(dbContext);
-        return dao.fetchMany(cveIds);
+    @Override
+    public Cve handleGetCveById(String cveId) throws DataAccessException {
+        return cveDao.fetch(Collections.singletonList(cveId)).get(0);
     }
 
-    public ArrayList<String> handleGetNvdCweDescriptions(String dbContext, String cveId) throws DataAccessException {
-        Cve cve = handleGetCveById(dbContext, cveId);
-        return cveResponseProcessor.extractCweDescriptions(cve);
+    @Override
+    public List<Cve> handleGetCveById(List<String> cveIds) throws DataAccessException {
+        return cveDao.fetch(cveIds);
     }
 
-    public NvdMirrorMetaData handleGetCurrentMetaData(String dbContext) throws DataAccessException {
-        IMetaDataDao<NvdMirrorMetaData> dao = dbContextResolver.resolveMetaDataDao(dbContext);
-        return dao.fetchMetaData();
+    @Override
+    public ArrayList<String> handleGetNvdCweDescriptions(String cveId) throws DataAccessException {
+        return cveResponseProcessor.extractCweDescriptions(handleGetCveById(cveId));
     }
 
-    public void handleInsertSingleCve(String dbContext, Cve cve) throws DataAccessException {
-        IDao<Cve> dao = dbContextResolver.resolveCveDao(dbContext);
-        dao.insert(cve);
+    @Override
+    public NvdMirrorMetaData handleGetCurrentMetaData() throws DataAccessException {
+        return metadataDao.fetch(Collections.singletonList("1")).get(0);
     }
 
-    public void handleDeleteSingleCve(String dbContext, String cveId) throws DataAccessException {
-        IDao<Cve> dao = dbContextResolver.resolveCveDao(dbContext);
-        dao.delete(cveId);
+    @Override
+    public void handleInsertSingleCve(Cve cve) throws DataAccessException {
+        cveDao.insert(Collections.singletonList(cve));
+    }
+
+    @Override
+    public void handleDeleteSingleCve(String cveId) throws DataAccessException {
+        cveDao.delete(Collections.singletonList(cveId));
+    }
+
+    @Override
+    public Map<String, Metrics> handleGetCvssMetrics(List<String> cveIds) throws DataAccessException {
+        List<Cve> cves = handleGetCveById(cveIds);
+        return cveResponseProcessor.extractCvssScores(cves);
     }
 }

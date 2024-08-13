@@ -1,5 +1,6 @@
 package businessObjects.cve;
 
+import businessObjects.baseClasses.BaseEntity;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,7 +13,7 @@ import java.util.ArrayList;
  */
 @Getter
 @Setter
-public final class CVEResponse {
+public final class CveEntity extends BaseEntity {
     private int resultsPerPage;
     private int startIndex;
     private int totalResults;

@@ -1,7 +1,7 @@
 package businessObjects;
 
 import businessObjects.baseClasses.BaseResponse;
-import businessObjects.cve.CVEResponse;
+import businessObjects.cve.CveEntity;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,6 +12,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public final class NvdResponse extends BaseResponse {
-    private CVEResponse cveResponse;
+    private CveEntity entity;
+
+    public NvdResponse(CveEntity entity, int status) {
+       this.entity = entity;
+       this.status = status;
+    }
 }
 

@@ -1,9 +1,9 @@
 package handlers;
 
-import businessObjects.ghsa.CweNode;
 import businessObjects.ghsa.Cwes;
+import businessObjects.ghsa.Nodes;
 import businessObjects.ghsa.SecurityAdvisory;
-import common.Constants;
+import com.google.gson.Gson;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,8 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public final class SecurityAdvisoryMarshaller implements IJsonMarshaller<SecurityAdvisory> {
+public class SecurityAdvisoryMarshaller implements IJsonMarshaller<SecurityAdvisory> {
     private static final Logger LOGGER = LoggerFactory.getLogger(SecurityAdvisoryMarshaller.class);
 
     @Override
@@ -31,30 +32,29 @@ public final class SecurityAdvisoryMarshaller implements IJsonMarshaller<Securit
                 LOGGER.info("GHSA response was null");
             }
         } catch (JSONException e) {
-            LOGGER.error(Constants.MALFORMED_JSON, e);
+            LOGGER.error("Malformed Json", e);
             throw new RuntimeException(e);
         }
 
         return securityAdvisory;
     }
 
-    // TODO implement this method
     @Override
-    public String marshalJson(SecurityAdvisory securityAdvisory) {
-        return "";
+    public String marshalJson(SecurityAdvisory advisory) {
+        return new Gson().toJson(advisory);
     }
 
-    private ArrayList<CweNode> getNodesFromJson(JSONObject response) {
-        ArrayList<CweNode> nodes = new ArrayList<>();
+    private List<Nodes> getNodesFromJson(JSONObject response) {
+        ArrayList<Nodes> nodes = new ArrayList<>();
         try {
             JSONArray jsonNodes = response.optJSONObject("cwes").optJSONArray("nodes");
-            for (int i = 0; i < jsonNodes.length(); i++) {
-                CweNode cweNode = new CweNode();
+            for(int i = 0; i < jsonNodes.length(); i++) {
+                Nodes cweNode = new Nodes();
                 cweNode.setCweId(jsonNodes.optJSONObject(i).getString("cweId"));
                 nodes.add(cweNode);
             }
         } catch (JSONException e) {
-            LOGGER.error(Constants.MALFORMED_JSON, e);
+            LOGGER.error("Malformed Json", e);
             throw new RuntimeException(e);
         }
         return nodes;

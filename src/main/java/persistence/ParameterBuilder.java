@@ -1,4 +1,4 @@
-package common;
+package persistence;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;

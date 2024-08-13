@@ -1,12 +1,17 @@
 package businessObjects;
 
 import businessObjects.baseClasses.BaseRequest;
-import businessObjects.interfaces.IRequest;
+import businessObjects.ghsa.SecurityAdvisory;
+import com.google.gson.Gson;
 import common.Constants;
+import exceptions.ApiCallException;
+import handlers.IJsonMarshaller;
+import handlers.JsonMarshallerFactory;
 import handlers.JsonResponseHandler;
-import handlers.SecurityAdvisoryMarshaller;
 
+import handlers.SecurityAdvisoryMarshaller;
 import org.apache.http.Header;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
@@ -25,43 +30,21 @@ public final class GHSARequest extends BaseRequest implements IRequest {
     private static final Logger LOGGER = LoggerFactory.getLogger(GHSARequest.class);
     private final JsonResponseHandler handler = new JsonResponseHandler();
     private final String query;
+    private final IJsonMarshaller<SecurityAdvisory> marshaller;
 
-    public GHSARequest(String httpMethod, String baseURI, Header[] headers, String query) {
+    public GHSARequest(String httpMethod, String baseURI, Header[] headers, String query, IJsonMarshaller<SecurityAdvisory> marshaller) {
         super(httpMethod, baseURI, headers);
         this.query = query;
+        this.marshaller = marshaller;
     }
 
     @Override
-    public GHSAResponse executeRequest() {
+    public GHSAResponse executeRequest() throws ApiCallException {
         return executeGHSARequest();
     }
 
-    // TODO fix the awkward error handling here
-    private GHSAResponse executeGHSARequest() {
-        URI uri;
-        GHSAResponse ghsaResponse = new GHSAResponse();
-        SecurityAdvisoryMarshaller securityAdvisoryMarshaler = new SecurityAdvisoryMarshaller();
-
-        uri = buildUri();
-        HttpPost request = formatRequest(uri);
-
-        try (CloseableHttpClient client = HttpClients.createDefault();
-             CloseableHttpResponse response = client.execute(request)) {
-
-            int status = response.getStatusLine().getStatusCode();
-            if (status >= 200 && status < 300) {
-                String json = handler.handleResponse(response);
-                ghsaResponse.setSecurityAdvisory(securityAdvisoryMarshaler.unmarshalJson(json));
-                ghsaResponse.setStatus(status);
-            } else {
-                LOGGER.info(Constants.RESPONSE_STATUS_MESSAGE, status);
-                throw new IOException(Constants.REQUEST_EXECUTION_FAILURE_MESSAGE + response.getStatusLine());
-            }
-        } catch ( IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return ghsaResponse;
+    private GHSAResponse executeGHSARequest() throws ApiCallException {
+        return makeHttpCall(formatRequest(buildUri()));
     }
 
     private URI buildUri() {
@@ -73,9 +56,31 @@ public final class GHSARequest extends BaseRequest implements IRequest {
         }
     }
 
+    private GHSAResponse makeHttpCall(HttpPost request) throws ApiCallException {
+        try (CloseableHttpClient client = HttpClients.createDefault();
+             CloseableHttpResponse response = client.execute(request)) {
+
+            return processHttpResponse(response);
+
+        } catch ( IOException e) {
+            throw new ApiCallException(e);
+        }
+    }
+
+    private GHSAResponse processHttpResponse(HttpResponse response) throws IOException {
+        int status = response.getStatusLine().getStatusCode();
+        if (status >= 200 && status < 300) {
+            return new GHSAResponse(
+                    marshaller.unmarshalJson(handler.handleResponse(response)),
+                    status);
+        } else {
+            LOGGER.info(Constants.RESPONSE_STATUS_MESSAGE, status);
+            throw new IOException(Constants.REQUEST_EXECUTION_FAILURE_MESSAGE + response.getStatusLine());
+        }
+    }
+
     private HttpPost formatRequest(URI uri) {
-        HttpPost request = new HttpPost();
-        request.setURI(uri);
+        HttpPost request = new HttpPost(uri);
         request.setHeaders(headers);
         request.setEntity(new StringEntity(query, StandardCharsets.UTF_8));
 

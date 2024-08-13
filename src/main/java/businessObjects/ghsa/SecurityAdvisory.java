@@ -1,5 +1,6 @@
 package businessObjects.ghsa;
 
+import businessObjects.baseClasses.BaseEntity;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,7 +11,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public final class SecurityAdvisory {
+public final class SecurityAdvisory extends BaseEntity {
     private String ghsaId;
     private String summary;
     private Cwes cwes;

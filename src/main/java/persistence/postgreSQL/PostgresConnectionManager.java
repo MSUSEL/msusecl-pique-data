@@ -8,21 +8,22 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import persistence.IDataSource;
+import service.CredentialService;
 
 
 public final class PostgresConnectionManager implements IDataSource<Connection> {
-    private static final BasicDataSource connectionPool = new BasicDataSource();
+    private final BasicDataSource connectionPool = new BasicDataSource();
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresConnectionManager.class);
 
-    public PostgresConnectionManager() {
+    public PostgresConnectionManager(CredentialService credentialService) {
         connectionPool.setUrl(
                 buildConnectionString(
-                        System.getenv("PG_DRIVER"),
-                        System.getenv("PG_HOSTNAME"),
-                        System.getenv("PG_PORT"),
-                        System.getenv("PG_DBNAME")));
-        connectionPool.setUsername(System.getenv("PG_USERNAME"));
-        connectionPool.setPassword(System.getenv("PG_PASS"));
+                        credentialService.getDriver(),
+                        credentialService.getHostname(),
+                        credentialService.getPort(),
+                        credentialService.getDbname()));
+        connectionPool.setUsername(credentialService.getUsername());
+        connectionPool.setPassword(credentialService.getPassword());
     }
 
     @Override

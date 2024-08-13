@@ -1,18 +1,14 @@
 package businessObjects;
 
 import businessObjects.baseClasses.BaseRequest;
-import businessObjects.interfaces.HTTPMethod;
-import businessObjects.interfaces.IRequest;
+import businessObjects.cve.CveEntity;
 import common.Constants;
-import common.HeaderBuilder;
-import common.NvdConstants;
-import common.ParameterBuilder;
 import exceptions.ApiCallException;
-import handlers.JsonResponseHandler;
-import handlers.NvdCveMarshaller;
+import handlers.IJsonMarshaller;
 
 import org.apache.http.Header;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
@@ -30,13 +26,20 @@ import java.util.List;
  * Inherits from Request and is used to execute GET requests against
  * the National Vulnerabilities Database
  */
-public final class NvdRequest extends BaseRequest implements IRequest {
+public final class NvdRequest extends BaseRequest {
     private static final Logger LOGGER = LoggerFactory.getLogger(NvdRequest.class);
-    private final List<NameValuePair> params;
+    private final ResponseHandler<String> jsonResponseHandler;
+    private final IJsonMarshaller<CveEntity> cveEntityMarshaller;
 
-    public NvdRequest(String httpMethod, String baseUri, Header[] headers, List<NameValuePair> params) {
-        super(httpMethod, baseUri, headers);
-        this.params = params;
+    public NvdRequest(String httpMethod,
+                      String baseUri,
+                      Header[] headers,
+                      List<NameValuePair> params,
+                      ResponseHandler<String> jsonResponseHandler,
+                      IJsonMarshaller<CveEntity> cveEntityMarshaller) {
+        super(httpMethod, baseUri, headers, params);
+        this.jsonResponseHandler = jsonResponseHandler;
+        this.cveEntityMarshaller = cveEntityMarshaller;
     }
 
     /**
@@ -50,8 +53,7 @@ public final class NvdRequest extends BaseRequest implements IRequest {
 
     private NvdResponse executeGetRequest() throws ApiCallException {
         HttpGet request = new HttpGet();
-        URI uri = buildUri();
-        request.setURI(uri);
+        request.setURI(buildUri());
         request.setHeaders(headers);
 
         return makeHttpCall(request);
@@ -67,7 +69,6 @@ public final class NvdRequest extends BaseRequest implements IRequest {
     }
 
     private NvdResponse makeHttpCall(HttpGet request) throws ApiCallException {
-
         try (CloseableHttpClient client = HttpClients.createDefault();
              CloseableHttpResponse response = client.execute(request)) {
             return processHttpResponse(response);
@@ -77,15 +78,12 @@ public final class NvdRequest extends BaseRequest implements IRequest {
     }
 
     private NvdResponse processHttpResponse(CloseableHttpResponse response) throws IOException {
-        NvdResponse nvdResponse = new NvdResponse();
         int status = response.getStatusLine().getStatusCode();
 
         if (status >= 200 && status < 300) {
-            String json = new JsonResponseHandler().handleResponse(response);
-            nvdResponse.setCveResponse(new NvdCveMarshaller().unmarshalJson(json));
-            nvdResponse.setStatus(status);
-
-            return nvdResponse;
+            return new NvdResponse(
+                    cveEntityMarshaller.unmarshalJson(jsonResponseHandler.handleResponse(response)),
+                    status);
         } else {
             LOGGER.info(Constants.RESPONSE_STATUS_MESSAGE, status);
             throw new IOException(Constants.REQUEST_EXECUTION_FAILURE_MESSAGE + response.getStatusLine());

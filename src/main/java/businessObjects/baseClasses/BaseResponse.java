@@ -14,4 +14,5 @@ public abstract class BaseResponse {
     protected int contentLength;
     protected String auth;
     protected String date;
+    protected BaseEntity entity;
 }

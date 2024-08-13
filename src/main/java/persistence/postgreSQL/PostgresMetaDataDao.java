@@ -1,13 +1,17 @@
 package persistence.postgreSQL;
 
+import common.Constants;
 import exceptions.DataAccessException;
+import org.apache.commons.lang3.NotImplementedException;
+import persistence.IDao;
 import persistence.IDataSource;
-import persistence.IMetaDataDao;
 import businessObjects.cve.NvdMirrorMetaData;
 
 import java.sql.*;
+import java.util.Collections;
+import java.util.List;
 
-public final class PostgresMetaDataDao implements IMetaDataDao<NvdMirrorMetaData> {
+public final class PostgresMetaDataDao implements IDao<NvdMirrorMetaData> {
     private final Connection conn;
 
     public PostgresMetaDataDao(IDataSource<Connection> dataSource) {
@@ -15,20 +19,20 @@ public final class PostgresMetaDataDao implements IMetaDataDao<NvdMirrorMetaData
     }
 
     @Override
-    public boolean updateMetaData(NvdMirrorMetaData metaData) throws DataAccessException {
+    public void update(List<NvdMirrorMetaData> metaData) throws DataAccessException {
         try {
             String sql = String.format("UPDATE nvd.metadata " +
                             "SET total_results = '%s', " +
                             "format = '%s', " +
                             "api_version = '%s', " +
                             "last_timestamp = '%s'::text;",
-                    metaData.getTotalResults(),
-                    metaData.getFormat(),
-                    metaData.getVersion(),
-                    metaData.getTimestamp());
+                    metaData.get(0).getTotalResults(),
+                    metaData.get(0).getFormat(),
+                    metaData.get(0).getVersion(),
+                    metaData.get(0).getTimestamp());
 
             PreparedStatement statement = conn.prepareStatement(sql);
-            return statement.execute();
+            statement.execute();
         }
         catch (SQLException e) {
             throw new DataAccessException(e);
@@ -36,11 +40,16 @@ public final class PostgresMetaDataDao implements IMetaDataDao<NvdMirrorMetaData
     }
 
     @Override
-    public NvdMirrorMetaData fetchMetaData() throws DataAccessException {
+    public void delete(List<String> t) throws DataAccessException {
+        throw new NotImplementedException(Constants.METHOD_NOT_IMPLEMENTED_MESSAGE);
+    }
+
+    public List<NvdMirrorMetaData> fetch(List<String> metadataId) throws DataAccessException {
         try {
-            String sql = "SELECT * FROM nvd.metadata;";
-            Statement statement = conn.createStatement();
-            ResultSet rs = statement.executeQuery(sql);
+            String sql = "SELECT * FROM nvd.metadata WHERE id LIKE ?;";
+            PreparedStatement statement = conn.prepareStatement(sql);
+            statement.setString(1, metadataId.get(0));
+            ResultSet rs = statement.executeQuery();
             NvdMirrorMetaData metaData = new NvdMirrorMetaData();
 
             if (rs.next()) {
@@ -57,9 +66,15 @@ public final class PostgresMetaDataDao implements IMetaDataDao<NvdMirrorMetaData
                 metaData.setTimestamp(timestamp);
             }
 
-            return metaData;
+            return Collections.singletonList(metaData);
+
         } catch (SQLException e) {
             throw new DataAccessException(e);
         }
+    }
+
+    @Override
+    public void insert(List<NvdMirrorMetaData> t) throws DataAccessException {
+        throw new NotImplementedException(Constants.METHOD_NOT_IMPLEMENTED_MESSAGE);
     }
 }

@@ -3,10 +3,10 @@ package businessObjects.ghsa;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
 public final class Cwes {
-    private ArrayList<CweNode> nodes;
+    private List<Nodes> nodes;
 }
