@@ -19,10 +19,10 @@ import persistence.IDataSource;
 // TODO move functionality to stored procedures
 public final class PostgresCveDao implements IDao<Cve> {
     private final Connection conn;
-    private final IJsonMarshaller cveDetailsMarshaller;
+    private final IJsonMarshaller<Cve> cveDetailsMarshaller;
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresCveDao.class);
 
-    public PostgresCveDao(IDataSource<Connection> dataSource, IJsonMarshaller cveMarshaller) {
+    public PostgresCveDao(IDataSource<Connection> dataSource, IJsonMarshaller<Cve> cveMarshaller) {
         this.cveDetailsMarshaller = cveMarshaller;
         this.conn = dataSource.getConnection();
     }

@@ -100,7 +100,7 @@ public class PiqueData {
         return mirrorService.handleGetCvssMetrics(cveIds);
     }
 
-    public String dumpNvdToJson() throws DataAccessException {
-        return mirrorService.handleDumpNvdToJson();
-    }
+//    public String dumpNvdToJson() throws DataAccessException {
+//        return mirrorService.handleDumpNvdToJson();
+//    }
 }

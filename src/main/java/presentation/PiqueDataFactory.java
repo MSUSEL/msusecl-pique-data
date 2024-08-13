@@ -29,14 +29,16 @@ public class PiqueDataFactory {
     private final NvdApiService nvdApiService = new NvdApiService(jsonResponseHandler, cveEntityMarshaller);
     private final GhsaApiService ghsaApiService = new GhsaApiService(new GhsaResponseProcessor(), securityAdvisoryMarshaller);
     private final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
-    private final IDataSource<MongoClient> mongoDataSource = new MongoConnectionManager();
     private final CredentialService credentialService = new CredentialService();
     private final String dbContext = credentialService.getDbContext();
     private IDataSource<Connection> pgDataSource;
+    private IDataSource<MongoClient> mongoDataSource;
 
     public PiqueDataFactory() {
         if (dbContext.equals(Constants.DB_CONTEXT_PERSISTENT)) {
             this.pgDataSource = new PostgresConnectionManager(credentialService);
+        } else if (dbContext.equals(Constants.DB_CONTEXT_LOCAL)) {
+            this.mongoDataSource = new MongoConnectionManager();
         }
     }
 
@@ -83,7 +85,7 @@ public class PiqueDataFactory {
                 cveResponseProcessor,
                 jsonResponseHandler,
                 cveEntityMarshaller,
-                new PostgresCveDao(pgDataSource, cveEntityMarshaller),
+                new PostgresCveDao(pgDataSource, cveMarshaller),
                 new PostgresMetaDataDao(pgDataSource));
     }
 

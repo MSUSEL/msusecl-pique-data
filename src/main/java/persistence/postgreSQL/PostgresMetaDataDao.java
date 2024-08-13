@@ -49,7 +49,7 @@ public final class PostgresMetaDataDao implements IDao<NvdMirrorMetaData> {
             String sql = "SELECT * FROM nvd.metadata WHERE id LIKE ?;";
             PreparedStatement statement = conn.prepareStatement(sql);
             statement.setString(1, metadataId.get(0));
-            ResultSet rs = statement.executeQuery(sql);
+            ResultSet rs = statement.executeQuery();
             NvdMirrorMetaData metaData = new NvdMirrorMetaData();
 
             if (rs.next()) {
