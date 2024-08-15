@@ -10,9 +10,9 @@ import java.util.Map;
 
 public class CveResponseProcessor {
 
-    public ArrayList<String> extractCweDescriptions(Cve cve) {
-        ArrayList<Weakness> cweList = cve.getWeaknesses();
-        ArrayList<String> cwes = new ArrayList<>();
+    public List<String> extractCweDescriptions(Cve cve) {
+        List<Weakness> cweList = cve.getWeaknesses();
+        List<String> cwes = new ArrayList<>();
 
         for (Weakness weakness : cweList) {
             for (WeaknessDescription description : weakness.getDescription()) {
@@ -31,7 +31,7 @@ public class CveResponseProcessor {
         return cveEntity.getTotalResults();
     }
 
-    public ArrayList<Vulnerability> extractVulnerabilities(CveEntity cveEntity) {
+    public List<Vulnerability> extractVulnerabilities(CveEntity cveEntity) {
         return cveEntity.getVulnerabilities();
     }
 
