@@ -14,7 +14,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class GhsaApiService {
     private static final Logger LOGGER = LoggerFactory.getLogger(GhsaApiService.class);
@@ -50,7 +50,7 @@ public class GhsaApiService {
         }
     }
 
-    public ArrayList<String> handleGetCweIdsFromGhsa(String ghsaId) throws ApiCallException {
+    public List<String> handleGetCweIdsFromGhsa(String ghsaId) throws ApiCallException {
         SecurityAdvisory advisory = handleGetEntity(ghsaId);
         return ghsaResponseProcessor.extractCweIds(advisory);
     }

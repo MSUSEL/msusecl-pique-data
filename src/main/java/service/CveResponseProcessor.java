@@ -3,15 +3,13 @@ package service;
 import businessObjects.cve.*;
 import common.Constants;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class CveResponseProcessor {
 
     public List<String> extractCweDescriptions(Cve cve) {
-        List<Weakness> cweList = cve.getWeaknesses();
+        Optional<List<Weakness>> optionalCweList = Optional.of(cve.getWeaknesses().orElse(new ArrayList<>()));
+        List<Weakness> cweList = optionalCweList.get();
         List<String> cwes = new ArrayList<>();
 
         for (Weakness weakness : cweList) {
