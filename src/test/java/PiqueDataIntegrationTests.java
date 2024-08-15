@@ -1,8 +1,5 @@
 import businessObjects.NvdRequest;
-import businessObjects.cve.Cve;
-import businessObjects.cve.CveEntity;
-import businessObjects.cve.Metrics;
-import businessObjects.cve.NvdMirrorMetaData;
+import businessObjects.cve.*;
 import businessObjects.ghsa.SecurityAdvisory;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
@@ -11,10 +8,7 @@ import presentation.NvdMirror;
 import presentation.PiqueData;
 import presentation.PiqueDataFactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 
@@ -38,8 +32,11 @@ public class PiqueDataIntegrationTests {
     @Test
     public void testPersistentGetCve() throws DataAccessException {
         Cve cve = piqueData.getCve(TestConstants.CVE_B);
+        Optional<List<Weakness>> optionalCweList = Optional.of(cve.getWeaknesses().orElse(new ArrayList<>()));
+        List<Weakness> cweList = optionalCweList.get();
+
         assertEquals(TestConstants.CVE_B, cve.getId());
-        assertEquals(TestConstants.CVE_B_CWE_ORACLE, cve.getWeaknesses().get(0).getDescription().get(0).getValue());
+        assertEquals(TestConstants.CVE_B_CWE_ORACLE, cweList.get(0).getDescription().get(0).getValue());
     }
 
     @Test
