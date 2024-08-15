@@ -92,7 +92,7 @@ public class PiqueData {
         return ghsaApiService.handleGetEntity(ghsaId);
     }
 
-    public ArrayList<String> getCweIdsFromGhsa(String ghsaId) throws ApiCallException {
+    public List<String> getCweIdsFromGhsa(String ghsaId) throws ApiCallException {
         return ghsaApiService.handleGetCweIdsFromGhsa(ghsaId);
     }
 

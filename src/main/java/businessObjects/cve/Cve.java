@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Getter 
 @Setter
@@ -13,9 +15,13 @@ public final class Cve {
     private String published;
     private String lastModified;
     private String vulnStatus;
-    private ArrayList<Description> descriptions;
+    private List<Description> descriptions;
     private Metrics metrics;
-    private ArrayList<Weakness> weaknesses;
-    private ArrayList<Configuration> configurations;
-    private ArrayList<Reference> references;
+    private List<Weakness> weaknesses;
+    private List<Configuration> configurations;
+    private List<Reference> references;
+
+    public Optional<List<Weakness>> getWeaknesses() {
+        return Optional.ofNullable(weaknesses);
+    }
 }

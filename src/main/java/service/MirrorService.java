@@ -6,7 +6,6 @@ import businessObjects.cve.NvdMirrorMetaData;
 import persistence.IDao;
 import exceptions.DataAccessException;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +32,7 @@ public final class MirrorService implements INvdMirrorService{
     }
 
     @Override
-    public ArrayList<String> handleGetNvdCweDescriptions(String cveId) throws DataAccessException {
+    public List<String> handleGetNvdCweDescriptions(String cveId) throws DataAccessException {
         return cveResponseProcessor.extractCweDescriptions(handleGetCveById(cveId));
     }
 

@@ -22,9 +22,9 @@ public final class GhsaResponseProcessor {
     }
 
     // methods to extract fields from Security Advisories
-    public ArrayList<String> extractCweIds(SecurityAdvisory advisory) {
+    public List<String> extractCweIds(SecurityAdvisory advisory) {
         List<Nodes> nodes = advisory.getCwes().getNodes();
-        ArrayList<String> ids = new ArrayList<>();
+        List<String> ids = new ArrayList<>();
         for (Nodes node : nodes) {
             ids.add(node.getCweId());
         }
