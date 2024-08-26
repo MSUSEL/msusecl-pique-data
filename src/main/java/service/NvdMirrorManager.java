@@ -50,7 +50,7 @@ public class NvdMirrorManager {
             CveEntity response = new NvdRequestBuilder(jsonResponseHandler, cveEntityMarshaller)
                     .withFullMirrorDefaults(Integer.toString(i))
                     .build()
-                    .executeRequest().getEntity();
+                   .executeRequest().getEntity();
             cveCount = resetCveCount(cveCount, response);
             persistPaginatedData(response, i, cveCount);
             handleSleep(i, cveCount);   // avoids hitting NVD rate limits
@@ -84,6 +84,10 @@ public class NvdMirrorManager {
         CveEntity fileContents = processFile(filepath);
         persistMetadata(fileContents);
         persistCveDetails(fileContents);
+    }
+
+    public void handleDumpNvdToFile(String filepath) throws DataAccessException {
+            cveDao.dumpToFile(filepath);
     }
 
     private int resetCveCount(int cveCount, CveEntity response) {

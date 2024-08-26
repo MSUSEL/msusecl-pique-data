@@ -1,5 +1,8 @@
 package persistence.postgreSQL;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -102,12 +105,25 @@ public final class PostgresCveDao implements IDao<Cve> {
             ResultSet rs = statement.executeQuery();
             List<Cve> result = new ArrayList<>();
             while (rs.next()) {
-                result.add((Cve) cveDetailsMarshaller.unmarshalJson(rs.getString("details")));
+                result.add(cveDetailsMarshaller.unmarshalJson(rs.getString("details")));
             }
 
             return result;
 
         } catch (SQLException e) {
+            throw new DataAccessException(e);
+        }
+    }
+
+    public void dumpToFile(String filepath) throws DataAccessException {
+        String sql = "SELECT details FROM nvd.cve";
+        try(BufferedWriter fileWriter = new BufferedWriter(new FileWriter(filepath, true))) {
+            PreparedStatement statement = conn.prepareStatement(sql);
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                fileWriter.write(rs.getString("details"));
+            }
+        } catch (SQLException | IOException e) {
             throw new DataAccessException(e);
         }
     }
@@ -147,6 +163,7 @@ public final class PostgresCveDao implements IDao<Cve> {
         return baseSQL + idList;
     }
 
+    // FixMe
     private void performBulkDelete(List<String> cveIds) throws DataAccessException {
         for (String id : cveIds) {
             performDelete(cveIds);
@@ -165,6 +182,7 @@ public final class PostgresCveDao implements IDao<Cve> {
         }
     }
 
+    // FixMe
     private void performBulkUpdate(List<Cve> cves) throws DataAccessException {
         for (Cve cve : cves) {
             performUpdate(cves);

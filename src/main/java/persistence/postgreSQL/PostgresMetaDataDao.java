@@ -44,6 +44,11 @@ public final class PostgresMetaDataDao implements IDao<NvdMirrorMetaData> {
         throw new NotImplementedException(Constants.METHOD_NOT_IMPLEMENTED_MESSAGE);
     }
 
+    @Override
+    public void dumpToFile(String filePath) throws DataAccessException {
+
+    }
+
     public List<NvdMirrorMetaData> fetch(List<String> metadataId) throws DataAccessException {
         try {
             String sql = "SELECT * FROM nvd.metadata WHERE id LIKE ?;";

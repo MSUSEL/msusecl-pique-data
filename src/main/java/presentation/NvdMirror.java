@@ -48,4 +48,8 @@ public final class NvdMirror {
     public void buildMirrorFromJsonFile(Path filepath) throws DataAccessException {
         nvdMirrorManager.handleBuildMirrorFromJsonFile(filepath);
     }
+
+    public void dumpNvdToFile(String filepath) throws DataAccessException {
+        nvdMirrorManager.handleDumpNvdToFile(filepath);
+    }
 }
