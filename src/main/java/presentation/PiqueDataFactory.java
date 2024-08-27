@@ -18,6 +18,7 @@ import persistence.postgreSQL.PostgresCveDao;
 import persistence.postgreSQL.PostgresMetaDataDao;
 import service.*;
 
+import java.nio.file.Path;
 import java.sql.Connection;
 
 public class PiqueDataFactory {
@@ -29,14 +30,27 @@ public class PiqueDataFactory {
     private final NvdApiService nvdApiService = new NvdApiService(jsonResponseHandler, cveEntityMarshaller);
     private final GhsaApiService ghsaApiService = new GhsaApiService(new GhsaResponseProcessor(), securityAdvisoryMarshaller);
     private final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
-    private final CredentialService credentialService = new CredentialService();
-    private final String dbContext = credentialService.getDbContext();
+    private final String dbContext;
     private IDataSource<Connection> pgDataSource;
     private IDataSource<MongoClient> mongoDataSource;
 
     public PiqueDataFactory() {
+        CredentialService credentialService = new CredentialService();
+        this.dbContext = credentialService.getDbContext();
+
         if (dbContext.equals(Constants.DB_CONTEXT_PERSISTENT)) {
-            this.pgDataSource = new PostgresConnectionManager(credentialService);
+            this.pgDataSource = new PostgresConnectionManager(new CredentialService());
+        } else if (dbContext.equals(Constants.DB_CONTEXT_LOCAL)) {
+            this.mongoDataSource = new MongoConnectionManager();
+        }
+    }
+
+    public PiqueDataFactory(String credentialsFilePath){
+        CredentialService credentialService = new CredentialService(credentialsFilePath);
+        this.dbContext = credentialService.getDbContext();
+
+        if (dbContext.equals(Constants.DB_CONTEXT_PERSISTENT)) {
+            this.pgDataSource = new PostgresConnectionManager(new CredentialService());
         } else if (dbContext.equals(Constants.DB_CONTEXT_LOCAL)) {
             this.mongoDataSource = new MongoConnectionManager();
         }

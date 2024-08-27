@@ -6,7 +6,6 @@ import exceptions.DataAccessException;
 import org.junit.Test;
 import persistence.IDao;
 import persistence.IDataSource;
-import persistence.IMetaDataDao;
 import persistence.postgreSQL.PostgresConnectionManager;
 import persistence.postgreSQL.PostgresMetaDataDao;
 import presentation.NvdMirror;
@@ -14,9 +13,11 @@ import presentation.PiqueData;
 import presentation.PiqueDataFactory;
 import service.CredentialService;
 
+import java.nio.file.Paths;
 import java.sql.Connection;
-import java.util.Arrays;
 import java.util.Collections;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * IMPORTANT!
@@ -103,4 +104,20 @@ public class NvdMirrorIntegrationTests {
     public void testDumpToFile() throws DataAccessException {
         nvdMirror.dumpNvdToFile("./out/nvd.json");
     }
+
+    @Test
+    public void testBuildMirrorFromJsonFile() throws DataAccessException {
+        nvdMirror.buildMirrorFromJsonFile(Paths.get("./out/nvd.json"));
+
+    }
+
+   @Test
+   public void testPiqueDataFactoryWithConstructorParams() throws DataAccessException {
+        String file = "./src/main/resources/credentials.json";
+        PiqueDataFactory piqueDataFactoryWithCreds = new PiqueDataFactory(file);
+        PiqueData piqueDataWithCreds = piqueDataFactoryWithCreds.getPiqueData();
+
+        Cve cve = piqueDataWithCreds.getCve(TestConstants.CVE_A);
+        assertEquals(TestConstants.CVE_A, cve.getId());
+   }
 }
