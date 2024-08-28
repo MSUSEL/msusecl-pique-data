@@ -45,7 +45,7 @@ public final class NvdMirror {
         mirrorService.handleDeleteSingleCve(cveId);
     }
 
-    public void buildMirrorFromJsonFile(Path filepath) throws DataAccessException {
-        nvdMirrorManager.handleBuildMirrorFromJsonFile(filepath);
-    }
+//    public void buildMirrorFromJsonFile(Path filepath) throws DataAccessException {
+//        nvdMirrorManager.handleBuildMirrorFromJsonFile(filepath);
+//    }
 }

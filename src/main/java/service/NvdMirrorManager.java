@@ -74,19 +74,19 @@ public class NvdMirrorManager {
         persistCveDetails(response);
     }
 
-    /**
-     * Handles building a full or partial NVD mirror from a json file.
-     * The file must be structured in exactly the same format as a CveResponse
-     *                  NVD Mirror or local containerized mongodb instance)
-     * @param filepath Path to the json file formatted as a CveResponse
-     * @throws DataAccessException
-     */
-    public void handleBuildMirrorFromJsonFile(Path filepath) throws DataAccessException {
-        CveEntity fileContents = processFile(filepath);
-        persistMetadata(fileContents);
-        persistCveDetails(fileContents);
-    }
-
+//    /**
+//     * Handles building a full or partial NVD mirror from a json file.
+//     * The file must be structured in exactly the same format as a CveResponse
+//     *                  NVD Mirror or local containerized mongodb instance)
+//     * @param filepath Path to the json file formatted as a CveResponse
+//     * @throws DataAccessException
+//     */
+//    public void handleBuildMirrorFromJsonFile(Path filepath) throws DataAccessException {
+//        CveEntity fileContents = processFile(filepath);
+//        persistMetadata(fileContents);
+//        persistCveDetails(fileContents);
+//    }
+//
 //    public void handleDumpNvdToFile(String filepath) throws DataAccessException {
 //            cveDao.dumpToFile(filepath);
 //    }
