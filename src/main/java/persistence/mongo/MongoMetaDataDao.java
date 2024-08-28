@@ -59,11 +59,6 @@ public final class MongoMetaDataDao implements IDao<NvdMirrorMetaData> {
         throw new NotImplementedException(Constants.METHOD_NOT_IMPLEMENTED_MESSAGE);
     }
 
-    @Override
-    public void dumpToFile(String filePath) throws DataAccessException {
-
-    }
-
     // TODO fix retrieve method here
     public NvdMirrorMetaData get(Document criteria) {
         NvdMirrorMetaData nvdMirrorMetadata = new NvdMirrorMetaData();

@@ -100,10 +100,10 @@ public class NvdMirrorIntegrationTests {
         dao.update(Collections.singletonList(metaData));
     }
 
-    @Test
-    public void testDumpToFile() throws DataAccessException {
-        nvdMirror.dumpNvdToFile("./out/nvd.json");
-    }
+//    @Test
+//    public void testDumpToFile() throws DataAccessException {
+//        nvdMirror.dumpNvdToFile("./out/nvd.json");
+//    }
 
     @Test
     public void testBuildMirrorFromJsonFile() throws DataAccessException {

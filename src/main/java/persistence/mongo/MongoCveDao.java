@@ -71,11 +71,6 @@ public final class MongoCveDao implements IDao<Cve> {
         throw new NotImplementedException(Constants.METHOD_NOT_IMPLEMENTED_MESSAGE);
     }
 
-    @Override
-    public void dumpToFile(String filePath) throws DataAccessException {
-
-    }
-
     private List<Cve> performBulkFetch(List<String> ids) {
         List<Cve> results = new ArrayList<>();
 

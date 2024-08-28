@@ -70,11 +70,6 @@ public final class MongoBulkCveDao implements IDao<Cve> {
         throw new NotImplementedException("Not implemented");
     }
 
-    @Override
-    public void dumpToFile(String filePath) throws DataAccessException {
-
-    }
-
     public List<Cve> fetch(List<String> cveIds) {
         Bson filter = Filters.in("id", cveIds);
         MongoIterable<Document> documents = vulnerabilities.find(filter);

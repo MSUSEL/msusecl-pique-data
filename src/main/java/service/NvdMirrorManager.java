@@ -5,6 +5,7 @@ import businessObjects.cve.CveEntity;
 import businessObjects.cve.Cve;
 import businessObjects.cve.NvdMirrorMetaData;
 import common.Constants;
+import common.HelperFunctions;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
 import handlers.IJsonMarshaller;
@@ -86,9 +87,9 @@ public class NvdMirrorManager {
         persistCveDetails(fileContents);
     }
 
-    public void handleDumpNvdToFile(String filepath) throws DataAccessException {
-            cveDao.dumpToFile(filepath);
-    }
+//    public void handleDumpNvdToFile(String filepath) throws DataAccessException {
+//            cveDao.dumpToFile(filepath);
+//    }
 
     private int resetCveCount(int cveCount, CveEntity response) {
         return cveCount == 1
@@ -123,16 +124,7 @@ public class NvdMirrorManager {
     }
 
     private CveEntity processFile(Path filepath) {
-        return cveEntityMarshaller.unmarshalJson(readJsonFile(filepath));
+        return cveEntityMarshaller.unmarshalJson(HelperFunctions.readJsonFile(filepath));
     }
 
-    private String readJsonFile(Path filepath) {
-        StringBuilder builder = new StringBuilder();
-        try(Stream<String> stream = Files.lines(filepath, StandardCharsets.UTF_8)) {
-            stream.forEach(s -> builder.append(s).append("\n"));
-            return builder.toString();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }
