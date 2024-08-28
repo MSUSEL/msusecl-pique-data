@@ -7,20 +7,15 @@ import exceptions.ApiCallException;
 import exceptions.DataAccessException;
 import service.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 /**
- * PiqueData serves as the primary class for interacting with this library. It provides static methods to work
+ * PiqueData serves as the primary class for interacting with this library. It provides methods to work
  * with common data needs in Pique wrappers. These methods are designed to work with multiple database contexts.
- * Currently, these contexts are "local" or "persistent". Both correspond to a constant in the Constants class
- * for ease of use. The SECL maintains a complete mirror of the National Vulnerability Database. It is an on-prem
- * postgresql database and instructions for setting up credentials can be found in the Readme in the persistence layer.
- * This mirror is for use by the Software Engineering and Cybersecuity Lab only. All others, please use the local context
- * or call directly to the NVD. (Both capabilities exist in this class) The local context builds a containerized instance
- * of MongoDB Community Edition and mirrors the NVD there. Again, more information can be found in the Persistence layer
- * Readme.
+ * Currently, these contexts are "local" or "persistent". The local context builds a containerized instance
+ * of MongoDB Community Edition and mirrors the NVD there. The persistent context allows members of the SECL
+ * to interact with our on-prem mirror of the NVD.
  *
  * If this class does not provide you with the calls you want to make, please speak with Ryan Cummings in the Software
  * Engineering and Cybersecurity Lab. This utility should include most common use cases for data access in the lab. New
@@ -65,8 +60,8 @@ public class PiqueData {
      * @return String array of CWEs
      * @throws DataAccessException
      */
-    public List<String> getCweDescriptions(String cveId) throws DataAccessException{
-        return mirrorService.handleGetNvdCweDescriptions(cveId);
+    public List<String> getCweName(String cveId) throws DataAccessException{
+        return mirrorService.handleGetNvdCweName(cveId);
     }
 
     /**
@@ -92,15 +87,28 @@ public class PiqueData {
         return ghsaApiService.handleGetEntity(ghsaId);
     }
 
+    /**
+     * Calls GitHub's Security Advisory database and returns a formatted List of CWE names as Strings.
+     *
+     * @param ghsaId
+     * @return
+     * @throws ApiCallException
+     */
     public List<String> getCweIdsFromGhsa(String ghsaId) throws ApiCallException {
         return ghsaApiService.handleGetCweIdsFromGhsa(ghsaId);
     }
 
+    /**
+     * Gets CVSS Metrics for a given CVE. The CVSS Metrics are returned as a java map. The key is
+     * the CVE id, and the value is a Metrics object. Each Metrics Object contains Lists of Strings
+     * that allow for different CVSS formats. You'll need to check that each list is not empty and
+     * use any contained values accordingly.
+     *
+     * @param cveIds
+     * @return
+     * @throws DataAccessException
+     */
     public Map<String, Metrics> getCvssMetrics(List<String> cveIds) throws DataAccessException {
         return mirrorService.handleGetCvssMetrics(cveIds);
     }
-
-//    public String dumpNvdToJson() throws DataAccessException {
-//        return mirrorService.handleDumpNvdToJson();
-//    }
 }

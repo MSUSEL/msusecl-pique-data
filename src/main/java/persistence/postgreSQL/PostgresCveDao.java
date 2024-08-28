@@ -102,7 +102,7 @@ public final class PostgresCveDao implements IDao<Cve> {
             ResultSet rs = statement.executeQuery();
             List<Cve> result = new ArrayList<>();
             while (rs.next()) {
-                result.add((Cve) cveDetailsMarshaller.unmarshalJson(rs.getString("details")));
+                result.add(cveDetailsMarshaller.unmarshalJson(rs.getString("details")));
             }
 
             return result;
@@ -147,6 +147,7 @@ public final class PostgresCveDao implements IDao<Cve> {
         return baseSQL + idList;
     }
 
+    // FixMe
     private void performBulkDelete(List<String> cveIds) throws DataAccessException {
         for (String id : cveIds) {
             performDelete(cveIds);
@@ -165,6 +166,7 @@ public final class PostgresCveDao implements IDao<Cve> {
         }
     }
 
+    // FixMe
     private void performBulkUpdate(List<Cve> cves) throws DataAccessException {
         for (Cve cve : cves) {
             performUpdate(cves);

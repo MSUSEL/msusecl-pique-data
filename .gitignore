@@ -40,3 +40,5 @@ build/
 
 ### Project-Specific ###
 input/
+out/
+credentials.json
