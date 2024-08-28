@@ -13,5 +13,4 @@ public interface IDao<T> {
     void insert(List<T> t) throws DataAccessException;
     void update(List<T> t) throws DataAccessException;
     void delete(List<String> t) throws DataAccessException;
-    //void dumpToFile(String filePath) throws  DataAccessException;
 }

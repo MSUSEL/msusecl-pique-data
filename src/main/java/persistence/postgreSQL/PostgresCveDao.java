@@ -1,8 +1,5 @@
 package persistence.postgreSQL;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -114,19 +111,6 @@ public final class PostgresCveDao implements IDao<Cve> {
             throw new DataAccessException(e);
         }
     }
-
-//    public void dumpToFile(String filepath) throws DataAccessException {
-//        String sql = "SELECT details FROM nvd.cve";
-//        try(BufferedWriter fileWriter = new BufferedWriter(new FileWriter(filepath, true))) {
-//            PreparedStatement statement = conn.prepareStatement(sql);
-//            ResultSet rs = statement.executeQuery();
-//            while (rs.next()) {
-//                fileWriter.write(rs.getString("details"));
-//            }
-//        } catch (SQLException | IOException e) {
-//            throw new DataAccessException(e);
-//        }
-//    }
 
     private List<Cve> performFetch(String id) throws DataAccessException {
         try {
