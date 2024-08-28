@@ -18,7 +18,6 @@ import persistence.postgreSQL.PostgresCveDao;
 import persistence.postgreSQL.PostgresMetaDataDao;
 import service.*;
 
-import java.nio.file.Path;
 import java.sql.Connection;
 
 public class PiqueDataFactory {
@@ -50,7 +49,7 @@ public class PiqueDataFactory {
         this.dbContext = credentialService.getDbContext();
 
         if (dbContext.equals(Constants.DB_CONTEXT_PERSISTENT)) {
-            this.pgDataSource = new PostgresConnectionManager(new CredentialService());
+            this.pgDataSource = new PostgresConnectionManager(credentialService);
         } else if (dbContext.equals(Constants.DB_CONTEXT_LOCAL)) {
             this.mongoDataSource = new MongoConnectionManager();
         }

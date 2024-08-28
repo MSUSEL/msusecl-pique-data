@@ -87,15 +87,28 @@ public class PiqueData {
         return ghsaApiService.handleGetEntity(ghsaId);
     }
 
+    /**
+     * Calls GitHub's Security Advisory database and returns a formatted List of CWE names as Strings.
+     *
+     * @param ghsaId
+     * @return
+     * @throws ApiCallException
+     */
     public List<String> getCweIdsFromGhsa(String ghsaId) throws ApiCallException {
         return ghsaApiService.handleGetCweIdsFromGhsa(ghsaId);
     }
 
+    /**
+     * Gets CVSS Metrics for a given CVE. The CVSS Metrics are returned as a java map. The key is
+     * the CVE id, and the value is a Metrics object. Each Metrics Object contains Lists of Strings
+     * that allow for different CVSS formats. You'll need to check that each list is not empty and
+     * use any contained values accordingly.
+     *
+     * @param cveIds
+     * @return
+     * @throws DataAccessException
+     */
     public Map<String, Metrics> getCvssMetrics(List<String> cveIds) throws DataAccessException {
         return mirrorService.handleGetCvssMetrics(cveIds);
     }
-
-//    public String dumpNvdToJson() throws DataAccessException {
-//        return mirrorService.handleDumpNvdToJson();
-//    }
 }

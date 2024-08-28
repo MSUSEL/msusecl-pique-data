@@ -27,38 +27,49 @@ import static org.junit.Assert.assertEquals;
 
 // TODO mock database to test methods
 public class NvdMirrorIntegrationTests {
-    private final PiqueDataFactory piqueDataFactory = new PiqueDataFactory();
-    private final PiqueData piqueData = piqueDataFactory.getPiqueData();
-    private final NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
 
     @Test
     public void testBuildLocalNvdMirror() throws DataAccessException, ApiCallException {
+        PiqueDataFactory piqueDataFactory = new PiqueDataFactory();
+        NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
         nvdMirror.buildNvdMirror();
     }
 
     @Test
     public void testBuildPersistentNvdMirror() throws DataAccessException, ApiCallException {
+        PiqueDataFactory piqueDataFactory = new PiqueDataFactory();
+        NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
         nvdMirror.buildNvdMirror();
     }
 
     @Test
     public void testUpdateLocalNvdMirror() throws DataAccessException, ApiCallException {
+        PiqueDataFactory piqueDataFactory = new PiqueDataFactory();
+        NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
         nvdMirror.updateNvdMirror();
     }
 
     @Test
     public void testUpdatePersistent() throws DataAccessException, ApiCallException {
+        PiqueDataFactory piqueDataFactory = new PiqueDataFactory();
+        NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
         nvdMirror.updateNvdMirror();
     }
 
     @Test
     public void testGetLocalMetaData() throws DataAccessException {
+        PiqueDataFactory piqueDataFactory = new PiqueDataFactory();
+        NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
         NvdMirrorMetaData metaData = nvdMirror.getMetaData();
     }
 
     @Test
     public void testGetPersistentMetaData() throws DataAccessException {
+        PiqueDataFactory piqueDataFactory = new PiqueDataFactory();
+        NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
+
         NvdMirrorMetaData metaData = nvdMirror.getMetaData();
+
         System.out.println(metaData.getId());
         System.out.println(metaData.getTotalResults());
         System.out.println(metaData.getFormat());
@@ -69,6 +80,10 @@ public class NvdMirrorIntegrationTests {
     @Test
     public void testLocalInsertSingleCve() throws DataAccessException {
         // TODO replace this with mocked Cve object
+        PiqueDataFactory piqueDataFactory = new PiqueDataFactory();
+        PiqueData piqueData = piqueDataFactory.getPiqueData();
+        NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
+
         Cve cve = piqueData.getCve(TestConstants.CVE_A);
         nvdMirror.insertSingleCve(cve);
     }
@@ -76,12 +91,19 @@ public class NvdMirrorIntegrationTests {
     @Test
     public void testPersistentInsertSingleCve() throws DataAccessException {
         // TODO replace this with mocked Cve object
+        PiqueDataFactory piqueDataFactory = new PiqueDataFactory();
+        PiqueData piqueData = piqueDataFactory.getPiqueData();
+        NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
+
         Cve cve = piqueData.getCve(TestConstants.CVE_A);
         nvdMirror.insertSingleCve(cve);
     }
 
     @Test
     public void testGetCveFromMirror() throws DataAccessException {
+        PiqueDataFactory piqueDataFactory = new PiqueDataFactory();
+        PiqueData piqueData = piqueDataFactory.getPiqueData();
+
         Cve cve = piqueData.getCve(TestConstants.CVE_A);
         System.out.println(cve.getId());
     }
@@ -98,17 +120,6 @@ public class NvdMirrorIntegrationTests {
         metaData.setFormat("NVD_CVE");
 
         dao.update(Collections.singletonList(metaData));
-    }
-
-//    @Test
-//    public void testDumpToFile() throws DataAccessException {
-//        nvdMirror.dumpNvdToFile("./out/nvd.json");
-//    }
-
-    @Test
-    public void testBuildMirrorFromJsonFile() throws DataAccessException {
-        nvdMirror.buildMirrorFromJsonFile(Paths.get("./out/nvd.json"));
-
     }
 
    @Test

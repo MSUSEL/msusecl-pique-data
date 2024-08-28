@@ -1,13 +1,11 @@
 package service;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import common.HelperFunctions;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Getter
@@ -44,12 +42,12 @@ public class CredentialService {
     private void processJsonFile(String filepath) {
         JsonObject creds = JsonParser.parseString(HelperFunctions.readJsonFile(Paths.get(filepath))).getAsJsonObject();
 
-        this.dbContext = creds.get("dbContext").toString();
-        this.driver= creds.get("driver").toString();
-        this.hostname = creds.get("hostname").toString();
-        this.port = creds.get("port").toString();
-        this.dbname = creds.get("dbname").toString();
-        this.username = creds.get("username").toString();
-        this.password = creds.get("password").toString();
+        this.dbContext = creds.get("dbContext").getAsString();
+        this.driver= creds.get("driver").getAsString();
+        this.hostname = creds.get("hostname").getAsString();
+        this.port = creds.get("port").getAsString();
+        this.dbname = creds.get("dbname").getAsString();
+        this.username = creds.get("username").getAsString();
+        this.password = creds.get("password").getAsString();
     }
 }
