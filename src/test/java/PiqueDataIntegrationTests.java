@@ -1,4 +1,3 @@
-import businessObjects.NvdRequest;
 import businessObjects.cve.*;
 import businessObjects.ghsa.SecurityAdvisory;
 import exceptions.ApiCallException;
@@ -59,14 +58,14 @@ public class PiqueDataIntegrationTests {
 
     @Test
     public void testGetLocalCwes() throws DataAccessException {
-       List<String> cwes = piqueData.getCweDescriptions(TestConstants.CVE_B);
+       List<String> cwes = piqueData.getCweName(TestConstants.CVE_B);
 
        assertEquals(cwes.get(0), TestConstants.CVE_B_CWE_ORACLE);
     }
 
     @Test
     public void testGetPersistentCwes() throws DataAccessException {
-        List<String> cwes = piqueData.getCweDescriptions(TestConstants.CVE_B);
+        List<String> cwes = piqueData.getCweName(TestConstants.CVE_B);
 
         assertEquals(cwes.get(0), TestConstants.CVE_B_CWE_ORACLE);
     }
