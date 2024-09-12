@@ -113,7 +113,7 @@ public class NvdMirrorIntegrationTests {
         IDataSource<Connection> dataSource = new PostgresConnectionManager(new CredentialService());
         IDao<NvdMirrorMetaData> dao = new PostgresMetaDataDao(dataSource);
         NvdMirrorMetaData metaData = new NvdMirrorMetaData();
-        metaData.setTimestamp("2024-07-07T23:26:08.260");
+        metaData.setTimestamp("2024-09-07T23:26:08.260");
         metaData.setId("1");
         metaData.setVersion("2.0");
         metaData.setTotalResults("255980");
@@ -131,4 +131,12 @@ public class NvdMirrorIntegrationTests {
         Cve cve = piqueDataWithCreds.getCve(TestConstants.CVE_A);
         assertEquals(TestConstants.CVE_A, cve.getId());
    }
+
+//   @Test
+//   public void testPersistMetadata() {
+//        IDataSource<Connection> dataSource = new PostgresConnectionManager(new CredentialService());
+//        IDao<NvdMirrorMetaData> metadataDao = new PostgresMetaDataDao(dataSource);
+//
+//        metadataDao.update();
+//   }
 }

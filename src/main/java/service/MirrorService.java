@@ -38,7 +38,7 @@ public final class MirrorService implements INvdMirrorService{
 
     @Override
     public NvdMirrorMetaData handleGetCurrentMetaData() throws DataAccessException {
-        return metadataDao.fetch(Collections.singletonList("1")).get(0);
+        return metadataDao.fetch(Collections.singletonList("3")).get(0);
     }
 
     @Override

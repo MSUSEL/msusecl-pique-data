@@ -21,11 +21,14 @@ public final class PostgresMetaDataDao implements IDao<NvdMirrorMetaData> {
     @Override
     public void update(List<NvdMirrorMetaData> metaData) throws DataAccessException {
         try {
-            String sql = String.format("UPDATE nvd.metadata " +
-                            "SET total_results = '%s', " +
-                            "format = '%s', " +
-                            "api_version = '%s', " +
-                            "last_timestamp = '%s'::text;",
+            String sql = String.format("INSERT INTO nvd.metadata (total_results, format, api_version, last_timestamp) " +
+                            "VALUES ('%s', '%s', '%s', '%s') " +
+                            "ON CONFLICT (id) " +
+                            "DO UPDATE SET " +
+                            "total_results = EXCLUDED.total_results, " +
+                            "format = EXCLUDED.format, " +
+                            "api_version = EXCLUDED.api_version, " +
+                            "last_timestamp = EXCLUDED.last_timestamp;",
                     metaData.get(0).getTotalResults(),
                     metaData.get(0).getFormat(),
                     metaData.get(0).getVersion(),
@@ -46,20 +49,20 @@ public final class PostgresMetaDataDao implements IDao<NvdMirrorMetaData> {
 
     public List<NvdMirrorMetaData> fetch(List<String> metadataId) throws DataAccessException {
         try {
-            String sql = "SELECT * FROM nvd.metadata WHERE id LIKE ?;";
+            String sql = "SELECT * FROM nvd.metadata WHERE id = ?;";
             PreparedStatement statement = conn.prepareStatement(sql);
-            statement.setString(1, metadataId.get(0));
+            statement.setInt(1, Integer.parseInt(metadataId.get(0)));
             ResultSet rs = statement.executeQuery();
             NvdMirrorMetaData metaData = new NvdMirrorMetaData();
 
             if (rs.next()) {
-                String id = rs.getString("id");
+                int id = rs.getInt("id");
                 String totalResults = rs.getString("total_results");
                 String format = rs.getString("format");
                 String version = rs.getString("api_version");
                 String timestamp = rs.getString("last_timestamp");
 
-                metaData.setId(id);
+                metaData.setId(Integer.toString(id));
                 metaData.setTotalResults(totalResults);
                 metaData.setFormat(format);
                 metaData.setVersion(version);
@@ -74,7 +77,20 @@ public final class PostgresMetaDataDao implements IDao<NvdMirrorMetaData> {
     }
 
     @Override
-    public void insert(List<NvdMirrorMetaData> t) throws DataAccessException {
-        throw new NotImplementedException(Constants.METHOD_NOT_IMPLEMENTED_MESSAGE);
+    public void insert(List<NvdMirrorMetaData> metaData) throws DataAccessException {
+        try {
+            String sql = String.format("INSERT INTO nvd.metadata (" +
+                            "total_results, format, api_version, last_timestamp) " +
+                            "VALUES ('%s', '%s', '%s', '%s') ",
+                    metaData.get(0).getTotalResults(),
+                    metaData.get(0).getFormat(),
+                    metaData.get(0).getVersion(),
+                    metaData.get(0).getTimestamp());
+
+            PreparedStatement statement = conn.prepareStatement(sql);
+            statement.execute();
+        } catch (SQLException e) {
+            throw new DataAccessException(e);
+        }
     }
 }

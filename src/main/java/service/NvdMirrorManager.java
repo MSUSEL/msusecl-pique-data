@@ -74,6 +74,10 @@ public class NvdMirrorManager {
         persistCveDetails(response);
     }
 
+    public void handleBuildPostgresDB() {
+
+    }
+
 //    /**
 //     * Handles building a full or partial NVD mirror from a json file.
 //     * The file must be structured in exactly the same format as a CveResponse
@@ -108,8 +112,8 @@ public class NvdMirrorManager {
         cveDao.insert(cveResponseProcessor.extractAllCves(response));
     }
 
-    private void persistMetadata(CveEntity response) throws DataAccessException {
-        metadataDao.update(Collections.singletonList(cveResponseProcessor.formatNvdMetaData(response)));
+    public void persistMetadata(CveEntity response) throws DataAccessException {
+        metadataDao.insert(Collections.singletonList(cveResponseProcessor.formatNvdMetaData(response)));
     }
 
     private void handleSleep(int startIndex, int cveCount) {

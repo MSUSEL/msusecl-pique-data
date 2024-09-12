@@ -9,9 +9,9 @@ import java.sql.Statement;
 public final class PgTableOperationsDao {
     private final Connection conn;
 
-    private final String dropCveData = "DROP TABLE IF EXISTS \"nvd\".\"cve\";\n"; //+
-//            "DROP SEQUENCE IF EXISTS cve_id_seq CASCADE;\n" +
-//            "CREATE SEQUENCE cve_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1;\n";
+    private final String dropCveData = "DROP TABLE IF EXISTS \"nvd\".\"cve\";\n" +
+            "DROP SEQUENCE IF EXISTS cve_id_seq CASCADE;\n" +
+            "CREATE SEQUENCE cve_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1;\n";
 
     private final String createCveTable = "CREATE TABLE IF NOT EXISTS \"nvd\".\"cve\" ( " +
             "\"id\" integer DEFAULT nextval('cve_id_seq') NOT NULL, " +
