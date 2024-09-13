@@ -14,12 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import persistence.IDao;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
-import java.util.stream.Stream;
 
 public class NvdMirrorManager {
     private final CveResponseProcessor cveResponseProcessor;
@@ -109,11 +105,11 @@ public class NvdMirrorManager {
     }
 
     private void persistCveDetails(CveEntity response) throws DataAccessException {
-        cveDao.insert(cveResponseProcessor.extractAllCves(response));
+        cveDao.upsert(cveResponseProcessor.extractAllCves(response));
     }
 
     public void persistMetadata(CveEntity response) throws DataAccessException {
-        metadataDao.insert(Collections.singletonList(cveResponseProcessor.formatNvdMetaData(response)));
+        metadataDao.upsert(Collections.singletonList(cveResponseProcessor.formatNvdMetaData(response)));
     }
 
     private void handleSleep(int startIndex, int cveCount) {

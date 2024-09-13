@@ -5,10 +5,8 @@ import businessObjects.cve.NvdMirrorMetaData;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
 import service.INvdMirrorService;
-import service.MirrorService;
 import service.NvdMirrorManager;
 
-import java.nio.file.Path;
 import java.time.Instant;
 
 /**

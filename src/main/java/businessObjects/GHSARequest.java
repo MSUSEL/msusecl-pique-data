@@ -2,14 +2,9 @@ package businessObjects;
 
 import businessObjects.baseClasses.BaseRequest;
 import businessObjects.ghsa.SecurityAdvisory;
-import com.google.gson.Gson;
-import common.Constants;
 import exceptions.ApiCallException;
 import handlers.IJsonMarshaller;
-import handlers.JsonMarshallerFactory;
 import handlers.JsonResponseHandler;
-
-import handlers.SecurityAdvisoryMarshaller;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -25,6 +20,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+
+import static common.Constants.*;
 
 public final class GHSARequest extends BaseRequest implements IRequest {
     private static final Logger LOGGER = LoggerFactory.getLogger(GHSARequest.class);
@@ -51,7 +48,7 @@ public final class GHSARequest extends BaseRequest implements IRequest {
         try {
             return new URIBuilder(baseUri).build();
         } catch (URISyntaxException e) {
-            LOGGER.error(Constants.URI_BUILD_FAILURE_MESSAGE, e);
+            LOGGER.error(URI_BUILD_FAILURE_MESSAGE, e);
             throw new RuntimeException(e);
         }
     }
@@ -74,8 +71,8 @@ public final class GHSARequest extends BaseRequest implements IRequest {
                     marshaller.unmarshalJson(handler.handleResponse(response)),
                     status);
         } else {
-            LOGGER.info(Constants.RESPONSE_STATUS_MESSAGE, status);
-            throw new IOException(Constants.REQUEST_EXECUTION_FAILURE_MESSAGE + response.getStatusLine());
+            LOGGER.info(RESPONSE_STATUS_MESSAGE, status);
+            throw new IOException(REQUEST_EXECUTION_FAILURE_MESSAGE + response.getStatusLine());
         }
     }
 

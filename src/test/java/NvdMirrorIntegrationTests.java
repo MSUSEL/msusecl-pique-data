@@ -1,6 +1,5 @@
 import businessObjects.cve.Cve;
 import businessObjects.cve.NvdMirrorMetaData;
-import common.Constants;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
 import org.junit.Test;
@@ -13,7 +12,6 @@ import presentation.PiqueData;
 import presentation.PiqueDataFactory;
 import service.CredentialService;
 
-import java.nio.file.Paths;
 import java.sql.Connection;
 import java.util.Collections;
 
@@ -70,7 +68,6 @@ public class NvdMirrorIntegrationTests {
 
         NvdMirrorMetaData metaData = nvdMirror.getMetaData();
 
-        System.out.println(metaData.getId());
         System.out.println(metaData.getTotalResults());
         System.out.println(metaData.getFormat());
         System.out.println(metaData.getVersion());
@@ -114,7 +111,6 @@ public class NvdMirrorIntegrationTests {
         IDao<NvdMirrorMetaData> dao = new PostgresMetaDataDao(dataSource);
         NvdMirrorMetaData metaData = new NvdMirrorMetaData();
         metaData.setTimestamp("2024-09-07T23:26:08.260");
-        metaData.setId("1");
         metaData.setVersion("2.0");
         metaData.setTotalResults("255980");
         metaData.setFormat("NVD_CVE");

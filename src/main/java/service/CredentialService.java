@@ -11,7 +11,6 @@ import java.nio.file.Paths;
 @Getter
 @Setter
 public class CredentialService {
-    private String dbContext;
     private String driver;
     private String hostname;
     private String port;
@@ -20,7 +19,6 @@ public class CredentialService {
     private String password;
 
     public CredentialService() {
-        this.dbContext = System.getenv("DB_CONTEXT");
         this.driver = System.getenv("PG_DRIVER");
         this.hostname = System.getenv("PG_HOSTNAME");
         this.port = System.getenv("PG_PORT");
@@ -42,7 +40,6 @@ public class CredentialService {
     private void processJsonFile(String filepath) {
         JsonObject creds = JsonParser.parseString(HelperFunctions.readJsonFile(Paths.get(filepath))).getAsJsonObject();
 
-        this.dbContext = creds.get("dbContext").getAsString();
         this.driver= creds.get("driver").getAsString();
         this.hostname = creds.get("hostname").getAsString();
         this.port = creds.get("port").getAsString();

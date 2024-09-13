@@ -43,7 +43,7 @@ public final class MirrorService implements INvdMirrorService{
 
     @Override
     public void handleInsertSingleCve(Cve cve) throws DataAccessException {
-        cveDao.insert(Collections.singletonList(cve));
+        cveDao.upsert(Collections.singletonList(cve));
     }
 
     @Override

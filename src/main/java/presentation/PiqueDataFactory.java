@@ -4,15 +4,10 @@ import businessObjects.NvdRequestBuilder;
 import businessObjects.cve.Cve;
 import businessObjects.cve.CveEntity;
 import businessObjects.ghsa.SecurityAdvisory;
-import com.mongodb.client.MongoClient;
-import common.Constants;
 import handlers.IJsonMarshaller;
 import handlers.JsonMarshallerFactory;
 import handlers.JsonResponseHandler;
 import persistence.IDataSource;
-import persistence.mongo.MongoConnectionManager;
-import persistence.mongo.MongoCveDao;
-import persistence.mongo.MongoMetaDataDao;
 import persistence.postgreSQL.PostgresConnectionManager;
 import persistence.postgreSQL.PostgresCveDao;
 import persistence.postgreSQL.PostgresMetaDataDao;
@@ -29,64 +24,27 @@ public class PiqueDataFactory {
     private final NvdApiService nvdApiService = new NvdApiService(jsonResponseHandler, cveEntityMarshaller);
     private final GhsaApiService ghsaApiService = new GhsaApiService(new GhsaResponseProcessor(), securityAdvisoryMarshaller);
     private final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
-    private final String dbContext;
-    private IDataSource<Connection> pgDataSource;
-    private IDataSource<MongoClient> mongoDataSource;
+    private final IDataSource<Connection> pgDataSource;
 
     public PiqueDataFactory() {
-        CredentialService credentialService = new CredentialService();
-        this.dbContext = credentialService.getDbContext();
-
-        if (dbContext.equals(Constants.DB_CONTEXT_PERSISTENT)) {
-            this.pgDataSource = new PostgresConnectionManager(new CredentialService());
-        } else if (dbContext.equals(Constants.DB_CONTEXT_LOCAL)) {
-            this.mongoDataSource = new MongoConnectionManager();
-        }
+        this.pgDataSource = new PostgresConnectionManager(new CredentialService());
     }
 
     public PiqueDataFactory(String credentialsFilePath){
         CredentialService credentialService = new CredentialService(credentialsFilePath);
-        this.dbContext = credentialService.getDbContext();
-
-        if (dbContext.equals(Constants.DB_CONTEXT_PERSISTENT)) {
-            this.pgDataSource = new PostgresConnectionManager(credentialService);
-        } else if (dbContext.equals(Constants.DB_CONTEXT_LOCAL)) {
-            this.mongoDataSource = new MongoConnectionManager();
-        }
+        this.pgDataSource = new PostgresConnectionManager(credentialService);
     }
 
     public PiqueData getPiqueData() {
-        PiqueData piqueData;
-        if (dbContext.equals(Constants.DB_CONTEXT_PERSISTENT)) {
-            piqueData =  new PiqueData(
-                    nvdApiService,
-                    ghsaApiService,
-                    instantiatePgMirrorService(),
-                    cveResponseProcessor);
-        } else if (dbContext.equals(Constants.DB_CONTEXT_LOCAL)) {
-            piqueData = new PiqueData(
-                    nvdApiService,
-                    ghsaApiService,
-                    instantiateMongoMirrorService(),
-                    cveResponseProcessor);
-        } else {
-            throw new IllegalArgumentException(Constants.DB_CONTEXT_ENV_VAR_ERROR_MESSAGE);
-        }
-
-        return piqueData;
+        return new PiqueData(
+                nvdApiService,
+                ghsaApiService,
+                instantiatePgMirrorService(),
+                cveResponseProcessor);
     }
 
     public NvdMirror getNvdMirror() {
-        NvdMirror nvdMirror;
-        if (dbContext.equals(Constants.DB_CONTEXT_PERSISTENT)) {
-            nvdMirror = new NvdMirror(instantiatePgMirrorService(), instantiatePgNvdMirrorManager());
-        } else if (dbContext.equals(Constants.DB_CONTEXT_LOCAL)) {
-            nvdMirror = new NvdMirror(instantiateMongoMirrorService(), instantiateMongoNvdMirrorManager());
-        } else {
-            throw new IllegalArgumentException(Constants.DB_CONTEXT_ENV_VAR_ERROR_MESSAGE);
-        }
-
-        return nvdMirror;
+        return new NvdMirror(instantiatePgMirrorService(), instantiatePgNvdMirrorManager());
     }
 
     public NvdRequestBuilder getNvdRequestBuilder() {
@@ -102,26 +60,10 @@ public class PiqueDataFactory {
                 new PostgresMetaDataDao(pgDataSource));
     }
 
-    private NvdMirrorManager instantiateMongoNvdMirrorManager() {
-        return new NvdMirrorManager(
-                cveResponseProcessor,
-                jsonResponseHandler,
-                cveEntityMarshaller,
-                new MongoCveDao(mongoDataSource, cveMarshaller),
-                new MongoMetaDataDao(mongoDataSource));
-    }
-
     private MirrorService instantiatePgMirrorService() {
         return new MirrorService(
                 cveResponseProcessor,
                 new PostgresCveDao(pgDataSource, cveMarshaller),
                 new PostgresMetaDataDao(pgDataSource));
-    }
-
-    private MirrorService instantiateMongoMirrorService() {
-        return new MirrorService(
-                cveResponseProcessor,
-                new MongoCveDao(mongoDataSource, cveMarshaller),
-                new MongoMetaDataDao(mongoDataSource));
     }
 }

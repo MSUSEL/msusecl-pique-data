@@ -5,9 +5,10 @@ import businessObjects.cve.CveEntity;
 import businessObjects.ghsa.SecurityAdvisory;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import common.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static common.Constants.*;
 
 public class JsonMarshallerFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonMarshallerFactory.class);
@@ -19,7 +20,7 @@ public class JsonMarshallerFactory {
                 try {
                     return new Gson().fromJson(json, CveEntity.class);
                 } catch (JsonSyntaxException e) {
-                    LOGGER.error(Constants.MALFORMED_JSON_SYNTAX_MESSAGE, e);
+                    LOGGER.error(MALFORMED_JSON_SYNTAX_MESSAGE, e);
                     throw new RuntimeException(e);
                 }
             }
@@ -38,7 +39,7 @@ public class JsonMarshallerFactory {
                 try {
                     return new Gson().fromJson(json, Cve.class);
                 } catch (JsonSyntaxException e) {
-                    LOGGER.error(Constants.MALFORMED_JSON_SYNTAX_MESSAGE, e);
+                    LOGGER.error(MALFORMED_JSON_SYNTAX_MESSAGE, e);
                     throw new RuntimeException(e);
                 }
             }

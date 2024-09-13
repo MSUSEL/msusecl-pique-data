@@ -1,15 +1,15 @@
 package persistence.postgreSQL;
 
-import common.Constants;
+import businessObjects.cve.NvdMirrorMetaData;
 import exceptions.DataAccessException;
-import org.apache.commons.lang3.NotImplementedException;
 import persistence.IDao;
 import persistence.IDataSource;
-import businessObjects.cve.NvdMirrorMetaData;
 
 import java.sql.*;
 import java.util.Collections;
 import java.util.List;
+
+import static persistence.postgreSQL.StoredProcedureCalls.INSERT_METADATA;
 
 public final class PostgresMetaDataDao implements IDao<NvdMirrorMetaData> {
     private final Connection conn;
@@ -18,34 +18,29 @@ public final class PostgresMetaDataDao implements IDao<NvdMirrorMetaData> {
         this.conn = dataSource.getConnection();
     }
 
-    @Override
-    public void update(List<NvdMirrorMetaData> metaData) throws DataAccessException {
-        try {
-            String sql = String.format("INSERT INTO nvd.metadata (total_results, format, api_version, last_timestamp) " +
-                            "VALUES ('%s', '%s', '%s', '%s') " +
-                            "ON CONFLICT (id) " +
-                            "DO UPDATE SET " +
-                            "total_results = EXCLUDED.total_results, " +
-                            "format = EXCLUDED.format, " +
-                            "api_version = EXCLUDED.api_version, " +
-                            "last_timestamp = EXCLUDED.last_timestamp;",
-                    metaData.get(0).getTotalResults(),
-                    metaData.get(0).getFormat(),
-                    metaData.get(0).getVersion(),
-                    metaData.get(0).getTimestamp());
-
-            PreparedStatement statement = conn.prepareStatement(sql);
-            statement.execute();
-        }
-        catch (SQLException e) {
-            throw new DataAccessException(e);
-        }
-    }
-
-    @Override
-    public void delete(List<String> t) throws DataAccessException {
-        throw new NotImplementedException(Constants.METHOD_NOT_IMPLEMENTED_MESSAGE);
-    }
+//    @Override
+//    public void update(List<NvdMirrorMetaData> metaData) throws DataAccessException {
+//        try {
+//            String sql = String.format("INSERT INTO nvd.metadata (total_results, format, api_version, last_timestamp) " +
+//                            "VALUES ('%s', '%s', '%s', '%s') " +
+//                            "ON CONFLICT (id) " +
+//                            "DO UPDATE SET " +
+//                            "total_results = EXCLUDED.total_results, " +
+//                            "format = EXCLUDED.format, " +
+//                            "api_version = EXCLUDED.api_version, " +
+//                            "last_timestamp = EXCLUDED.last_timestamp;",
+//                    metaData.get(0).getTotalResults(),
+//                    metaData.get(0).getFormat(),
+//                    metaData.get(0).getVersion(),
+//                    metaData.get(0).getTimestamp());
+//
+//            PreparedStatement statement = conn.prepareStatement(sql);
+//            statement.execute();
+//        }
+//        catch (SQLException e) {
+//            throw new DataAccessException(e);
+//        }
+//    }
 
     public List<NvdMirrorMetaData> fetch(List<String> metadataId) throws DataAccessException {
         try {
@@ -56,13 +51,11 @@ public final class PostgresMetaDataDao implements IDao<NvdMirrorMetaData> {
             NvdMirrorMetaData metaData = new NvdMirrorMetaData();
 
             if (rs.next()) {
-                int id = rs.getInt("id");
                 String totalResults = rs.getString("total_results");
                 String format = rs.getString("format");
                 String version = rs.getString("api_version");
                 String timestamp = rs.getString("last_timestamp");
 
-                metaData.setId(Integer.toString(id));
                 metaData.setTotalResults(totalResults);
                 metaData.setFormat(format);
                 metaData.setVersion(version);
@@ -76,21 +69,45 @@ public final class PostgresMetaDataDao implements IDao<NvdMirrorMetaData> {
         }
     }
 
-    @Override
-    public void insert(List<NvdMirrorMetaData> metaData) throws DataAccessException {
-        try {
-            String sql = String.format("INSERT INTO nvd.metadata (" +
-                            "total_results, format, api_version, last_timestamp) " +
-                            "VALUES ('%s', '%s', '%s', '%s') ",
-                    metaData.get(0).getTotalResults(),
-                    metaData.get(0).getFormat(),
-                    metaData.get(0).getVersion(),
-                    metaData.get(0).getTimestamp());
+//    @Override
+//    public void upsert(List<NvdMirrorMetaData> metaData) throws DataAccessException {
+//        try {
+//            String sql = String.format("INSERT INTO nvd.metadata (" +
+//                            "total_results, format, api_version, last_timestamp) " +
+//                            "VALUES ('%s', '%s', '%s', '%s') ",
+//                    metaData.get(0).getTotalResults(),
+//                    metaData.get(0).getFormat(),
+//                    metaData.get(0).getVersion(),
+//                    metaData.get(0).getTimestamp());
+//
+//            PreparedStatement statement = conn.prepareStatement(sql);
+//            statement.execute();
+//        } catch (SQLException e) {
+//            throw new DataAccessException(e);
+//        }
+//    }
 
-            PreparedStatement statement = conn.prepareStatement(sql);
+    @Override
+    public void upsert(List<NvdMirrorMetaData> metadata) throws DataAccessException {
+        insertMetadata(metadata.get(0));
+    }
+
+    @Override
+    public void delete(List<String> ids) throws DataAccessException {
+
+    }
+
+
+    private void insertMetadata(NvdMirrorMetaData metadata) {
+        try {
+            CallableStatement statement = conn.prepareCall(INSERT_METADATA);
+            statement.setInt(1, Integer.parseInt(metadata.getTotalResults()));
+            statement.setString(2, metadata.getFormat());
+            statement.setString(3, metadata.getVersion());
+            statement.setString(4, metadata.getTimestamp());
             statement.execute();
         } catch (SQLException e) {
-            throw new DataAccessException(e);
+            throw new RuntimeException(e);
         }
     }
 }
