@@ -5,7 +5,7 @@ import lombok.Getter;
 import java.sql.SQLException;
 
 @Getter
-public class ApiCallException extends Exception {
+public class ApiCallException extends RuntimeException{
     private int errorCode = 0;
 
     public ApiCallException(int errorCode) {

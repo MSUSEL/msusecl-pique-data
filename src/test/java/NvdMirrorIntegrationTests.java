@@ -1,21 +1,30 @@
 import businessObjects.cve.Cve;
+import businessObjects.cve.CveEntity;
 import businessObjects.cve.NvdMirrorMetaData;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
+import handlers.IJsonMarshaller;
+import handlers.JsonMarshallerFactory;
+import handlers.JsonResponseHandler;
+import org.apache.http.client.ResponseHandler;
 import org.junit.Test;
 import persistence.IDao;
 import persistence.IDataSource;
+import persistence.postgreSQL.Migration;
 import persistence.postgreSQL.PostgresConnectionManager;
 import persistence.postgreSQL.PostgresMetaDataDao;
 import presentation.NvdMirror;
 import presentation.PiqueData;
 import presentation.PiqueDataFactory;
 import service.CredentialService;
+import service.CveResponseProcessor;
+import service.NvdMirrorManager;
 
 import java.sql.Connection;
 import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
+import static common.Constants.*;
 
 /**
  * IMPORTANT!
@@ -115,13 +124,12 @@ public class NvdMirrorIntegrationTests {
         metaData.setTotalResults("255980");
         metaData.setFormat("NVD_CVE");
 
-        dao.update(Collections.singletonList(metaData));
+        dao.upsert(Collections.singletonList(metaData));
     }
 
    @Test
    public void testPiqueDataFactoryWithConstructorParams() throws DataAccessException {
-        String file = "./src/main/resources/credentials.json";
-        PiqueDataFactory piqueDataFactoryWithCreds = new PiqueDataFactory(file);
+        PiqueDataFactory piqueDataFactoryWithCreds = new PiqueDataFactory(CREDENTIALS_FILE_PATH);
         PiqueData piqueDataWithCreds = piqueDataFactoryWithCreds.getPiqueData();
 
         Cve cve = piqueDataWithCreds.getCve(TestConstants.CVE_A);
@@ -135,4 +143,18 @@ public class NvdMirrorIntegrationTests {
 //
 //        metadataDao.update();
 //   }
+
+    @Test
+    public void testMigration() {
+        IDataSource<Connection> dataSource = new PostgresConnectionManager(
+                        new CredentialService(CREDENTIALS_FILE_PATH));
+
+        NvdMirrorManager manager = new NvdMirrorManager(
+                new CveResponseProcessor(),
+                new JsonResponseHandler(),
+                JsonMarshallerFactory.get
+
+        Migration migration = new Migration();
+
+    }
 }

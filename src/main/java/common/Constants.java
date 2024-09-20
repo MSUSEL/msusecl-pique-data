@@ -16,4 +16,7 @@ public final class Constants {
     public static final String REQUEST_EXECUTION_FAILURE_MESSAGE = "Failed to execute request: ";
     public static final String MALFORMED_JSON_SYNTAX_MESSAGE = "Incorrect JSON syntax - uable to parse to object";
     public static final String NVD_API_KEY = System.getenv("NVD_KEY");
+    public static final String CREDENTIALS_FILE_PATH = "./src/main/resources/credentials.json";
+    public static final String MIGRATION_SCRIPT_PATH = "./src/main/resources/sql/BuildPostgres.sql";
+    public static final String PG_STORED_PROCEDURES_PATH = "./src/main/resources/sql/StoredProcedures.sql";
 }

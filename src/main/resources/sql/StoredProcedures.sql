@@ -28,19 +28,6 @@ BEGIN
 END;
 $$;
 
--- Performs bulk inserts of cves
---CREATE OR REPLACE PROCEDURE insert_cve_batch(p_cve_id VARCHAR[], p_details JSONB[])
---LANGUAGE plpgsql
---AS $$
---BEGIN
---    EXECUTE format(
---    'INSERT INTO nvd.cve (cve_id, details) VALUES %s',
---    array_to_string(array_agg(row_to_json((cve_id, details))
---    ::jsonb FROM unnest(p_cve_ids, p_details) AS row), ', ')
---    );
---END;
---$$;
-
 -- upserts cves in batch
 CREATE OR REPLACE PROCEDURE upsert_cve_batch(p_cve_ids TEXT[], p_details JSONB[])
 LANGUAGE plpgsql

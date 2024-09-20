@@ -30,7 +30,7 @@ public class PiqueDataFactory {
         this.pgDataSource = new PostgresConnectionManager(new CredentialService());
     }
 
-    public PiqueDataFactory(String credentialsFilePath){
+    public PiqueDataFactory(String credentialsFilePath) {
         CredentialService credentialService = new CredentialService(credentialsFilePath);
         this.pgDataSource = new PostgresConnectionManager(credentialService);
     }
