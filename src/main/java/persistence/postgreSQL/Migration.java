@@ -3,6 +3,7 @@ package persistence.postgreSQL;
 import businessObjects.cve.NvdMirrorMetaData;
 import exceptions.DataAccessException;
 import persistence.IDataSource;
+import service.INvdMirrorService;
 import service.MirrorService;
 import service.NvdMirrorManager;
 
@@ -17,9 +18,9 @@ import static common.Constants.*;
 public class Migration {
     Connection conn;
     NvdMirrorManager manager;
-    MirrorService mirrorService;
+    INvdMirrorService mirrorService;
 
-    public Migration(IDataSource<Connection> dataSource, NvdMirrorManager manager, MirrorService mirrorService) {
+    public Migration(IDataSource<Connection> dataSource, NvdMirrorManager manager, INvdMirrorService mirrorService) {
         this.conn = dataSource.getConnection();
         this.manager = manager;
         this.mirrorService = mirrorService;

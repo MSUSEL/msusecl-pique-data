@@ -6,19 +6,17 @@ import exceptions.DataAccessException;
 import handlers.IJsonMarshaller;
 import handlers.JsonMarshallerFactory;
 import handlers.JsonResponseHandler;
-import org.apache.http.client.ResponseHandler;
 import org.junit.Test;
 import persistence.IDao;
 import persistence.IDataSource;
 import persistence.postgreSQL.Migration;
 import persistence.postgreSQL.PostgresConnectionManager;
+import persistence.postgreSQL.PostgresCveDao;
 import persistence.postgreSQL.PostgresMetaDataDao;
 import presentation.NvdMirror;
 import presentation.PiqueData;
 import presentation.PiqueDataFactory;
-import service.CredentialService;
-import service.CveResponseProcessor;
-import service.NvdMirrorManager;
+import service.*;
 
 import java.sql.Connection;
 import java.util.Collections;
@@ -146,15 +144,36 @@ public class NvdMirrorIntegrationTests {
 
     @Test
     public void testMigration() {
+        JsonMarshallerFactory jsonMarshallerFactory = new JsonMarshallerFactory();
+        IJsonMarshaller<Cve> cveMarshaller = jsonMarshallerFactory.getCveMarshaller();
+        IJsonMarshaller<CveEntity> cveEntityMarshaller = jsonMarshallerFactory.getCveEntityMarshaller();
         IDataSource<Connection> dataSource = new PostgresConnectionManager(
                         new CredentialService(CREDENTIALS_FILE_PATH));
+        IDao<Cve> postgresCveDao = new PostgresCveDao(dataSource, cveMarshaller);
+        CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
+        IDao<NvdMirrorMetaData> postgresMetaDataDao = new PostgresMetaDataDao(dataSource);
+        INvdMirrorService mirrorService = new MirrorService(cveResponseProcessor, postgresCveDao, postgresMetaDataDao);
 
-        NvdMirrorManager manager = new NvdMirrorManager(
-                new CveResponseProcessor(),
-                new JsonResponseHandler(),
-                JsonMarshallerFactory.get
+        CredentialService credentialService = setInitCredentials();
 
-        Migration migration = new Migration();
+        Migration migration = new Migration(
+                dataSource,
+                new NvdMirrorManager(
+                        cveResponseProcessor,
+                        new JsonResponseHandler(),
+                        cveEntityMarshaller,
+                        postgresCveDao,
+                        postgresMetaDataDao),
+                mirrorService);
 
+        migration.migrate();
+
+    }
+
+    private CredentialService setInitCredentials() {
+        CredentialService credentialService = new CredentialService(CREDENTIALS_FILE_PATH);
+        credentialService.setDbname("postgres");
+
+        return credentialService;
     }
 }

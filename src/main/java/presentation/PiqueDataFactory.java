@@ -1,6 +1,5 @@
 package presentation;
 
-import businessObjects.NvdRequestBuilder;
 import businessObjects.cve.Cve;
 import businessObjects.cve.CveEntity;
 import businessObjects.ghsa.SecurityAdvisory;

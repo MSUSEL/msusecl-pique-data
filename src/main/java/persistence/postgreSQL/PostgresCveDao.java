@@ -134,60 +134,60 @@ public final class PostgresCveDao implements IDao<Cve> {
         }
     }
 
-//    private List<Cve> performBulkFetch(List<String> ids) throws DataAccessException {
-//        String base = "SELECT details FROM nvd.cve WHERE cve_id IN (";
-//        String sql = formatBulkFetchSQL(ids, base);
-//        try {
-//            PreparedStatement statement = conn.prepareStatement(sql);
-//            ResultSet rs = statement.executeQuery();
-//            List<Cve> result = new ArrayList<>();
-//            while (rs.next()) {
-//                result.add(cveDetailsMarshaller.unmarshalJson(rs.getString("details")));
-//            }
-//
-//            return result;
-//
-//        } catch (SQLException e) {
-//            throw new DataAccessException(e);
-//        }
-//    }
-//
-//    private List<Cve> performFetch(String id) throws DataAccessException {
-//        try {
-//            String sql = "SELECT details FROM nvd.cve WHERE cve_id = ?;";
-//            PreparedStatement statement = conn.prepareStatement(sql);
-//            statement.setString(1, id);
-//            ResultSet rs = statement.executeQuery();
-//
-//            if (rs.next()) {
-//                String result = rs.getString("details");
-//                return Collections.singletonList((Cve) cveDetailsMarshaller.unmarshalJson(result));
-//            } else {
-//                LOGGER.info(DB_QUERY_NO_RESULTS);
-//                throw new DataAccessException(DB_QUERY_NO_RESULTS);
-//            }
-//        } catch (SQLException e) {
-//            LOGGER.error(DB_QUERY_FAILED, e);
-//            throw new DataAccessException(DB_QUERY_FAILED, e);
-//        }
-//    }
+    private List<Cve> performBulkFetch(List<String> ids) throws DataAccessException {
+        String base = "SELECT details FROM nvd.cve WHERE cve_id IN (";
+        String sql = formatBulkFetchSQL(ids, base);
+        try {
+            PreparedStatement statement = conn.prepareStatement(sql);
+            ResultSet rs = statement.executeQuery();
+            List<Cve> result = new ArrayList<>();
+            while (rs.next()) {
+                result.add(cveDetailsMarshaller.unmarshalJson(rs.getString("details")));
+            }
 
-//    private String formatBulkFetchSQL(List<String> ids, String baseSQL) {
-//        StringBuilder idListBuilder = new StringBuilder();
-//
-//        for (int i = 0; i < ids.size(); i++) {
-//            idListBuilder.append("'").append(ids.get(i)).append("'");
-//            if (i < ids.size() - 1) {
-//                idListBuilder.append(", ");
-//            }
-//        }
-//        idListBuilder.append(");");
-//        String idList = idListBuilder.toString();
-//
-//        return baseSQL + idList;
-//    }
-//
-//    // FixMe
+            return result;
+
+        } catch (SQLException e) {
+            throw new DataAccessException(e);
+        }
+    }
+
+    private List<Cve> performFetch(String id) throws DataAccessException {
+        try {
+            String sql = "SELECT details FROM nvd.cve WHERE cve_id = ?;";
+            PreparedStatement statement = conn.prepareStatement(sql);
+            statement.setString(1, id);
+            ResultSet rs = statement.executeQuery();
+
+            if (rs.next()) {
+                String result = rs.getString("details");
+                return Collections.singletonList((Cve) cveDetailsMarshaller.unmarshalJson(result));
+            } else {
+                LOGGER.info(DB_QUERY_NO_RESULTS);
+                throw new DataAccessException(DB_QUERY_NO_RESULTS);
+            }
+        } catch (SQLException e) {
+            LOGGER.error(DB_QUERY_FAILED, e);
+            throw new DataAccessException(DB_QUERY_FAILED, e);
+        }
+    }
+
+    private String formatBulkFetchSQL(List<String> ids, String baseSQL) {
+        StringBuilder idListBuilder = new StringBuilder();
+
+        for (int i = 0; i < ids.size(); i++) {
+            idListBuilder.append("'").append(ids.get(i)).append("'");
+            if (i < ids.size() - 1) {
+                idListBuilder.append(", ");
+            }
+        }
+        idListBuilder.append(");");
+        String idList = idListBuilder.toString();
+
+        return baseSQL + idList;
+    }
+
+    // FixMe
 //    private void performBulkUpdate(List<Cve> cves) throws DataAccessException {
 //        for (Cve cve : cves) {
 //            performUpdate(cves.get(0));

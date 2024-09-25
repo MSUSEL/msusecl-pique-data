@@ -1,6 +1,6 @@
 package service;
 
-import businessObjects.NvdRequestBuilder;
+import presentation.NvdRequestBuilder;
 import businessObjects.cve.CveEntity;
 import businessObjects.cve.Cve;
 import businessObjects.cve.NvdMirrorMetaData;

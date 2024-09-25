@@ -1,5 +1,7 @@
-package businessObjects;
+package presentation;
 
+import businessObjects.HTTPMethod;
+import businessObjects.NvdRequest;
 import common.Constants;
 import persistence.HeaderBuilder;
 import common.NvdConstants;
