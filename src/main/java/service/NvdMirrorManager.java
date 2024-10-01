@@ -4,7 +4,6 @@ import presentation.NvdRequestBuilder;
 import businessObjects.cve.CveEntity;
 import businessObjects.cve.Cve;
 import businessObjects.cve.NvdMirrorMetaData;
-import common.Constants;
 import common.HelperFunctions;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
@@ -16,6 +15,8 @@ import persistence.IDao;
 
 import java.nio.file.Path;
 import java.util.Collections;
+
+import static common.Constants.*;
 
 public class NvdMirrorManager {
     private final CveResponseProcessor cveResponseProcessor;
@@ -38,12 +39,12 @@ public class NvdMirrorManager {
     }
 
     /**
-     * Gets CVEs in bulk from the NVD and stores them in the given database context.
+     * Gets CVEs in bulk from the NVD and stores them in the configured mirror
      */
     public void handleBuildMirror() throws DataAccessException, ApiCallException {
         int cveCount = 1;
 
-        for (int i = Constants.DEFAULT_START_INDEX; i < cveCount; i += Constants.NVD_MAX_PAGE_SIZE) {
+        for (int i = DEFAULT_START_INDEX; i < cveCount; i += NVD_MAX_PAGE_SIZE) {
             CveEntity response = new NvdRequestBuilder(jsonResponseHandler, cveEntityMarshaller)
                     .withFullMirrorDefaults(Integer.toString(i))
                     .build()
@@ -57,21 +58,17 @@ public class NvdMirrorManager {
     /**
      * Handles updating the SECL NVD Mirror
      * @param lastModStartDate Timestamp of previous call to NVD CVE API to update SECL mirror
-     * @param lastModEndDate Typically it is the current time - but provides the upper bound to the time window
+     * @param lastModEndDate Typically it is the current time - provides the upper bound to the time window
      *                       from which to pull updates
      */
     public void handleUpdateNvdMirror(String lastModStartDate, String lastModEndDate) throws DataAccessException, ApiCallException {
         CveEntity response = new NvdRequestBuilder(jsonResponseHandler, cveEntityMarshaller)
-                        .withApiKey(Constants.NVD_API_KEY)
+                        .withApiKey(NVD_API_KEY)
                         .withLastModStartEndDates(lastModStartDate, lastModEndDate)
                         .build()
                 .executeRequest().getEntity();
         persistMetadata(response);
         persistCveDetails(response);
-    }
-
-    public void handleBuildPostgresDB() {
-
     }
 
 //    /**
@@ -99,7 +96,7 @@ public class NvdMirrorManager {
 
     private void persistPaginatedData(CveEntity response, int loopIndex, int cveCount) throws DataAccessException {
         persistCveDetails(response);
-        if (loopIndex == cveCount - 1) {
+        if (loopIndex >= cveCount - NVD_MAX_PAGE_SIZE) {
             persistMetadata(response);
         }
     }
@@ -115,7 +112,7 @@ public class NvdMirrorManager {
     private void handleSleep(int startIndex, int cveCount) {
         try {
             if (startIndex != cveCount - 1) {
-                Thread.sleep(Constants.DEFAULT_NVD_REQUEST_SLEEP);
+                Thread.sleep(DEFAULT_NVD_REQUEST_SLEEP);
             }
         } catch (InterruptedException e) {
             LOGGER.error("Thread interrupted", e);

@@ -3,6 +3,7 @@ package persistence.postgreSQL;
 import businessObjects.cve.NvdMirrorMetaData;
 import exceptions.DataAccessException;
 import persistence.IDataSource;
+import service.CredentialService;
 import service.INvdMirrorService;
 import service.MirrorService;
 import service.NvdMirrorManager;
@@ -16,9 +17,10 @@ import java.time.Instant;
 import static common.Constants.*;
 
 public class Migration {
-    Connection conn;
-    NvdMirrorManager manager;
-    INvdMirrorService mirrorService;
+    private final Connection conn;
+    private final NvdMirrorManager manager;
+    private final INvdMirrorService mirrorService;
+
 
     public Migration(IDataSource<Connection> dataSource, NvdMirrorManager manager, INvdMirrorService mirrorService) {
         this.conn = dataSource.getConnection();
@@ -27,7 +29,6 @@ public class Migration {
     }
 
     public void migrate() {
-        // Build/Update Database infrastructure;
         executeScript(MIGRATION_SCRIPT_PATH, "sql");
         executeScript(PG_STORED_PROCEDURES_PATH, "plpgsql");
 
@@ -37,9 +38,9 @@ public class Migration {
 
     private void executeScript(String filepath, String scriptType) {
         String line;
-        String lineEnd = determineLineEnd(scriptType);
         StringBuilder query = new StringBuilder();
 
+        String lineEnd = determineLineEnd(scriptType);
 
         try (BufferedReader reader = new BufferedReader(new FileReader(filepath))) {
             while((line = reader.readLine()) != null) {
@@ -70,8 +71,8 @@ public class Migration {
         try {
             PreparedStatement statement = conn.prepareStatement(query);
             int rowsAffected = statement.executeUpdate();
-            System.out.printf("Query: %s%n", query);
-            System.out.printf("Rows Affected: %s\n%n", rowsAffected);
+            System.out.printf("Query: %s\n", query);
+            System.out.printf("Rows Affected: %s\n\n", rowsAffected);
         } catch (SQLException e) {
             throw new DataAccessException(e);
         }

@@ -9,7 +9,7 @@ import java.sql.*;
 import java.util.Collections;
 import java.util.List;
 
-import static persistence.postgreSQL.StoredProcedureCalls.INSERT_METADATA;
+import static persistence.postgreSQL.StoredProcedureCalls.UPSERT_METADATA;
 
 public final class PostgresMetaDataDao implements IDao<NvdMirrorMetaData> {
     private final Connection conn;
@@ -17,30 +17,6 @@ public final class PostgresMetaDataDao implements IDao<NvdMirrorMetaData> {
     public PostgresMetaDataDao(IDataSource<Connection> dataSource) {
         this.conn = dataSource.getConnection();
     }
-
-//    @Override
-//    public void update(List<NvdMirrorMetaData> metaData) throws DataAccessException {
-//        try {
-//            String sql = String.format("INSERT INTO nvd.metadata (total_results, format, api_version, last_timestamp) " +
-//                            "VALUES ('%s', '%s', '%s', '%s') " +
-//                            "ON CONFLICT (id) " +
-//                            "DO UPDATE SET " +
-//                            "total_results = EXCLUDED.total_results, " +
-//                            "format = EXCLUDED.format, " +
-//                            "api_version = EXCLUDED.api_version, " +
-//                            "last_timestamp = EXCLUDED.last_timestamp;",
-//                    metaData.get(0).getTotalResults(),
-//                    metaData.get(0).getFormat(),
-//                    metaData.get(0).getVersion(),
-//                    metaData.get(0).getTimestamp());
-//
-//            PreparedStatement statement = conn.prepareStatement(sql);
-//            statement.execute();
-//        }
-//        catch (SQLException e) {
-//            throw new DataAccessException(e);
-//        }
-//    }
 
     public List<NvdMirrorMetaData> fetch(List<String> metadataId) throws DataAccessException {
         try {
@@ -69,24 +45,6 @@ public final class PostgresMetaDataDao implements IDao<NvdMirrorMetaData> {
         }
     }
 
-//    @Override
-//    public void upsert(List<NvdMirrorMetaData> metaData) throws DataAccessException {
-//        try {
-//            String sql = String.format("INSERT INTO nvd.metadata (" +
-//                            "total_results, format, api_version, last_timestamp) " +
-//                            "VALUES ('%s', '%s', '%s', '%s') ",
-//                    metaData.get(0).getTotalResults(),
-//                    metaData.get(0).getFormat(),
-//                    metaData.get(0).getVersion(),
-//                    metaData.get(0).getTimestamp());
-//
-//            PreparedStatement statement = conn.prepareStatement(sql);
-//            statement.execute();
-//        } catch (SQLException e) {
-//            throw new DataAccessException(e);
-//        }
-//    }
-
     @Override
     public void upsert(List<NvdMirrorMetaData> metadata) throws DataAccessException {
         insertMetadata(metadata.get(0));
@@ -97,10 +55,9 @@ public final class PostgresMetaDataDao implements IDao<NvdMirrorMetaData> {
 
     }
 
-
     private void insertMetadata(NvdMirrorMetaData metadata) {
         try {
-            CallableStatement statement = conn.prepareCall(INSERT_METADATA);
+            CallableStatement statement = conn.prepareCall(UPSERT_METADATA);
             statement.setInt(1, Integer.parseInt(metadata.getTotalResults()));
             statement.setString(2, metadata.getFormat());
             statement.setString(3, metadata.getVersion());

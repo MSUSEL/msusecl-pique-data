@@ -29,7 +29,7 @@ public final class PostgresCveDao implements IDao<Cve> {
 
     private static class CveInsertParams {
         static String[] cveIds;
-        static String[] details;
+        static Object[] details;
     }
 
     @Override
@@ -78,61 +78,37 @@ public final class PostgresCveDao implements IDao<Cve> {
         }
     }
 
-//    private void performUpsert(List<Cve> cves) throws DataAccessException {
-//        String sql = "INSERT INTO nvd.cve (cve_id, details) VALUES (?, CAST(? AS jsonb));";
-//        try {
-//            PreparedStatement statement = conn.prepareStatement(sql);
-//            statement.setString(1, cves.get(0).getId());
-//            statement.setString(2, cveDetailsMarshaller.marshalJson(cves.get(0)));
-//            statement.executeUpdate();
-//        } catch (SQLException e) {
-//            throw new DataAccessException(DB_QUERY_FAILED, e);
-//        }
-//    }
-
-//    private void performBulkInsert(List<Cve> cves) throws DataAccessException {
-//        for (Cve cve : cves) {
-//            String sql = "INSERT INTO nvd.cve (cve_id, details) VALUES (?, CAST(? AS jsonb));";
-//            try {
-//                PreparedStatement statement = conn.prepareStatement(sql);
-//                statement.setString(1, cve.getId());
-//                statement.setString(2, cveDetailsMarshaller.marshalJson(cve));
-//                statement.executeUpdate();
-//            } catch(SQLException e) {
-//                throw new DataAccessException("Insert statement failed", e);
-//            }
-//        }
-//    }
-
     private void performBulkInsert(List<Cve> cves) throws DataAccessException {
         formatCveInsertParams(cves);
-        executePGBulkInsertCall(CveInsertParams.cveIds, CveInsertParams.details);
+        executePGBulkInsertCall();
     }
 
     private void formatCveInsertParams(List<Cve> cves) {
         int size = cves.size();
         String[] cve_ids = new String[size];
-        String[] details = new String[size];
+        String[] stringDetails = new String[size];
 
         for (int i = 0; i < cves.size(); i++) {
             cve_ids[i] = cves.get(i).getId();
-            details[i] = cveDetailsMarshaller.marshalJson(cves.get(i));
+            stringDetails[i] = cveDetailsMarshaller.marshalJson(cves.get(i));
         }
+        Object[] jsonbArray = formatJsonbArray(stringDetails);
 
         CveInsertParams.cveIds = cve_ids;
-        CveInsertParams.details = details;
+        CveInsertParams.details = jsonbArray;
     }
 
-    private void executePGBulkInsertCall(String[] cve_ids, String[] details) throws DataAccessException {
+    private void executePGBulkInsertCall() throws DataAccessException {
         try {
             CallableStatement statement = conn.prepareCall(UPSERT_BULK_CVES);
-            statement.setArray(1, conn.createArrayOf("text", cve_ids));
-            statement.setArray(2, conn.createArrayOf("text", details));
+            statement.setArray(1, conn.createArrayOf("TEXT", CveInsertParams.cveIds));
+            statement.setArray(2, conn.createArrayOf("JSONB", CveInsertParams.details));
             statement.execute();
         } catch (SQLException e) {
             throw new DataAccessException(e);
         }
     }
+
 
     private List<Cve> performBulkFetch(List<String> ids) throws DataAccessException {
         String base = "SELECT details FROM nvd.cve WHERE cve_id IN (";
@@ -187,21 +163,21 @@ public final class PostgresCveDao implements IDao<Cve> {
         return baseSQL + idList;
     }
 
-    // FixMe
-//    private void performBulkUpdate(List<Cve> cves) throws DataAccessException {
-//        for (Cve cve : cves) {
-//            performUpdate(cves.get(0));
-//        }
-//    }
-
     private void performUpdate(Cve cves) throws DataAccessException {
         try {
-            CallableStatement callableStatement = conn.prepareCall("{call update_cve_details(?, ?)}");
+            CallableStatement callableStatement = conn.prepareCall("CALL update_cve_details(?, ?)");
             callableStatement.setString(1, cves.getId());
             callableStatement.setString(2, cveDetailsMarshaller.marshalJson(cves));
             callableStatement.execute();
         } catch (SQLException e) {
             throw new DataAccessException(e);
         }
+    }
+
+    private Object[] formatJsonbArray(String[] details) {
+        Object[] jsonbArray = new Object[details.length];
+        System.arraycopy(details, 0, jsonbArray, 0, details.length);
+
+        return jsonbArray;
     }
 }

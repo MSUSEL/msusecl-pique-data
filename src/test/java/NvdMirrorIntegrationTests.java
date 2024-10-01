@@ -32,30 +32,15 @@ import static common.Constants.*;
 
 // TODO mock database to test methods
 public class NvdMirrorIntegrationTests {
-
     @Test
-    public void testBuildLocalNvdMirror() throws DataAccessException, ApiCallException {
+    public void testBuildNvdMirror() throws DataAccessException, ApiCallException {
         PiqueDataFactory piqueDataFactory = new PiqueDataFactory();
         NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
         nvdMirror.buildNvdMirror();
     }
 
     @Test
-    public void testBuildPersistentNvdMirror() throws DataAccessException, ApiCallException {
-        PiqueDataFactory piqueDataFactory = new PiqueDataFactory();
-        NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
-        nvdMirror.buildNvdMirror();
-    }
-
-    @Test
-    public void testUpdateLocalNvdMirror() throws DataAccessException, ApiCallException {
-        PiqueDataFactory piqueDataFactory = new PiqueDataFactory();
-        NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
-        nvdMirror.updateNvdMirror();
-    }
-
-    @Test
-    public void testUpdatePersistent() throws DataAccessException, ApiCallException {
+    public void testUpdateNvdMirror() throws DataAccessException, ApiCallException {
         PiqueDataFactory piqueDataFactory = new PiqueDataFactory();
         NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
         nvdMirror.updateNvdMirror();
@@ -69,7 +54,7 @@ public class NvdMirrorIntegrationTests {
     }
 
     @Test
-    public void testGetPersistentMetaData() throws DataAccessException {
+    public void testGetMetaData() throws DataAccessException {
         PiqueDataFactory piqueDataFactory = new PiqueDataFactory();
         NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
 
@@ -82,18 +67,7 @@ public class NvdMirrorIntegrationTests {
     }
 
     @Test
-    public void testLocalInsertSingleCve() throws DataAccessException {
-        // TODO replace this with mocked Cve object
-        PiqueDataFactory piqueDataFactory = new PiqueDataFactory();
-        PiqueData piqueData = piqueDataFactory.getPiqueData();
-        NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
-
-        Cve cve = piqueData.getCve(TestConstants.CVE_A);
-        nvdMirror.insertSingleCve(cve);
-    }
-
-    @Test
-    public void testPersistentInsertSingleCve() throws DataAccessException {
+    public void testInsertSingleCve() throws DataAccessException {
         // TODO replace this with mocked Cve object
         PiqueDataFactory piqueDataFactory = new PiqueDataFactory();
         PiqueData piqueData = piqueDataFactory.getPiqueData();
@@ -134,46 +108,29 @@ public class NvdMirrorIntegrationTests {
         assertEquals(TestConstants.CVE_A, cve.getId());
    }
 
-//   @Test
-//   public void testPersistMetadata() {
-//        IDataSource<Connection> dataSource = new PostgresConnectionManager(new CredentialService());
-//        IDao<NvdMirrorMetaData> metadataDao = new PostgresMetaDataDao(dataSource);
-//
-//        metadataDao.update();
-//   }
-
     @Test
-    public void testMigration() {
+    public void testDBSetup() {
+        IDataSource<Connection> dataSource = new PostgresConnectionManager(
+                        new CredentialService(CREDENTIALS_FILE_PATH));
         JsonMarshallerFactory jsonMarshallerFactory = new JsonMarshallerFactory();
         IJsonMarshaller<Cve> cveMarshaller = jsonMarshallerFactory.getCveMarshaller();
         IJsonMarshaller<CveEntity> cveEntityMarshaller = jsonMarshallerFactory.getCveEntityMarshaller();
-        IDataSource<Connection> dataSource = new PostgresConnectionManager(
-                        new CredentialService(CREDENTIALS_FILE_PATH));
+        JsonResponseHandler jsonResponseHandler = new JsonResponseHandler();
         IDao<Cve> postgresCveDao = new PostgresCveDao(dataSource, cveMarshaller);
         CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
         IDao<NvdMirrorMetaData> postgresMetaDataDao = new PostgresMetaDataDao(dataSource);
         INvdMirrorService mirrorService = new MirrorService(cveResponseProcessor, postgresCveDao, postgresMetaDataDao);
 
-        CredentialService credentialService = setInitCredentials();
-
         Migration migration = new Migration(
                 dataSource,
                 new NvdMirrorManager(
                         cveResponseProcessor,
-                        new JsonResponseHandler(),
+                        jsonResponseHandler,
                         cveEntityMarshaller,
                         postgresCveDao,
                         postgresMetaDataDao),
                 mirrorService);
 
         migration.migrate();
-
-    }
-
-    private CredentialService setInitCredentials() {
-        CredentialService credentialService = new CredentialService(CREDENTIALS_FILE_PATH);
-        credentialService.setDbname("postgres");
-
-        return credentialService;
     }
 }
