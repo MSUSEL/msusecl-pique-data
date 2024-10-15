@@ -20,6 +20,8 @@ public class Migration {
     private final Connection conn;
     private final NvdMirrorManager manager;
     private final INvdMirrorService mirrorService;
+    private final String SQL = "sql";
+    private final String PLPGSQL = "plpgsql";
 
 
     public Migration(IDataSource<Connection> dataSource, NvdMirrorManager manager, INvdMirrorService mirrorService) {
@@ -29,10 +31,8 @@ public class Migration {
     }
 
     public void migrate() {
-        executeScript(MIGRATION_SCRIPT_PATH, "sql");
-        executeScript(PG_STORED_PROCEDURES_PATH, "plpgsql");
-
-        // Update Data
+        executeScript(MIGRATION_SCRIPT_PATH, SQL);
+        executeScript(PG_STORED_PROCEDURES_PATH, PLPGSQL);
         hydrate();
     }
 
@@ -57,9 +57,9 @@ public class Migration {
 
     private String determineLineEnd(String scriptType) {
         String lineEnd;
-        if (scriptType.equals("sql")) {
+        if (scriptType.equals(SQL)) {
             lineEnd = ";";
-        } else if (scriptType.equals("plpgsql")) {
+        } else if (scriptType.equals(PLPGSQL)) {
             lineEnd = "$$;";
         } else {
             throw new DataAccessException("Incorrect database script type");

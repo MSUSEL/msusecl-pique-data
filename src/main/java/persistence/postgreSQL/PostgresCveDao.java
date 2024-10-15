@@ -109,7 +109,6 @@ public final class PostgresCveDao implements IDao<Cve> {
         }
     }
 
-
     private List<Cve> performBulkFetch(List<String> ids) throws DataAccessException {
         String base = "SELECT details FROM nvd.cve WHERE cve_id IN (";
         String sql = formatBulkFetchSQL(ids, base);

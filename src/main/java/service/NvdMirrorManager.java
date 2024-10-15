@@ -56,8 +56,8 @@ public class NvdMirrorManager {
     }
 
     /**
-     * Handles updating the SECL NVD Mirror
-     * @param lastModStartDate Timestamp of previous call to NVD CVE API to update SECL mirror
+     * Handles updating an NVD Mirror
+     * @param lastModStartDate Timestamp of previous call to NVD CVE API to update mirror
      * @param lastModEndDate Typically it is the current time - provides the upper bound to the time window
      *                       from which to pull updates
      */
