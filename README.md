@@ -9,36 +9,35 @@ it is "use at your own risk".__
 The original intent of this project was to provide opinionated access to the NVD's CVE2.0 API.
 The official NVD APIs provide limited functionality. If greater expressiveness or flexibility is required, users are encouraged to [mirror the
 database](https://nvd.nist.gov/developers/api-workflows). Some PIQUE models which depend on the NVD, already build a mirror of the NVD at startup.
-However, this complicates the setup, benchmarking and evaluation phases of PIQUE. As such, this project evolved from simply
-accessing the NVD through API calls to maintaining an on-prem mirror at the lab. **Again, please note that this mirror is for use only
-by members of the SECL.** Recognizing that not all users of PiqueData will be members of SECL, this library provides flexibility to
-build ephemeral mirrors with MongoDB and Docker. Outside the lab, this is the recommended approach.  More instructions follow on
-how to build permanent and ephemeral mirrors and interact with 3rd-party APIs.
+However, this complicates the setup, benchmarking and evaluation phases of PIQUE. This utility simplifies the process of building permanent and
+ephemeral mirrors as well as interacting with 3rd-party APIs.
 
-Finally, this is a work in progress. The developers will attempt to avoid breaking changes but stability is not currently guaranteed.
+This is a work in progress. The developers will attempt to avoid breaking changes but stability is not currently guaranteed.
 
 
 
 -----------------
 
 ### Installation
-This project requires java 8+ and only supports the maven build system.
+This project requires java 11+ and only supports the maven build system.
 To install, add the following to your project's pom.xml file. Alternatively, you can clone the
 git repository and compile from source using java language level 8.
 ```
 <dependency>
     <groupId>edu.montana.gsoc.msusel</groupId>
     <artifactId>msusecl-data-utility</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.4</version>
 </dependency>
 ```
 
 ## General Setup
 ### Necessary Software
-* java development kit with a language level of 8+
+* java development kit with a language level of 11+
 * docker
 
-### Environment Variables
+### Environment and Secrets Management
+
+#### Environment Variables
 PiqueData uses environment variables to store sensitive and global values. To get the best out of this library,
 it is necessary to set up an [NVD api key](https://nvd.nist.gov/developers/request-an-api-key). This will prevent
 rate limits from interrupting calls. Additionally calls for Github Security Advisories require a Personal Access
@@ -52,6 +51,9 @@ export GITHUB_PAT=<Your Personal Access Token>
 ```
 *Note: extra steps may be required to make these environment variables persistent between sessions.*
 
+
+#### Credentials File
+PiqueData can accept a credentials file in lieu of environment variables.
 
 
 -----------------
