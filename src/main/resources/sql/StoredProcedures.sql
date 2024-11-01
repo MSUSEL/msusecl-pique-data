@@ -1,12 +1,12 @@
 -- upserts a single cve row in the nvd.cve table
-CREATE OR REPLACE PROCEDURE nvd.upsert_cve_details(p_cve_id VARCHAR, p_details JSONB)
+CREATE OR REPLACE PROCEDURE nvd.upsert_vulnerability(p_cve_id VARCHAR, p_vulnerability JSONB)
 LANGUAGE plpgsql
 AS $$
 BEGIN
-    INSERT INTO nvd.cve (cve_id, details)
-    VALUES (p_cve_id, p_details)
+    INSERT INTO nvd.cve (cve_id, vulnerability)
+    VALUES (p_cve_id, p_vulnerability)
     ON CONFLICT (cve_id) DO UPDATE
-        SET details = EXCLUDED.details;
+        SET vulnerability = EXCLUDED.vulnerability;
 END;
 $$;
 
@@ -28,17 +28,17 @@ END;
 $$;
 
 -- upserts cves in batch
-CREATE OR REPLACE PROCEDURE nvd.upsert_cve_batch(p_cve_ids TEXT[], p_details JSONB[])
+CREATE OR REPLACE PROCEDURE nvd.upsert_batch_vulnerabilities(p_cve_ids TEXT[], p_vulnerability JSONB[])
 LANGUAGE plpgsql
 AS $$
 BEGIN
-    INSERT INTO nvd.cve (cve_id, details)
-    SELECT cve_id, json_build_object('details', detail)
+    INSERT INTO nvd.cve (cve_id, vulnerability)
+    SELECT cve_id, json_build_object('vulnerability', detail)
     FROM unnest(p_cve_ids) WITH ORDINALITY AS cve_id(cve_id, ord)
-    JOIN unnest(p_details) WITH ORDINALITY AS details(detail, ord)
-      ON cve_id.ord = details.ord
+    JOIN unnest(p_vulnerability) WITH ORDINALITY AS vulnerability(detail, ord)
+      ON cve_id.ord = vulnerability.ord
     ON CONFLICT (cve_id) DO UPDATE
-        SET details = EXCLUDED.details;
+        SET vulnerability = EXCLUDED.vulnerability;
 END;
 $$;
 
@@ -50,3 +50,12 @@ BEGIN
     EXECUTE format('DELETE FROM %I WHERE %I LIKE ANY(p_ids)', p_table_name, p_identifier_name);
 END;
 $$;
+
+-- fetch a list of CVE's from a list of CVE_ID's
+--CREATE OR REPLACE FUNCTION nvd.fetch_cves(p_ids TEXT[])
+--LANGUAGE plpgsql
+--AS &&
+--BEGIN
+--    EXECUTE format('SELECT vulnerability FROM nvd.cve WHERE cve_id LIKE ANY(p_ids)', p_ids);
+--END;
+--$$;

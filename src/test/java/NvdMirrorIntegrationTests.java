@@ -12,7 +12,7 @@ import persistence.IDataSource;
 import persistence.postgreSQL.Migration;
 import persistence.postgreSQL.PostgresConnectionManager;
 import persistence.postgreSQL.PostgresCveDao;
-import persistence.postgreSQL.PostgresMetaDataDao;
+import persistence.postgreSQL.PostgresMetadataDao;
 import presentation.NvdMirror;
 import presentation.PiqueData;
 import presentation.PiqueDataFactory;
@@ -48,7 +48,7 @@ public class NvdMirrorIntegrationTests {
 
     @Test
     public void testGetLocalMetaData() throws DataAccessException {
-        PiqueDataFactory piqueDataFactory = new PiqueDataFactory();
+        PiqueDataFactory piqueDataFactory = new PiqueDataFactory(CREDENTIALS_FILE_PATH);
         NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
         NvdMirrorMetaData metaData = nvdMirror.getMetaData();
     }
@@ -89,7 +89,7 @@ public class NvdMirrorIntegrationTests {
     @Test
     public void testInsertMetaData() throws DataAccessException {
         IDataSource<Connection> dataSource = new PostgresConnectionManager(new CredentialService());
-        IDao<NvdMirrorMetaData> dao = new PostgresMetaDataDao(dataSource);
+        IDao<NvdMirrorMetaData> dao = new PostgresMetadataDao(dataSource);
         NvdMirrorMetaData metaData = new NvdMirrorMetaData();
         metaData.setTimestamp("2024-09-07T23:26:08.260");
         metaData.setVersion("2.0");
@@ -113,20 +113,17 @@ public class NvdMirrorIntegrationTests {
         IDataSource<Connection> dataSource = new PostgresConnectionManager(
                         new CredentialService(CREDENTIALS_FILE_PATH));
         JsonMarshallerFactory jsonMarshallerFactory = new JsonMarshallerFactory();
-        IJsonMarshaller<Cve> cveMarshaller = jsonMarshallerFactory.getCveMarshaller();
-        IJsonMarshaller<CveEntity> cveEntityMarshaller = jsonMarshallerFactory.getCveEntityMarshaller();
-        JsonResponseHandler jsonResponseHandler = new JsonResponseHandler();
-        IDao<Cve> postgresCveDao = new PostgresCveDao(dataSource, cveMarshaller);
+        IDao<Cve> postgresCveDao = new PostgresCveDao(dataSource, jsonMarshallerFactory.getCveMarshaller());
         CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
-        IDao<NvdMirrorMetaData> postgresMetaDataDao = new PostgresMetaDataDao(dataSource);
+        IDao<NvdMirrorMetaData> postgresMetaDataDao = new PostgresMetadataDao(dataSource);
         INvdMirrorService mirrorService = new MirrorService(cveResponseProcessor, postgresCveDao, postgresMetaDataDao);
 
         Migration migration = new Migration(
                 dataSource,
                 new NvdMirrorManager(
                         cveResponseProcessor,
-                        jsonResponseHandler,
-                        cveEntityMarshaller,
+                        new JsonResponseHandler(),
+                        jsonMarshallerFactory.getCveEntityMarshaller(),
                         postgresCveDao,
                         postgresMetaDataDao),
                 mirrorService);

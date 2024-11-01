@@ -9,7 +9,7 @@ import handlers.JsonResponseHandler;
 import persistence.IDataSource;
 import persistence.postgreSQL.PostgresConnectionManager;
 import persistence.postgreSQL.PostgresCveDao;
-import persistence.postgreSQL.PostgresMetaDataDao;
+import persistence.postgreSQL.PostgresMetadataDao;
 import service.*;
 
 import java.sql.Connection;
@@ -30,8 +30,7 @@ public class PiqueDataFactory {
     }
 
     public PiqueDataFactory(String credentialsFilePath) {
-        CredentialService credentialService = new CredentialService(credentialsFilePath);
-        this.pgDataSource = new PostgresConnectionManager(credentialService);
+        this.pgDataSource = new PostgresConnectionManager(new CredentialService(credentialsFilePath));
     }
 
     public PiqueData getPiqueData() {
@@ -56,13 +55,13 @@ public class PiqueDataFactory {
                 jsonResponseHandler,
                 cveEntityMarshaller,
                 new PostgresCveDao(pgDataSource, cveMarshaller),
-                new PostgresMetaDataDao(pgDataSource));
+                new PostgresMetadataDao(pgDataSource));
     }
 
     private MirrorService instantiatePgMirrorService() {
         return new MirrorService(
                 cveResponseProcessor,
                 new PostgresCveDao(pgDataSource, cveMarshaller),
-                new PostgresMetaDataDao(pgDataSource));
+                new PostgresMetadataDao(pgDataSource));
     }
 }

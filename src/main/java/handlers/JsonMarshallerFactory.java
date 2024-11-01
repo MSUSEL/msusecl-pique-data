@@ -2,6 +2,7 @@ package handlers;
 
 import businessObjects.cve.Cve;
 import businessObjects.cve.CveEntity;
+import businessObjects.cve.Vulnerability;
 import businessObjects.ghsa.SecurityAdvisory;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -14,7 +15,7 @@ public class JsonMarshallerFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonMarshallerFactory.class);
 
     public IJsonMarshaller<CveEntity> getCveEntityMarshaller() {
-        return new IJsonMarshaller<CveEntity>() {
+        return new IJsonMarshaller<>() {
             @Override
             public CveEntity unmarshalJson(String json) {
                 try {
@@ -33,7 +34,7 @@ public class JsonMarshallerFactory {
     }
 
     public IJsonMarshaller<Cve> getCveMarshaller() {
-        return new IJsonMarshaller<Cve>() {
+        return new IJsonMarshaller<>() {
             @Override
             public Cve unmarshalJson(String json) {
                 try {
@@ -46,6 +47,25 @@ public class JsonMarshallerFactory {
 
             @Override
             public String marshalJson(Cve entity) {
+                return new Gson().toJson(entity);
+            }
+        };
+    }
+
+    public IJsonMarshaller<Vulnerability> getVulnerabilityMarshaller() {
+        return new IJsonMarshaller<>() {
+            @Override
+            public Vulnerability unmarshalJson(String json) {
+                try {
+                    return new Gson().fromJson(json, Vulnerability.class);
+                } catch (JsonSyntaxException e) {
+                    LOGGER.error(MALFORMED_JSON_SYNTAX_MESSAGE, e);
+                    throw new RuntimeException(e);
+                }
+            }
+
+            @Override
+            public String marshalJson(Vulnerability entity) {
                 return new Gson().toJson(entity);
             }
         };

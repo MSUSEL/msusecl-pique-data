@@ -11,10 +11,10 @@ import java.util.List;
 
 import static persistence.postgreSQL.StoredProcedureCalls.UPSERT_METADATA;
 
-public final class PostgresMetaDataDao implements IDao<NvdMirrorMetaData> {
+public final class PostgresMetadataDao implements IDao<NvdMirrorMetaData> {
     private final Connection conn;
 
-    public PostgresMetaDataDao(IDataSource<Connection> dataSource) {
+    public PostgresMetadataDao(IDataSource<Connection> dataSource) {
         this.conn = dataSource.getConnection();
     }
 

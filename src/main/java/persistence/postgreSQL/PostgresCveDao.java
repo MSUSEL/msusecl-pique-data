@@ -3,6 +3,7 @@ package persistence.postgreSQL;
 import businessObjects.cve.Cve;
 import exceptions.DataAccessException;
 import handlers.IJsonMarshaller;
+import handlers.JsonMarshallerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import persistence.IDao;
@@ -10,7 +11,6 @@ import persistence.IDataSource;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static common.Constants.DB_QUERY_FAILED;
@@ -29,7 +29,7 @@ public final class PostgresCveDao implements IDao<Cve> {
 
     private static class CveInsertParams {
         static String[] cveIds;
-        static Object[] details;
+        static Object[] cve;
     }
 
     @Override
@@ -69,7 +69,7 @@ public final class PostgresCveDao implements IDao<Cve> {
 
     private void performUpsert(Cve cve) throws DataAccessException {
         try {
-            CallableStatement statement = conn.prepareCall(UPSERT_CVE);
+            CallableStatement statement = conn.prepareCall(UPSERT_VULNERABILITY);
             statement.setString(1, cve.getId());
             statement.setString(2, cveDetailsMarshaller.marshalJson(cve));
             statement.execute();
@@ -86,23 +86,23 @@ public final class PostgresCveDao implements IDao<Cve> {
     private void formatCveInsertParams(List<Cve> cves) {
         int size = cves.size();
         String[] cve_ids = new String[size];
-        String[] stringDetails = new String[size];
+        String[] cve = new String[size];
 
         for (int i = 0; i < cves.size(); i++) {
             cve_ids[i] = cves.get(i).getId();
-            stringDetails[i] = cveDetailsMarshaller.marshalJson(cves.get(i));
+            cve[i] = cveDetailsMarshaller.marshalJson(cves.get(i));
         }
-        Object[] jsonbArray = formatJsonbArray(stringDetails);
+        Object[] jsonbFormattedCve = formatJsonbArray(cve);
 
         CveInsertParams.cveIds = cve_ids;
-        CveInsertParams.details = jsonbArray;
+        CveInsertParams.cve = jsonbFormattedCve;
     }
 
     private void executePGBulkInsertCall() throws DataAccessException {
         try {
-            CallableStatement statement = conn.prepareCall(UPSERT_BULK_CVES);
+            CallableStatement statement = conn.prepareCall(UPSERT_BATCH_VULNERABILITIES);
             statement.setArray(1, conn.createArrayOf("TEXT", CveInsertParams.cveIds));
-            statement.setArray(2, conn.createArrayOf("JSONB", CveInsertParams.details));
+            statement.setArray(2, conn.createArrayOf("JSONB", CveInsertParams.cve));
             statement.execute();
         } catch (SQLException e) {
             throw new DataAccessException(e);
@@ -110,14 +110,14 @@ public final class PostgresCveDao implements IDao<Cve> {
     }
 
     private List<Cve> performBulkFetch(List<String> ids) throws DataAccessException {
-        String base = "SELECT details FROM nvd.cve WHERE cve_id IN (";
+        String base = "SELECT cve FROM nvd.cve WHERE cve_id IN (";
         String sql = formatBulkFetchSQL(ids, base);
         try {
             PreparedStatement statement = conn.prepareStatement(sql);
             ResultSet rs = statement.executeQuery();
             List<Cve> result = new ArrayList<>();
             while (rs.next()) {
-                result.add(cveDetailsMarshaller.unmarshalJson(rs.getString("details")));
+                result.add(cveDetailsMarshaller.unmarshalJson(rs.getString("cve")));
             }
 
             return result;
@@ -128,15 +128,23 @@ public final class PostgresCveDao implements IDao<Cve> {
     }
 
     private List<Cve> performFetch(String id) throws DataAccessException {
+        JsonMarshallerFactory jsonMarshallerFactory = new JsonMarshallerFactory();
+        IJsonMarshaller vulnerabilityMarshaller = jsonMarshallerFactory.getVulnerabilityMarshaller();
+        List<Cve> results = new ArrayList<>();
+
         try {
-            String sql = "SELECT details FROM nvd.cve WHERE cve_id = ?;";
+            String sql = "SELECT vulnerability FROM nvd.cve WHERE cve_id = ?;";
             PreparedStatement statement = conn.prepareStatement(sql);
             statement.setString(1, id);
             ResultSet rs = statement.executeQuery();
 
             if (rs.next()) {
-                String result = rs.getString("details");
-                return Collections.singletonList((Cve) cveDetailsMarshaller.unmarshalJson(result));
+                String result = rs.getString("vulnerability");
+//                String processedResultString = result.replaceFirst("vulnerability", "cve");
+                Cve resultCve = cveDetailsMarshaller.unmarshalJson(result);
+                results.add(resultCve);
+                return results;
+//                return Collections.singletonList(cveDetailsMarshaller.unmarshalJson(result));
             } else {
                 LOGGER.info(DB_QUERY_NO_RESULTS);
                 throw new DataAccessException(DB_QUERY_NO_RESULTS);
@@ -164,7 +172,7 @@ public final class PostgresCveDao implements IDao<Cve> {
 
     private void performUpdate(Cve cves) throws DataAccessException {
         try {
-            CallableStatement callableStatement = conn.prepareCall("CALL update_cve_details(?, ?)");
+            CallableStatement callableStatement = conn.prepareCall(UPSERT_BATCH_VULNERABILITIES);
             callableStatement.setString(1, cves.getId());
             callableStatement.setString(2, cveDetailsMarshaller.marshalJson(cves));
             callableStatement.execute();

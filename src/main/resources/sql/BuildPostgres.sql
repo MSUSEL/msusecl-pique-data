@@ -3,7 +3,7 @@ CREATE SCHEMA IF NOT EXISTS nvd;
 CREATE TABLE IF NOT EXISTS nvd.cve (
     id SERIAL PRIMARY KEY,
     cve_id VARCHAR(20) UNIQUE NOT NULL,
-    details JSONB
+    cve JSONB
 );
 
 CREATE TABLE IF NOT EXISTS nvd.metadata(
