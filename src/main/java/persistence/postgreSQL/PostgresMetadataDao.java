@@ -20,22 +20,17 @@ public final class PostgresMetadataDao implements IDao<NvdMirrorMetaData> {
 
     public List<NvdMirrorMetaData> fetch(List<String> metadataId) throws DataAccessException {
         try {
-            String sql = "SELECT * FROM nvd.metadata WHERE id = ?;";
+            String sql = "SELECT * FROM nvd.metadata;";
             PreparedStatement statement = conn.prepareStatement(sql);
             statement.setInt(1, Integer.parseInt(metadataId.get(0)));
             ResultSet rs = statement.executeQuery();
             NvdMirrorMetaData metaData = new NvdMirrorMetaData();
 
             if (rs.next()) {
-                String totalResults = rs.getString("total_results");
-                String format = rs.getString("format");
-                String version = rs.getString("api_version");
-                String timestamp = rs.getString("last_timestamp");
-
-                metaData.setTotalResults(totalResults);
-                metaData.setFormat(format);
-                metaData.setVersion(version);
-                metaData.setTimestamp(timestamp);
+                metaData.setCvesModified(Integer.toString(rs.getInt("cves_modified")));
+                metaData.setFormat(rs.getString("format"));
+                metaData.setApiVersion(rs.getString("api_version"));
+                metaData.setLastTimestamp(rs.getString("last_timestamp"));
             }
 
             return Collections.singletonList(metaData);
@@ -58,10 +53,10 @@ public final class PostgresMetadataDao implements IDao<NvdMirrorMetaData> {
     private void insertMetadata(NvdMirrorMetaData metadata) {
         try {
             CallableStatement statement = conn.prepareCall(UPSERT_METADATA);
-            statement.setInt(1, Integer.parseInt(metadata.getTotalResults()));
+            statement.setInt(1, Integer.parseInt(metadata.getCvesModified()));
             statement.setString(2, metadata.getFormat());
-            statement.setString(3, metadata.getVersion());
-            statement.setString(4, metadata.getTimestamp());
+            statement.setString(3, metadata.getApiVersion());
+            statement.setString(4, metadata.getLastTimestamp());
             statement.execute();
         } catch (SQLException e) {
             throw new RuntimeException(e);

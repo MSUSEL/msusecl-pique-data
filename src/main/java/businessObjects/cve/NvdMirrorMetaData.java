@@ -6,8 +6,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public final class NvdMirrorMetaData {
-    private String totalResults;
+    private String cvesModified;
     private String format;
-    private String version;
-    private String timestamp;
+    private String apiVersion;
+    private String lastTimestamp;
 }

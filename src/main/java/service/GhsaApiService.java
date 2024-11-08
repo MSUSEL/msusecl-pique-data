@@ -6,7 +6,8 @@ import businessObjects.GraphQlQueries;
 import businessObjects.HTTPMethod;
 import businessObjects.ghsa.SecurityAdvisory;
 import common.Constants;
-import handlers.IJsonMarshaller;
+import handlers.JsonResponseHandler;
+import handlers.SecurityAdvisoryMarshaller;
 import persistence.HeaderBuilder;
 import exceptions.ApiCallException;
 import org.json.JSONException;
@@ -19,11 +20,13 @@ import java.util.List;
 public class GhsaApiService {
     private static final Logger LOGGER = LoggerFactory.getLogger(GhsaApiService.class);
     private final GhsaResponseProcessor ghsaResponseProcessor;
-    private final IJsonMarshaller<SecurityAdvisory> marshaller;
+    private final SecurityAdvisoryMarshaller marshaller;
+    private final JsonResponseHandler responseHandler;
 
-    public GhsaApiService(GhsaResponseProcessor ghsaResponseProcessor, IJsonMarshaller<SecurityAdvisory> marshaller) {
+    public GhsaApiService(GhsaResponseProcessor ghsaResponseProcessor, SecurityAdvisoryMarshaller marshaller, JsonResponseHandler responseHandler) {
         this.ghsaResponseProcessor = ghsaResponseProcessor;
         this.marshaller = marshaller;
+        this.responseHandler = responseHandler;
     }
 
     public SecurityAdvisory handleGetEntity(String ghsaId) throws ApiCallException {
@@ -39,7 +42,8 @@ public class GhsaApiService {
                         .addHeader(AUTHORIZATION, String.format("Bearer %s", System.getenv("GITHUB_PAT")))
                         .build(),
                 formatQueryBody(ghsaId),
-                marshaller);
+                marshaller,
+                responseHandler);
         GHSAResponse ghsaResponse = ghsaRequest.executeRequest();
 
         int status = ghsaResponse.getStatus();

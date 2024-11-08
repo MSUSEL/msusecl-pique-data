@@ -36,9 +36,10 @@ public final class MirrorService implements INvdMirrorService{
         return cveResponseProcessor.extractCweDescriptions(handleGetCveById(cveId));
     }
 
+    // FIXME: fetch metadata by something other than auto-generated id number
     @Override
     public NvdMirrorMetaData handleGetCurrentMetaData() throws DataAccessException {
-        return metadataDao.fetch(Collections.singletonList("3")).get(0);
+        return metadataDao.fetch(Collections.singletonList("1")).get(0);
     }
 
     @Override

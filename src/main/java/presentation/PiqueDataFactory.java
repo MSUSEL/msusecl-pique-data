@@ -1,11 +1,10 @@
 package presentation;
 
-import businessObjects.cve.Cve;
-import businessObjects.cve.CveEntity;
-import businessObjects.ghsa.SecurityAdvisory;
-import handlers.IJsonMarshaller;
-import handlers.JsonMarshallerFactory;
+import com.google.gson.Gson;
+import handlers.IJsonSerializer;
 import handlers.JsonResponseHandler;
+import handlers.JsonSerializer;
+import handlers.SecurityAdvisoryMarshaller;
 import persistence.IDataSource;
 import persistence.postgreSQL.PostgresConnectionManager;
 import persistence.postgreSQL.PostgresCveDao;
@@ -15,13 +14,9 @@ import service.*;
 import java.sql.Connection;
 
 public class PiqueDataFactory {
-    private final JsonMarshallerFactory jsonMarshallerFactory = new JsonMarshallerFactory();
-    private final IJsonMarshaller<Cve> cveMarshaller = jsonMarshallerFactory.getCveMarshaller();
-    private final IJsonMarshaller<CveEntity> cveEntityMarshaller = jsonMarshallerFactory.getCveEntityMarshaller();
-    private final IJsonMarshaller<SecurityAdvisory> securityAdvisoryMarshaller = jsonMarshallerFactory.getSecurityAdvisoryMarshaller();
     private final JsonResponseHandler jsonResponseHandler = new JsonResponseHandler();
-    private final NvdApiService nvdApiService = new NvdApiService(jsonResponseHandler, cveEntityMarshaller);
-    private final GhsaApiService ghsaApiService = new GhsaApiService(new GhsaResponseProcessor(), securityAdvisoryMarshaller);
+    private final IJsonSerializer jsonSerializer = new JsonSerializer(new Gson());
+    private final GhsaApiService ghsaApiService = new GhsaApiService(new GhsaResponseProcessor(), new SecurityAdvisoryMarshaller(), jsonResponseHandler);
     private final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
     private final IDataSource<Connection> pgDataSource;
 
@@ -35,7 +30,7 @@ public class PiqueDataFactory {
 
     public PiqueData getPiqueData() {
         return new PiqueData(
-                nvdApiService,
+                new NvdApiService(jsonResponseHandler, jsonSerializer),
                 ghsaApiService,
                 instantiatePgMirrorService(),
                 cveResponseProcessor);
@@ -46,22 +41,22 @@ public class PiqueDataFactory {
     }
 
     public NvdRequestBuilder getNvdRequestBuilder() {
-        return new NvdRequestBuilder(jsonResponseHandler, cveEntityMarshaller);
+        return new NvdRequestBuilder(jsonResponseHandler, jsonSerializer);
     }
 
     private NvdMirrorManager instantiatePgNvdMirrorManager() {
         return new NvdMirrorManager(
                 cveResponseProcessor,
                 jsonResponseHandler,
-                cveEntityMarshaller,
-                new PostgresCveDao(pgDataSource, cveMarshaller),
+                jsonSerializer,
+                new PostgresCveDao(pgDataSource, jsonSerializer),
                 new PostgresMetadataDao(pgDataSource));
     }
 
     private MirrorService instantiatePgMirrorService() {
         return new MirrorService(
                 cveResponseProcessor,
-                new PostgresCveDao(pgDataSource, cveMarshaller),
+                new PostgresCveDao(pgDataSource, jsonSerializer),
                 new PostgresMetadataDao(pgDataSource));
     }
 }

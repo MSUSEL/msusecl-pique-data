@@ -3,10 +3,10 @@ package presentation;
 import businessObjects.HTTPMethod;
 import businessObjects.NvdRequest;
 import common.Constants;
+import handlers.IJsonSerializer;
 import persistence.HeaderBuilder;
 import common.NvdConstants;
 import persistence.NvdParameterBuilder;
-import handlers.IJsonMarshaller;
 import org.apache.http.Header;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ResponseHandler;
@@ -17,11 +17,11 @@ public class NvdRequestBuilder {
     private final NvdParameterBuilder nvdParameterBuilder = new NvdParameterBuilder();
     private final HeaderBuilder headerBuilder = new HeaderBuilder();
     private final ResponseHandler<String> jsonResponseHandler;
-    private final IJsonMarshaller cveEntityMarshaller;
+    private final IJsonSerializer serializer;
 
-    public NvdRequestBuilder(ResponseHandler<String> jsonResponseHandler, IJsonMarshaller cveMarshaller) {
+    public NvdRequestBuilder(ResponseHandler<String> jsonResponseHandler, IJsonSerializer serializer) {
         this.jsonResponseHandler = jsonResponseHandler;
-        this.cveEntityMarshaller = cveMarshaller;
+        this.serializer = serializer;
     }
 
     public NvdRequestBuilder withCveId(String cveId) {
@@ -172,6 +172,6 @@ public class NvdRequestBuilder {
         List<NameValuePair> params = nvdParameterBuilder.build();
         Header[] headers = headerBuilder.build();
 
-        return new NvdRequest(HTTPMethod.GET, Constants.NVD_CVE_URI, headers, params, jsonResponseHandler, cveEntityMarshaller);
+        return new NvdRequest(HTTPMethod.GET, Constants.NVD_CVE_URI, headers, params, jsonResponseHandler, serializer);
     }
 }

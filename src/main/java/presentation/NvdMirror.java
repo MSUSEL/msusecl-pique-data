@@ -27,7 +27,7 @@ public final class NvdMirror {
 
     public void updateNvdMirror() throws DataAccessException, ApiCallException {
         nvdMirrorManager.handleUpdateNvdMirror(
-                mirrorService.handleGetCurrentMetaData().getTimestamp(),
+                mirrorService.handleGetCurrentMetaData().getLastTimestamp(),
                 Instant.now().toString());
     }
 

@@ -35,10 +35,10 @@ public class CveResponseProcessor {
     public NvdMirrorMetaData formatNvdMetaData(CveEntity response) {
         NvdMirrorMetaData metaData = new NvdMirrorMetaData();
 
-        metaData.setTotalResults(Integer.toString(response.getTotalResults()));
+        metaData.setCvesModified(Integer.toString(response.getTotalResults()));
         metaData.setFormat(response.getFormat());
-        metaData.setVersion(response.getVersion());
-        metaData.setTimestamp(response.getTimestamp());
+        metaData.setApiVersion(response.getVersion());
+        metaData.setLastTimestamp(response.getTimestamp());
 
         return metaData;
     }

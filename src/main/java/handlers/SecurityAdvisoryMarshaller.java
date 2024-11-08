@@ -13,10 +13,9 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SecurityAdvisoryMarshaller implements IJsonMarshaller<SecurityAdvisory> {
+public class SecurityAdvisoryMarshaller{
     private static final Logger LOGGER = LoggerFactory.getLogger(SecurityAdvisoryMarshaller.class);
 
-    @Override
     public SecurityAdvisory unmarshalJson(String json) {
         SecurityAdvisory securityAdvisory = new SecurityAdvisory();
         Cwes cwes = new Cwes();
@@ -39,7 +38,6 @@ public class SecurityAdvisoryMarshaller implements IJsonMarshaller<SecurityAdvis
         return securityAdvisory;
     }
 
-    @Override
     public String marshalJson(SecurityAdvisory advisory) {
         return new Gson().toJson(advisory);
     }

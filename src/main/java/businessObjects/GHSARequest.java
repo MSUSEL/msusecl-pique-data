@@ -3,8 +3,8 @@ package businessObjects;
 import businessObjects.baseClasses.BaseRequest;
 import businessObjects.ghsa.SecurityAdvisory;
 import exceptions.ApiCallException;
-import handlers.IJsonMarshaller;
 import handlers.JsonResponseHandler;
+import handlers.SecurityAdvisoryMarshaller;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -25,14 +25,15 @@ import static common.Constants.*;
 
 public final class GHSARequest extends BaseRequest implements IRequest {
     private static final Logger LOGGER = LoggerFactory.getLogger(GHSARequest.class);
-    private final JsonResponseHandler handler = new JsonResponseHandler();
+    private final JsonResponseHandler handler;
     private final String query;
-    private final IJsonMarshaller<SecurityAdvisory> marshaller;
+    private final SecurityAdvisoryMarshaller marshaller;
 
-    public GHSARequest(String httpMethod, String baseURI, Header[] headers, String query, IJsonMarshaller<SecurityAdvisory> marshaller) {
+    public GHSARequest(String httpMethod, String baseURI, Header[] headers, String query, SecurityAdvisoryMarshaller marshaller, JsonResponseHandler jsonResponseHandler) {
         super(httpMethod, baseURI, headers);
         this.query = query;
         this.marshaller = marshaller;
+        this.handler = jsonResponseHandler;
     }
 
     @Override

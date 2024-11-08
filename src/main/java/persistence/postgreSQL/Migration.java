@@ -3,9 +3,7 @@ package persistence.postgreSQL;
 import businessObjects.cve.NvdMirrorMetaData;
 import exceptions.DataAccessException;
 import persistence.IDataSource;
-import service.CredentialService;
 import service.INvdMirrorService;
-import service.MirrorService;
 import service.NvdMirrorManager;
 
 import java.io.BufferedReader;
@@ -80,10 +78,10 @@ public class Migration {
 
     private void hydrate() {
         NvdMirrorMetaData metadata = mirrorService.handleGetCurrentMetaData();
-        if (metadata.getTimestamp() == null) {
+        if (metadata.getLastTimestamp() == null) {
             manager.handleBuildMirror();
         } else {
-            manager.handleUpdateNvdMirror(metadata.getTimestamp(), Instant.now().toString());
+            manager.handleUpdateNvdMirror(metadata.getLastTimestamp(), Instant.now().toString());
         }
     }
 }

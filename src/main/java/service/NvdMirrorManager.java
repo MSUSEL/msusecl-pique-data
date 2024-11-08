@@ -1,5 +1,6 @@
 package service;
 
+import handlers.IJsonSerializer;
 import presentation.NvdRequestBuilder;
 import businessObjects.cve.CveEntity;
 import businessObjects.cve.Cve;
@@ -7,7 +8,6 @@ import businessObjects.cve.NvdMirrorMetaData;
 import common.HelperFunctions;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
-import handlers.IJsonMarshaller;
 import org.apache.http.client.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,19 +21,19 @@ import static common.Constants.*;
 public class NvdMirrorManager {
     private final CveResponseProcessor cveResponseProcessor;
     private final ResponseHandler<String> jsonResponseHandler;
-    private final IJsonMarshaller<CveEntity> cveEntityMarshaller;
+    private final IJsonSerializer jsonSerializer;
     private final IDao<Cve> cveDao;
     private final IDao<NvdMirrorMetaData> metadataDao;
     private static final Logger LOGGER = LoggerFactory.getLogger(NvdMirrorManager.class);
 
     public NvdMirrorManager(CveResponseProcessor cveResponseProcessor,
                             ResponseHandler<String> jsonResponseHandler,
-                            IJsonMarshaller<CveEntity> cveEntityMarshaller,
+                            IJsonSerializer jsonSerializer,
                             IDao<Cve> cveDao,
                             IDao<NvdMirrorMetaData> metadataDao) {
         this.cveResponseProcessor = cveResponseProcessor;
         this.jsonResponseHandler = jsonResponseHandler;
-        this.cveEntityMarshaller = cveEntityMarshaller;
+        this.jsonSerializer = jsonSerializer;
         this.cveDao = cveDao;
         this.metadataDao = metadataDao;
     }
@@ -45,7 +45,7 @@ public class NvdMirrorManager {
         int cveCount = 1;
 
         for (int i = DEFAULT_START_INDEX; i < cveCount; i += NVD_MAX_PAGE_SIZE) {
-            CveEntity response = new NvdRequestBuilder(jsonResponseHandler, cveEntityMarshaller)
+            CveEntity response = new NvdRequestBuilder(jsonResponseHandler, jsonSerializer)
                     .withFullMirrorDefaults(Integer.toString(i))
                     .build()
                    .executeRequest().getEntity();
@@ -62,11 +62,12 @@ public class NvdMirrorManager {
      *                       from which to pull updates
      */
     public void handleUpdateNvdMirror(String lastModStartDate, String lastModEndDate) throws DataAccessException, ApiCallException {
-        CveEntity response = new NvdRequestBuilder(jsonResponseHandler, cveEntityMarshaller)
+        CveEntity response = new NvdRequestBuilder(jsonResponseHandler, jsonSerializer)
                         .withApiKey(NVD_API_KEY)
                         .withLastModStartEndDates(lastModStartDate, lastModEndDate)
                         .build()
                 .executeRequest().getEntity();
+
         persistMetadata(response);
         persistCveDetails(response);
     }
@@ -121,7 +122,7 @@ public class NvdMirrorManager {
     }
 
     private CveEntity processFile(Path filepath) {
-        return cveEntityMarshaller.unmarshalJson(HelperFunctions.readJsonFile(filepath));
+        return jsonSerializer.deserialize(HelperFunctions.readJsonFile(filepath), CveEntity.class);
     }
 
 }

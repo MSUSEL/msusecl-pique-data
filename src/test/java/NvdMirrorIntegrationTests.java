@@ -1,11 +1,11 @@
 import businessObjects.cve.Cve;
-import businessObjects.cve.CveEntity;
 import businessObjects.cve.NvdMirrorMetaData;
+import com.google.gson.Gson;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
-import handlers.IJsonMarshaller;
-import handlers.JsonMarshallerFactory;
+import handlers.IJsonSerializer;
 import handlers.JsonResponseHandler;
+import handlers.JsonSerializer;
 import org.junit.Test;
 import persistence.IDao;
 import persistence.IDataSource;
@@ -60,10 +60,10 @@ public class NvdMirrorIntegrationTests {
 
         NvdMirrorMetaData metaData = nvdMirror.getMetaData();
 
-        System.out.println(metaData.getTotalResults());
+        System.out.println(metaData.getCvesModified());
         System.out.println(metaData.getFormat());
-        System.out.println(metaData.getVersion());
-        System.out.println(metaData.getTimestamp());
+        System.out.println(metaData.getApiVersion());
+        System.out.println(metaData.getLastTimestamp());
     }
 
     @Test
@@ -91,9 +91,9 @@ public class NvdMirrorIntegrationTests {
         IDataSource<Connection> dataSource = new PostgresConnectionManager(new CredentialService());
         IDao<NvdMirrorMetaData> dao = new PostgresMetadataDao(dataSource);
         NvdMirrorMetaData metaData = new NvdMirrorMetaData();
-        metaData.setTimestamp("2024-09-07T23:26:08.260");
-        metaData.setVersion("2.0");
-        metaData.setTotalResults("255980");
+        metaData.setLastTimestamp("2024-09-07T23:26:08.260");
+        metaData.setApiVersion("2.0");
+        metaData.setCvesModified("255980");
         metaData.setFormat("NVD_CVE");
 
         dao.upsert(Collections.singletonList(metaData));
@@ -110,10 +110,10 @@ public class NvdMirrorIntegrationTests {
 
     @Test
     public void testDBSetup() {
+        IJsonSerializer serializer = new JsonSerializer(new Gson());
         IDataSource<Connection> dataSource = new PostgresConnectionManager(
                         new CredentialService(CREDENTIALS_FILE_PATH));
-        JsonMarshallerFactory jsonMarshallerFactory = new JsonMarshallerFactory();
-        IDao<Cve> postgresCveDao = new PostgresCveDao(dataSource, jsonMarshallerFactory.getCveMarshaller());
+        IDao<Cve> postgresCveDao = new PostgresCveDao(dataSource, serializer);
         CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
         IDao<NvdMirrorMetaData> postgresMetaDataDao = new PostgresMetadataDao(dataSource);
         INvdMirrorService mirrorService = new MirrorService(cveResponseProcessor, postgresCveDao, postgresMetaDataDao);
@@ -123,7 +123,7 @@ public class NvdMirrorIntegrationTests {
                 new NvdMirrorManager(
                         cveResponseProcessor,
                         new JsonResponseHandler(),
-                        jsonMarshallerFactory.getCveEntityMarshaller(),
+                        serializer,
                         postgresCveDao,
                         postgresMetaDataDao),
                 mirrorService);
