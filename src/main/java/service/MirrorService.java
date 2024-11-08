@@ -5,6 +5,7 @@ import businessObjects.cve.Metrics;
 import businessObjects.cve.NvdMirrorMetaData;
 import persistence.IDao;
 import exceptions.DataAccessException;
+import persistence.postgreSQL.PostgresMetadataDao;
 
 import java.util.Collections;
 import java.util.List;
@@ -13,9 +14,9 @@ import java.util.Map;
 public final class MirrorService implements INvdMirrorService{
     private final CveResponseProcessor cveResponseProcessor;
     private final IDao<Cve> cveDao;
-    private final IDao<NvdMirrorMetaData> metadataDao;
+    private final PostgresMetadataDao metadataDao;
 
-    public MirrorService(CveResponseProcessor cveResponseProcessor, IDao<Cve> cveDao, IDao<NvdMirrorMetaData> metadataDao) {
+    public MirrorService(CveResponseProcessor cveResponseProcessor, IDao<Cve> cveDao, PostgresMetadataDao metadataDao) {
         this.cveResponseProcessor = cveResponseProcessor;
         this.cveDao = cveDao;
         this.metadataDao = metadataDao;
@@ -39,7 +40,7 @@ public final class MirrorService implements INvdMirrorService{
     // FIXME: fetch metadata by something other than auto-generated id number
     @Override
     public NvdMirrorMetaData handleGetCurrentMetaData() throws DataAccessException {
-        return metadataDao.fetch(Collections.singletonList("1")).get(0);
+        return metadataDao.fetch().get(0);
     }
 
     @Override

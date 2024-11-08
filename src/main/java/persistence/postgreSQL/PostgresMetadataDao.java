@@ -11,18 +11,17 @@ import java.util.List;
 
 import static persistence.postgreSQL.StoredProcedureCalls.UPSERT_METADATA;
 
-public final class PostgresMetadataDao implements IDao<NvdMirrorMetaData> {
+public final class PostgresMetadataDao {
     private final Connection conn;
 
     public PostgresMetadataDao(IDataSource<Connection> dataSource) {
         this.conn = dataSource.getConnection();
     }
 
-    public List<NvdMirrorMetaData> fetch(List<String> metadataId) throws DataAccessException {
+    public List<NvdMirrorMetaData> fetch() throws DataAccessException {
         try {
             String sql = "SELECT * FROM nvd.metadata;";
             PreparedStatement statement = conn.prepareStatement(sql);
-            statement.setInt(1, Integer.parseInt(metadataId.get(0)));
             ResultSet rs = statement.executeQuery();
             NvdMirrorMetaData metaData = new NvdMirrorMetaData();
 
@@ -40,15 +39,10 @@ public final class PostgresMetadataDao implements IDao<NvdMirrorMetaData> {
         }
     }
 
-    @Override
     public void upsert(List<NvdMirrorMetaData> metadata) throws DataAccessException {
         insertMetadata(metadata.get(0));
     }
 
-    @Override
-    public void delete(List<String> ids) throws DataAccessException {
-
-    }
 
     private void insertMetadata(NvdMirrorMetaData metadata) {
         try {

@@ -1,5 +1,8 @@
 import businessObjects.cve.*;
 import businessObjects.ghsa.SecurityAdvisory;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
 import org.junit.Test;

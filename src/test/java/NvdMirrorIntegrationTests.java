@@ -68,12 +68,11 @@ public class NvdMirrorIntegrationTests {
 
     @Test
     public void testInsertSingleCve() throws DataAccessException {
-        // TODO replace this with mocked Cve object
-        PiqueDataFactory piqueDataFactory = new PiqueDataFactory();
+        PiqueDataFactory piqueDataFactory = new PiqueDataFactory(CREDENTIALS_FILE_PATH);
         PiqueData piqueData = piqueDataFactory.getPiqueData();
         NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
 
-        Cve cve = piqueData.getCve(TestConstants.CVE_A);
+        Cve cve = piqueData.getCveFromNvd(TestConstants.CVE_A);
         nvdMirror.insertSingleCve(cve);
     }
 
@@ -89,7 +88,7 @@ public class NvdMirrorIntegrationTests {
     @Test
     public void testInsertMetaData() throws DataAccessException {
         IDataSource<Connection> dataSource = new PostgresConnectionManager(new CredentialService());
-        IDao<NvdMirrorMetaData> dao = new PostgresMetadataDao(dataSource);
+        PostgresMetadataDao dao = new PostgresMetadataDao(dataSource);
         NvdMirrorMetaData metaData = new NvdMirrorMetaData();
         metaData.setLastTimestamp("2024-09-07T23:26:08.260");
         metaData.setApiVersion("2.0");
@@ -115,7 +114,7 @@ public class NvdMirrorIntegrationTests {
                         new CredentialService(CREDENTIALS_FILE_PATH));
         IDao<Cve> postgresCveDao = new PostgresCveDao(dataSource, serializer);
         CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
-        IDao<NvdMirrorMetaData> postgresMetaDataDao = new PostgresMetadataDao(dataSource);
+        PostgresMetadataDao postgresMetaDataDao = new PostgresMetadataDao(dataSource);
         INvdMirrorService mirrorService = new MirrorService(cveResponseProcessor, postgresCveDao, postgresMetaDataDao);
 
         Migration migration = new Migration(

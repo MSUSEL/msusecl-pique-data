@@ -1,6 +1,7 @@
 package persistence.postgreSQL;
 
 import businessObjects.cve.Cve;
+import businessObjects.cve.Vulnerability;
 import exceptions.DataAccessException;
 import handlers.IJsonSerializer;
 import org.slf4j.Logger;
@@ -10,10 +11,9 @@ import persistence.IDataSource;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import static common.Constants.DB_QUERY_FAILED;
-import static common.Constants.DB_QUERY_NO_RESULTS;
 import static persistence.postgreSQL.StoredProcedureCalls.*;
 
 public final class PostgresCveDao implements IDao<Cve> {
@@ -33,15 +33,21 @@ public final class PostgresCveDao implements IDao<Cve> {
 
     @Override
     public List<Cve> fetch(List<String> ids) throws DataAccessException {
-        List<Cve> result;
+        String base = "SELECT vulnerability FROM nvd.cve WHERE cve_id IN (";
+        String sql = formatBulkFetchSQL(ids, base);
+        try {
+            PreparedStatement statement = conn.prepareStatement(sql);
+            ResultSet rs = statement.executeQuery();
+            List<Cve> result = new ArrayList<>();
+            while (rs.next()) {
+                result.add(jsonSerializer.deserialize(rs.getString("vulnerability"), Vulnerability.class).getCve());
+            }
 
-        if (ids.size() > 1) {
-            result = performBulkFetch(ids);
-        } else {
-            result = performFetch(ids.get(0));
+            return result;
+
+        } catch (SQLException e) {
+            throw new DataAccessException(e);
         }
-
-        return result;
     }
 
     @Override
@@ -49,7 +55,7 @@ public final class PostgresCveDao implements IDao<Cve> {
         if (cves.size() > 1) {
             performBulkInsert(cves);
         } else {
-            performUpsert(cves.get(0));
+            performBulkInsert(Collections.singletonList(cves.get(0)));
         }
     }
 
@@ -67,6 +73,7 @@ public final class PostgresCveDao implements IDao<Cve> {
     }
 
     private void performUpsert(Cve cve) throws DataAccessException {
+        formatCveInsertParams(Collections.singletonList(cve));
         try {
             CallableStatement statement = conn.prepareCall(UPSERT_VULNERABILITY);
             statement.setString(1, cve.getId());
@@ -105,48 +112,6 @@ public final class PostgresCveDao implements IDao<Cve> {
             statement.execute();
         } catch (SQLException e) {
             throw new DataAccessException(e);
-        }
-    }
-
-    private List<Cve> performBulkFetch(List<String> ids) throws DataAccessException {
-        String base = "SELECT cve FROM nvd.cve WHERE cve_id IN (";
-        String sql = formatBulkFetchSQL(ids, base);
-        try {
-            PreparedStatement statement = conn.prepareStatement(sql);
-            ResultSet rs = statement.executeQuery();
-            List<Cve> result = new ArrayList<>();
-            while (rs.next()) {
-                result.add(jsonSerializer.deserialize(rs.getString("cve"), Cve.class));
-            }
-
-            return result;
-
-        } catch (SQLException e) {
-            throw new DataAccessException(e);
-        }
-    }
-
-    private List<Cve> performFetch(String id) throws DataAccessException {
-        List<Cve> results = new ArrayList<>();
-
-        try {
-            String sql = "SELECT vulnerability FROM nvd.cve WHERE cve_id = ?;";
-            PreparedStatement statement = conn.prepareStatement(sql);
-            statement.setString(1, id);
-            ResultSet rs = statement.executeQuery();
-
-            if (rs.next()) {
-                String result = rs.getString("vulnerability");
-                Cve resultCve = jsonSerializer.deserialize(result, Cve.class);
-                results.add(resultCve);
-                return results;
-            } else {
-                LOGGER.info(DB_QUERY_NO_RESULTS);
-                throw new DataAccessException(DB_QUERY_NO_RESULTS);
-            }
-        } catch (SQLException e) {
-            LOGGER.error(DB_QUERY_FAILED, e);
-            throw new DataAccessException(DB_QUERY_FAILED, e);
         }
     }
 

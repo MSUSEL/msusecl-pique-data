@@ -33,7 +33,7 @@ LANGUAGE plpgsql
 AS $$
 BEGIN
     INSERT INTO nvd.cve (cve_id, vulnerability)
-    SELECT cve_id, json_build_object('vulnerability', detail)
+    SELECT cve_id, json_build_object('cve', detail)
     FROM unnest(p_cve_ids) WITH ORDINALITY AS cve_id(cve_id, ord)
     JOIN unnest(p_vulnerability) WITH ORDINALITY AS vulnerability(detail, ord)
       ON cve_id.ord = vulnerability.ord

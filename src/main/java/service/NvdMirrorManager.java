@@ -1,6 +1,7 @@
 package service;
 
 import handlers.IJsonSerializer;
+import persistence.postgreSQL.PostgresMetadataDao;
 import presentation.NvdRequestBuilder;
 import businessObjects.cve.CveEntity;
 import businessObjects.cve.Cve;
@@ -23,14 +24,14 @@ public class NvdMirrorManager {
     private final ResponseHandler<String> jsonResponseHandler;
     private final IJsonSerializer jsonSerializer;
     private final IDao<Cve> cveDao;
-    private final IDao<NvdMirrorMetaData> metadataDao;
+    private final PostgresMetadataDao metadataDao;
     private static final Logger LOGGER = LoggerFactory.getLogger(NvdMirrorManager.class);
 
     public NvdMirrorManager(CveResponseProcessor cveResponseProcessor,
                             ResponseHandler<String> jsonResponseHandler,
                             IJsonSerializer jsonSerializer,
                             IDao<Cve> cveDao,
-                            IDao<NvdMirrorMetaData> metadataDao) {
+                            PostgresMetadataDao metadataDao) {
         this.cveResponseProcessor = cveResponseProcessor;
         this.jsonResponseHandler = jsonResponseHandler;
         this.jsonSerializer = jsonSerializer;

@@ -16,7 +16,7 @@ public final class PgTableOperationsDao {
     private final String createCveTable = "CREATE TABLE IF NOT EXISTS \"nvd\".\"cve\" ( " +
             "\"id\" integer DEFAULT nextval('cve_id_seq') NOT NULL, " +
             "\"cve_id\" text, " +
-            "\"Vulnerability\" jsonb, " +
+            "\"vulnerability\" jsonb, " +
             "CONSTRAINT \"cve_cve_id\" UNIQUE (\"cve_id\"), " +
             "CONSTRAINT \"cve_pkey\" PRIMARY KEY (\"id\") " +
             ") WITH (oids = false); ";
