@@ -1,8 +1,5 @@
 import businessObjects.cve.*;
 import businessObjects.ghsa.SecurityAdvisory;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
 import org.junit.Test;
@@ -14,6 +11,7 @@ import java.util.*;
 
 import static common.Constants.CREDENTIALS_FILE_PATH;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 /**
  * Integration tests covering PiqueData in the presentation layer
@@ -64,14 +62,14 @@ public class PiqueDataIntegrationTests {
     public void testGetLocalCwes() throws DataAccessException {
        List<String> cwes = piqueData.getCweName(TestConstants.CVE_B);
 
-       assertEquals(cwes.get(0), TestConstants.CVE_B_CWE_ORACLE);
+       assertEquals(TestConstants.CVE_B_CWE_ORACLE, cwes.get(0));
     }
 
     @Test
     public void testGetPersistentCwes() throws DataAccessException {
         List<String> cwes = piqueData.getCweName(TestConstants.CVE_B);
 
-        assertEquals(cwes.get(0), TestConstants.CVE_B_CWE_ORACLE);
+        assertEquals(TestConstants.CVE_B_CWE_ORACLE, cwes.get(0));
     }
 
     @Test
@@ -120,6 +118,9 @@ public class PiqueDataIntegrationTests {
     @Test
     public void testMarshalMetadataToJson() throws DataAccessException {
         NvdMirrorMetaData metadata = nvdMirror.getMetaData();
-
+        assertNotEquals(null, metadata.getFormat());
+        assertNotEquals(null, metadata.getLastTimestamp());
+        assertNotEquals(null, metadata.getApiVersion());
+        assertNotEquals(null, metadata.getCvesModified());
     }
 }
