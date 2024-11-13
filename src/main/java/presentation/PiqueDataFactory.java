@@ -29,6 +29,7 @@ import handlers.JsonResponseHandler;
 import handlers.JsonSerializer;
 import handlers.SecurityAdvisoryMarshaller;
 import persistence.IDataSource;
+import persistence.postgreSQL.Migration;
 import persistence.postgreSQL.PostgresConnectionManager;
 import persistence.postgreSQL.PostgresCveDao;
 import persistence.postgreSQL.PostgresMetadataDao;
@@ -42,6 +43,8 @@ public class PiqueDataFactory {
     private final GhsaApiService ghsaApiService = new GhsaApiService(new GhsaResponseProcessor(), new SecurityAdvisoryMarshaller(), jsonResponseHandler);
     private final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
     private final IDataSource<Connection> pgDataSource;
+    private final NvdMirrorManager manager = instantiatePgNvdMirrorManager();
+    private final INvdMirrorService nvdMirrorService = instantiatePgMirrorService();
 
     public PiqueDataFactory() {
         this.pgDataSource = new PostgresConnectionManager(new CredentialService());
@@ -55,12 +58,15 @@ public class PiqueDataFactory {
         return new PiqueData(
                 new NvdApiService(jsonResponseHandler, jsonSerializer),
                 ghsaApiService,
-                instantiatePgMirrorService(),
+                nvdMirrorService,
                 cveResponseProcessor);
     }
 
     public NvdMirror getNvdMirror() {
-        return new NvdMirror(instantiatePgMirrorService(), instantiatePgNvdMirrorManager());
+        return new NvdMirror(
+                nvdMirrorService,
+                manager,
+                new Migration(pgDataSource, manager, nvdMirrorService));
     }
 
     public NvdRequestBuilder getNvdRequestBuilder() {

@@ -152,4 +152,11 @@ public class NvdMirrorIntegrationTests {
 
         migration.migrate();
     }
+
+    @Test
+    public void testBuildAndHydrateMirror() throws DataAccessException, ApiCallException {
+        PiqueDataFactory piqueDataFactory = new PiqueDataFactory(CREDENTIALS_FILE_PATH);
+        NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
+        nvdMirror.buildAndHydrateMirror();
+    }
 }

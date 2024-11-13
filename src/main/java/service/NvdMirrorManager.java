@@ -24,6 +24,7 @@
 package service;
 
 import handlers.IJsonSerializer;
+import persistence.postgreSQL.Migration;
 import persistence.postgreSQL.PostgresMetadataDao;
 import presentation.NvdRequestBuilder;
 import businessObjects.cve.CveEntity;
@@ -148,5 +149,4 @@ public class NvdMirrorManager {
     private CveEntity processFile(Path filepath) {
         return jsonSerializer.deserialize(HelperFunctions.readJsonFile(filepath), CveEntity.class);
     }
-
 }
