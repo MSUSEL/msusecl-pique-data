@@ -6,6 +6,11 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: nvd_mirror
+    networks:
+      docker_postgres_network:
+        aliases:
+          - postgres_network
+
     ports:
       - "5432:5432"
     volumes:
@@ -15,7 +20,14 @@ services:
     image: adminer:latest
     ports:
       - "8080:8080"
+    networks:
+      docker_postgres_network:
+        aliases:
+          - postgres_network
 
 volumes:
   postgres_data:
 
+networks:
+  docker_postgres_network:
+    driver: bridge
