@@ -34,7 +34,6 @@ import persistence.IDataSource;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static persistence.postgreSQL.StoredProcedureCalls.*;
@@ -42,7 +41,6 @@ import static persistence.postgreSQL.StoredProcedureCalls.*;
 public final class PostgresCveDao implements IDao<Cve> {
     private final Connection conn;
     private final IJsonSerializer jsonSerializer;
-    private static final Logger LOGGER = LoggerFactory.getLogger(PostgresCveDao.class);
 
     public PostgresCveDao(IDataSource<Connection> dataSource, IJsonSerializer jsonSerializer) {
         this.jsonSerializer = jsonSerializer;
@@ -75,11 +73,8 @@ public final class PostgresCveDao implements IDao<Cve> {
 
     @Override
     public void upsert(List<Cve> cves) throws DataAccessException {
-        if (cves.size() > 1) {
-            performBulkInsert(cves);
-        } else {
-            performBulkInsert(Collections.singletonList(cves.get(0)));
-        }
+        formatCveInsertParams(cves);
+        executePGBulkInsertCall();
     }
 
     @Override
@@ -93,23 +88,6 @@ public final class PostgresCveDao implements IDao<Cve> {
         } catch (SQLException e) {
             throw new DataAccessException(e);
         }
-    }
-
-    private void performUpsert(Cve cve) throws DataAccessException {
-        formatCveInsertParams(Collections.singletonList(cve));
-        try {
-            CallableStatement statement = conn.prepareCall(UPSERT_VULNERABILITY);
-            statement.setString(1, cve.getId());
-            statement.setString(2, jsonSerializer.serialize(cve));
-            statement.execute();
-        } catch (SQLException e) {
-            throw new DataAccessException(e);
-        }
-    }
-
-    private void performBulkInsert(List<Cve> cves) throws DataAccessException {
-        formatCveInsertParams(cves);
-        executePGBulkInsertCall();
     }
 
     private void formatCveInsertParams(List<Cve> cves) {
@@ -153,16 +131,16 @@ public final class PostgresCveDao implements IDao<Cve> {
         return baseSQL + idList;
     }
 
-    private void performUpdate(Cve cves) throws DataAccessException {
-        try {
-            CallableStatement callableStatement = conn.prepareCall(UPSERT_BATCH_VULNERABILITIES);
-            callableStatement.setString(1, cves.getId());
-            callableStatement.setString(2, jsonSerializer.serialize(cves));
-            callableStatement.execute();
-        } catch (SQLException e) {
-            throw new DataAccessException(e);
-        }
-    }
+//    private void performUpdate(Cve cves) throws DataAccessException {
+//        try {
+//            CallableStatement callableStatement = conn.prepareCall(UPSERT_BATCH_VULNERABILITIES);
+//            callableStatement.setString(1, cves.getId());
+//            callableStatement.setString(2, jsonSerializer.serialize(cves));
+//            callableStatement.execute();
+//        } catch (SQLException e) {
+//            throw new DataAccessException(e);
+//        }
+//    }
 
     private Object[] formatJsonbArray(String[] details) {
         Object[] jsonbArray = new Object[details.length];

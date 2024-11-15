@@ -64,7 +64,7 @@ public class NvdMirrorIntegrationTests {
 
     @Test
     public void testUpdateNvdMirror() throws DataAccessException, ApiCallException {
-        PiqueDataFactory piqueDataFactory = new PiqueDataFactory();
+        PiqueDataFactory piqueDataFactory = new PiqueDataFactory(CREDENTIALS_FILE_PATH);
         NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
         nvdMirror.updateNvdMirror();
     }

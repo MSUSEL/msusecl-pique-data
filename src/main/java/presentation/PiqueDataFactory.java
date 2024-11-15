@@ -43,8 +43,6 @@ public class PiqueDataFactory {
     private final GhsaApiService ghsaApiService = new GhsaApiService(new GhsaResponseProcessor(), new SecurityAdvisoryMarshaller(), jsonResponseHandler);
     private final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
     private final IDataSource<Connection> pgDataSource;
-    private final NvdMirrorManager manager = instantiatePgNvdMirrorManager();
-    private final INvdMirrorService nvdMirrorService = instantiatePgMirrorService();
 
     public PiqueDataFactory() {
         this.pgDataSource = new PostgresConnectionManager(new CredentialService());
@@ -58,11 +56,14 @@ public class PiqueDataFactory {
         return new PiqueData(
                 new NvdApiService(jsonResponseHandler, jsonSerializer),
                 ghsaApiService,
-                nvdMirrorService,
+                instantiatePgMirrorService(),
                 cveResponseProcessor);
     }
 
     public NvdMirror getNvdMirror() {
+        NvdMirrorManager manager = instantiatePgNvdMirrorManager();
+        INvdMirrorService nvdMirrorService = instantiatePgMirrorService();
+
         return new NvdMirror(
                 nvdMirrorService,
                 manager,

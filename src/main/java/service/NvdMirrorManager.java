@@ -149,4 +149,4 @@ public class NvdMirrorManager {
     private CveEntity processFile(Path filepath) {
         return jsonSerializer.deserialize(HelperFunctions.readJsonFile(filepath), CveEntity.class);
     }
-}
+    }

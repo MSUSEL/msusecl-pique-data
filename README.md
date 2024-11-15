@@ -1,49 +1,45 @@
-# PiqueData Library
+# Pique Data (msusecl-pique-data)
 
-PiqueData (on github as "msusecl-data-utility") is a java library primarily intended for the Software Engineering and Cybersercutiy
-Laboratory, Montana State University - Bozeman (SECL). While members of this research lab are the intended users, anyone developing a PIQUE
-model may find this library useful for accessing third-party APIs or managing a local mirror of the National Vulnerability Database (NVD).
-__Please note that at this time, the SECL does not offer public support for this library, does not guarantee functionality, and
-it is "use at your own risk".__
+Pique Data is a java library, intended for users of [PIQUE](https://GitHub.com/MSUSEL/msusel-pique), that provides features related to accessing
+public repositories of cyber vulnerabilities. In particular, it provides methods to access the the [National Vulnerability
+Database](https://nvd.nist.gov/developers/api-workflows) (NVD) CVE 2.0 API and the [GitHub Security Advisory Database](https://GitHub.com/advisories).
+The NVD has a limited feature set and recommends that heavy users of its API's create a mirror of the database. As such, this library provides
+methods to create and interact with a local mirror of the NVD. This local mirror can be maintained on a dev machine or permanently stored on a
+database server. Also this mirror can be updated as often as necessary to maintain parity with the current NVD. The performance improvements
+of a local NVD mirror over the use of the API make it the recommended way to interact with the NVD when using Pique Data.
 
-The original intent of this project was to provide opinionated access to the NVD's CVE2.0 API.
-The official NVD APIs provide limited functionality. If greater expressiveness or flexibility is required, users are encouraged to [mirror the
-database](https://nvd.nist.gov/developers/api-workflows). Some PIQUE models which depend on the NVD, already build a mirror of the NVD at startup.
-However, this complicates the setup, benchmarking and evaluation phases of PIQUE. As such, this project evolved from simply
-accessing the NVD through API calls to maintaining an on-prem mirror at the lab. **Again, please note that this mirror is for use only
-by members of the SECL.** Recognizing that not all users of PiqueData will be members of SECL, this library provides flexibility to
-build ephemeral mirrors with MongoDB and Docker. Outside the lab, this is the recommended approach.  More instructions follow on
-how to build permanent and ephemeral mirrors and interact with 3rd-party APIs.
-
-Finally, this is a work in progress. The developers will attempt to avoid breaking changes but stability is not currently guaranteed.
+This library is versioned and developers will attempt to avoid breaking changes. However, backwards compatibility is not guaranteed.
+View the Changelog for information on breaking changes. __Please note there is no warranty of any kind and this library is "use at your own risk"__
 
 
 
 -----------------
 
 ### Installation
-This project requires java 8+ and only supports the maven build system.
+This project requires java 11+ and only supports the maven build system.
 To install, add the following to your project's pom.xml file. Alternatively, you can clone the
-git repository and compile from source using java language level 8.
+git repository and compile from source using java language level 11.
 ```
 <dependency>
     <groupId>edu.montana.gsoc.msusel</groupId>
-    <artifactId>msusecl-data-utility</artifactId>
-    <version>0.0.1</version>
+    <artifactId>msusecl-pique-data</artifactId>
+    <version>1.0.0</version>
 </dependency>
 ```
 
 ## General Setup
 ### Necessary Software
-* java development kit with a language level of 8+
+* java development kit with a language level of 11+
 * docker
 
-### Environment Variables
-PiqueData uses environment variables to store sensitive and global values. To get the best out of this library,
-it is necessary to set up an [NVD api key](https://nvd.nist.gov/developers/request-an-api-key). This will prevent
-rate limits from interrupting calls. Additionally calls for Github Security Advisories require a Personal Access
-Token from [Github](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
-No scope needs to be assigned to this token, but it must exist on the user's github profile. To use these tokens in PiqueData,
+
+### Configuration
+#### Environment Variables
+PiqueData can use environment variables to handle configuration values. To get the best out of this library,
+it is recommended to set up an [NVD api key](https://nvd.nist.gov/developers/request-an-api-key). This will prevent
+rate limits from interrupting calls. Additionally API calls to GitHub Security Advisories require a Personal Access
+Token from [GitHub](https://docs.GitHub.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
+No scope needs to be assigned to this token, but it must exist on the user's GitHub profile. To use these tokens with Pique Data,
 create the following environment variables:
 
 ```bash
@@ -55,9 +51,30 @@ export GITHUB_PAT=<Your Personal Access Token>
 
 
 -----------------
-## Database Context and Setup
+### Database Setup
+The NVD Mirror created by this library uses postgres. The user will need to set up postgres on their hardware with one of two methods.
 
-### On-Prem NVD Mirror
+1. Docker Image
+    * Be sure docker is installed on your system and the docker daemon is running
+    * Download this [docker compose](https://raw.githubusercontent.com/MSUSEL/msusecl-data-utility/refs/heads/remove-mongo-and-improve-postgres/src/main/resources/docker-compose.yml) file or run the following command in bash
+        ```bash
+        curl -o https://raw.githubusercontent.com/MSUSEL/msusecl-data-utility/refs/heads/remove-mongo-and-improve-postgres/src/main/resources/docker-compose.yml
+        ``````
+    * Run the following command to download and configure a postgres instance in a docker container.
+        ```bash
+        docker-compose up -d
+        ```
+    * This docker compose file bundles Adminer, a simple, graphical database management tool which will run containerized over localhost. To start it, naviagate to the following url in a browser.  *Note that the port number can be customized in the docker-compose.yml file.*
+        ```bash
+        localhost:8080
+        ```
+
+2. Bare Metal Installation
+
+    * Follow instructions on the postgres [website](https://www.postgresql.org/) to install postgres on your system.
+    * Configure a DBMS of your choice.
+
+#### On-Prem NVD Mirror
 The PiqueData library supports two different database systems and is architected to easily incorporate
 new data sources. If you are developing a pique model in the SECL, and that pique model depends on information from
 the NVD, the on-prem (or persistent) database is likely the right data source. The on-prem NVD mirror is updated
