@@ -32,7 +32,7 @@ import presentation.PiqueDataFactory;
 
 import java.util.*;
 
-import static common.Constants.CREDENTIALS_FILE_PATH;
+import static common.Constants.DEFAULT_CREDENTIALS_FILE_PATH;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
@@ -43,7 +43,7 @@ import static org.junit.Assert.assertNotEquals;
 // TODO test edge cases and create more robust asserts
 // TODO Create Mocked databases rather than hitting "production"
 public class PiqueDataIntegrationTests {
-    private final PiqueDataFactory piqueDataFactory = new PiqueDataFactory(CREDENTIALS_FILE_PATH);
+    private final PiqueDataFactory piqueDataFactory = new PiqueDataFactory(DEFAULT_CREDENTIALS_FILE_PATH);
     private final PiqueData piqueData = piqueDataFactory.getPiqueData();
     private final NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
 

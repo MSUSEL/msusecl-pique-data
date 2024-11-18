@@ -71,8 +71,6 @@ PG_USERNAME=postgres
 PG_PASS=postgres
 ```
 
-
-
 *Note: extra steps may be required to make these environment variables persistent between sessions. Check your operating system's
 documentation on custom environment variables for more information*
 
@@ -84,7 +82,7 @@ is a skeleton configuration file. You can easily download that file with the fol
 curl -o https://raw.githubusercontent.com/MSUSEL/msusecl-data-utility/refs/heads/master/src/main/resources/credentialsTemplate.json
 ```
 
-__*Important*__ To work properly, the file must be named `configuration.json`. The recommended filepath is `/src/main/resources/configuration.json`, but this can be customized.
+__*Important:*__ To work properly, the file must be named `configuration.json`. The recommended filepath is `/src/main/resources/configuration.json`, but this can be customized.
 
 *Note: Only one of the above methods is necessary to configure your project to use Pique Data*
 

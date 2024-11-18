@@ -64,14 +64,14 @@ public class NvdMirrorIntegrationTests {
 
     @Test
     public void testUpdateNvdMirror() throws DataAccessException, ApiCallException {
-        PiqueDataFactory piqueDataFactory = new PiqueDataFactory(CREDENTIALS_FILE_PATH);
+        PiqueDataFactory piqueDataFactory = new PiqueDataFactory(DEFAULT_CREDENTIALS_FILE_PATH);
         NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
         nvdMirror.updateNvdMirror();
     }
 
     @Test
     public void testGetLocalMetaData() throws DataAccessException {
-        PiqueDataFactory piqueDataFactory = new PiqueDataFactory(CREDENTIALS_FILE_PATH);
+        PiqueDataFactory piqueDataFactory = new PiqueDataFactory(DEFAULT_CREDENTIALS_FILE_PATH);
         NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
         NvdMirrorMetaData metaData = nvdMirror.getMetaData();
     }
@@ -91,7 +91,7 @@ public class NvdMirrorIntegrationTests {
 
     @Test
     public void testInsertSingleCve() throws DataAccessException {
-        PiqueDataFactory piqueDataFactory = new PiqueDataFactory(CREDENTIALS_FILE_PATH);
+        PiqueDataFactory piqueDataFactory = new PiqueDataFactory(DEFAULT_CREDENTIALS_FILE_PATH);
         PiqueData piqueData = piqueDataFactory.getPiqueData();
         NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
 
@@ -123,7 +123,7 @@ public class NvdMirrorIntegrationTests {
 
    @Test
    public void testPiqueDataFactoryWithConstructorParams() throws DataAccessException {
-        PiqueDataFactory piqueDataFactoryWithCreds = new PiqueDataFactory(CREDENTIALS_FILE_PATH);
+        PiqueDataFactory piqueDataFactoryWithCreds = new PiqueDataFactory(DEFAULT_CREDENTIALS_FILE_PATH);
         PiqueData piqueDataWithCreds = piqueDataFactoryWithCreds.getPiqueData();
 
         Cve cve = piqueDataWithCreds.getCve(TestConstants.CVE_A);
@@ -134,7 +134,7 @@ public class NvdMirrorIntegrationTests {
     public void testDBSetup() {
         IJsonSerializer serializer = new JsonSerializer(new Gson());
         IDataSource<Connection> dataSource = new PostgresConnectionManager(
-                        new CredentialService(CREDENTIALS_FILE_PATH));
+                        new CredentialService(DEFAULT_CREDENTIALS_FILE_PATH));
         IDao<Cve> postgresCveDao = new PostgresCveDao(dataSource, serializer);
         CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
         PostgresMetadataDao postgresMetaDataDao = new PostgresMetadataDao(dataSource);
@@ -155,7 +155,7 @@ public class NvdMirrorIntegrationTests {
 
     @Test
     public void testBuildAndHydrateMirror() throws DataAccessException, ApiCallException {
-        PiqueDataFactory piqueDataFactory = new PiqueDataFactory(CREDENTIALS_FILE_PATH);
+        PiqueDataFactory piqueDataFactory = new PiqueDataFactory(DEFAULT_CREDENTIALS_FILE_PATH);
         NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
         nvdMirror.buildAndHydrateMirror();
     }
