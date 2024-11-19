@@ -1,14 +1,32 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2024 Montana State University Software Engineering and Cybersecurity Laboratory
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package businessObjects;
 
 import businessObjects.baseClasses.BaseRequest;
 import businessObjects.ghsa.SecurityAdvisory;
-import com.google.gson.Gson;
-import common.Constants;
 import exceptions.ApiCallException;
-import handlers.IJsonMarshaller;
-import handlers.JsonMarshallerFactory;
 import handlers.JsonResponseHandler;
-
 import handlers.SecurityAdvisoryMarshaller;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -26,16 +44,19 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 
+import static common.Constants.*;
+
 public final class GHSARequest extends BaseRequest implements IRequest {
     private static final Logger LOGGER = LoggerFactory.getLogger(GHSARequest.class);
-    private final JsonResponseHandler handler = new JsonResponseHandler();
+    private final JsonResponseHandler handler;
     private final String query;
-    private final IJsonMarshaller<SecurityAdvisory> marshaller;
+    private final SecurityAdvisoryMarshaller marshaller;
 
-    public GHSARequest(String httpMethod, String baseURI, Header[] headers, String query, IJsonMarshaller<SecurityAdvisory> marshaller) {
+    public GHSARequest(String httpMethod, String baseURI, Header[] headers, String query, SecurityAdvisoryMarshaller marshaller, JsonResponseHandler jsonResponseHandler) {
         super(httpMethod, baseURI, headers);
         this.query = query;
         this.marshaller = marshaller;
+        this.handler = jsonResponseHandler;
     }
 
     @Override
@@ -51,7 +72,7 @@ public final class GHSARequest extends BaseRequest implements IRequest {
         try {
             return new URIBuilder(baseUri).build();
         } catch (URISyntaxException e) {
-            LOGGER.error(Constants.URI_BUILD_FAILURE_MESSAGE, e);
+            LOGGER.error(URI_BUILD_FAILURE_MESSAGE, e);
             throw new RuntimeException(e);
         }
     }
@@ -74,8 +95,8 @@ public final class GHSARequest extends BaseRequest implements IRequest {
                     marshaller.unmarshalJson(handler.handleResponse(response)),
                     status);
         } else {
-            LOGGER.info(Constants.RESPONSE_STATUS_MESSAGE, status);
-            throw new IOException(Constants.REQUEST_EXECUTION_FAILURE_MESSAGE + response.getStatusLine());
+            LOGGER.info(RESPONSE_STATUS_MESSAGE, status);
+            throw new IOException(REQUEST_EXECUTION_FAILURE_MESSAGE + response.getStatusLine());
         }
     }
 

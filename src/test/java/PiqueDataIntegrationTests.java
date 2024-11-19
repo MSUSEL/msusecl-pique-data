@@ -1,3 +1,26 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2024 Montana State University Software Engineering and Cybersecurity Laboratory
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 import businessObjects.cve.*;
 import businessObjects.ghsa.SecurityAdvisory;
 import exceptions.ApiCallException;
@@ -9,7 +32,9 @@ import presentation.PiqueDataFactory;
 
 import java.util.*;
 
+import static common.Constants.DEFAULT_CREDENTIALS_FILE_PATH;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 /**
  * Integration tests covering PiqueData in the presentation layer
@@ -18,7 +43,7 @@ import static org.junit.Assert.assertEquals;
 // TODO test edge cases and create more robust asserts
 // TODO Create Mocked databases rather than hitting "production"
 public class PiqueDataIntegrationTests {
-    private final PiqueDataFactory piqueDataFactory = new PiqueDataFactory();
+    private final PiqueDataFactory piqueDataFactory = new PiqueDataFactory(DEFAULT_CREDENTIALS_FILE_PATH);
     private final PiqueData piqueData = piqueDataFactory.getPiqueData();
     private final NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
 
@@ -60,14 +85,14 @@ public class PiqueDataIntegrationTests {
     public void testGetLocalCwes() throws DataAccessException {
        List<String> cwes = piqueData.getCweName(TestConstants.CVE_B);
 
-       assertEquals(cwes.get(0), TestConstants.CVE_B_CWE_ORACLE);
+       assertEquals(TestConstants.CVE_B_CWE_ORACLE, cwes.get(0));
     }
 
     @Test
     public void testGetPersistentCwes() throws DataAccessException {
         List<String> cwes = piqueData.getCweName(TestConstants.CVE_B);
 
-        assertEquals(cwes.get(0), TestConstants.CVE_B_CWE_ORACLE);
+        assertEquals(TestConstants.CVE_B_CWE_ORACLE, cwes.get(0));
     }
 
     @Test
@@ -116,6 +141,9 @@ public class PiqueDataIntegrationTests {
     @Test
     public void testMarshalMetadataToJson() throws DataAccessException {
         NvdMirrorMetaData metadata = nvdMirror.getMetaData();
-
+        assertNotEquals(null, metadata.getFormat());
+        assertNotEquals(null, metadata.getLastTimestamp());
+        assertNotEquals(null, metadata.getApiVersion());
+        assertNotEquals(null, metadata.getCvesModified());
     }
 }

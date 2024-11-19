@@ -1,54 +1,76 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2024 Montana State University Software Engineering and Cybersecurity Laboratory
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package service;
 
-import businessObjects.NvdRequestBuilder;
+import handlers.IJsonSerializer;
+import persistence.postgreSQL.Migration;
+import persistence.postgreSQL.PostgresMetadataDao;
+import presentation.NvdRequestBuilder;
 import businessObjects.cve.CveEntity;
 import businessObjects.cve.Cve;
 import businessObjects.cve.NvdMirrorMetaData;
-import common.Constants;
 import common.HelperFunctions;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
-import handlers.IJsonMarshaller;
 import org.apache.http.client.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import persistence.IDao;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
-import java.util.stream.Stream;
+
+import static common.Constants.*;
 
 public class NvdMirrorManager {
     private final CveResponseProcessor cveResponseProcessor;
     private final ResponseHandler<String> jsonResponseHandler;
-    private final IJsonMarshaller<CveEntity> cveEntityMarshaller;
+    private final IJsonSerializer jsonSerializer;
     private final IDao<Cve> cveDao;
-    private final IDao<NvdMirrorMetaData> metadataDao;
+    private final PostgresMetadataDao metadataDao;
     private static final Logger LOGGER = LoggerFactory.getLogger(NvdMirrorManager.class);
 
     public NvdMirrorManager(CveResponseProcessor cveResponseProcessor,
                             ResponseHandler<String> jsonResponseHandler,
-                            IJsonMarshaller<CveEntity> cveEntityMarshaller,
+                            IJsonSerializer jsonSerializer,
                             IDao<Cve> cveDao,
-                            IDao<NvdMirrorMetaData> metadataDao) {
+                            PostgresMetadataDao metadataDao) {
         this.cveResponseProcessor = cveResponseProcessor;
         this.jsonResponseHandler = jsonResponseHandler;
-        this.cveEntityMarshaller = cveEntityMarshaller;
+        this.jsonSerializer = jsonSerializer;
         this.cveDao = cveDao;
         this.metadataDao = metadataDao;
     }
 
     /**
-     * Gets CVEs in bulk from the NVD and stores them in the given database context.
+     * Gets CVEs in bulk from the NVD and stores them in the configured mirror
      */
     public void handleBuildMirror() throws DataAccessException, ApiCallException {
         int cveCount = 1;
 
-        for (int i = Constants.DEFAULT_START_INDEX; i < cveCount; i += Constants.NVD_MAX_PAGE_SIZE) {
-            CveEntity response = new NvdRequestBuilder(jsonResponseHandler, cveEntityMarshaller)
+        for (int i = DEFAULT_START_INDEX; i < cveCount; i += NVD_MAX_PAGE_SIZE) {
+            CveEntity response = new NvdRequestBuilder(jsonResponseHandler, jsonSerializer)
                     .withFullMirrorDefaults(Integer.toString(i))
                     .build()
                    .executeRequest().getEntity();
@@ -59,17 +81,18 @@ public class NvdMirrorManager {
     }
 
     /**
-     * Handles updating the SECL NVD Mirror
-     * @param lastModStartDate Timestamp of previous call to NVD CVE API to update SECL mirror
-     * @param lastModEndDate Typically it is the current time - but provides the upper bound to the time window
+     * Handles updating an NVD Mirror
+     * @param lastModStartDate Timestamp of previous call to NVD CVE API to update mirror
+     * @param lastModEndDate Typically it is the current time - provides the upper bound to the time window
      *                       from which to pull updates
      */
     public void handleUpdateNvdMirror(String lastModStartDate, String lastModEndDate) throws DataAccessException, ApiCallException {
-        CveEntity response = new NvdRequestBuilder(jsonResponseHandler, cveEntityMarshaller)
-                        .withApiKey(Constants.NVD_API_KEY)
+        CveEntity response = new NvdRequestBuilder(jsonResponseHandler, jsonSerializer)
+                        .withApiKey(NVD_API_KEY)
                         .withLastModStartEndDates(lastModStartDate, lastModEndDate)
                         .build()
                 .executeRequest().getEntity();
+
         persistMetadata(response);
         persistCveDetails(response);
     }
@@ -99,23 +122,23 @@ public class NvdMirrorManager {
 
     private void persistPaginatedData(CveEntity response, int loopIndex, int cveCount) throws DataAccessException {
         persistCveDetails(response);
-        if (loopIndex == cveCount - 1) {
+        if (loopIndex >= cveCount - NVD_MAX_PAGE_SIZE) {
             persistMetadata(response);
         }
     }
 
     private void persistCveDetails(CveEntity response) throws DataAccessException {
-        cveDao.insert(cveResponseProcessor.extractAllCves(response));
+        cveDao.upsert(cveResponseProcessor.extractAllCves(response));
     }
 
-    private void persistMetadata(CveEntity response) throws DataAccessException {
-        metadataDao.update(Collections.singletonList(cveResponseProcessor.formatNvdMetaData(response)));
+    public void persistMetadata(CveEntity response) throws DataAccessException {
+        metadataDao.upsert(Collections.singletonList(cveResponseProcessor.formatNvdMetaData(response)));
     }
 
     private void handleSleep(int startIndex, int cveCount) {
         try {
             if (startIndex != cveCount - 1) {
-                Thread.sleep(Constants.DEFAULT_NVD_REQUEST_SLEEP);
+                Thread.sleep(DEFAULT_NVD_REQUEST_SLEEP);
             }
         } catch (InterruptedException e) {
             LOGGER.error("Thread interrupted", e);
@@ -124,7 +147,6 @@ public class NvdMirrorManager {
     }
 
     private CveEntity processFile(Path filepath) {
-        return cveEntityMarshaller.unmarshalJson(HelperFunctions.readJsonFile(filepath));
+        return jsonSerializer.deserialize(HelperFunctions.readJsonFile(filepath), CveEntity.class);
     }
-
-}
+    }
