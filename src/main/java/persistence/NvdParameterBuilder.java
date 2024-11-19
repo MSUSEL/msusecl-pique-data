@@ -21,21 +21,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package businessObjects.baseClasses;
+package persistence;
 
-import lombok.Getter;
-import lombok.Setter;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 
-/**
- * Base class for any HTTP Response Objects
- */
-@Getter
-@Setter
-public abstract class BaseResponse {
-    protected int status;
-    protected String contentType;
-    protected int contentLength;
-    protected String auth;
-    protected String date;
-    protected BaseEntity entity;
+import java.util.ArrayList;
+import java.util.List;
+
+public final class NvdParameterBuilder {
+    private final List<NameValuePair> params = new ArrayList<>();
+
+    public NvdParameterBuilder addParameter(String name, String value) {
+        params.add(new BasicNameValuePair(name, value));
+        return this;
+    }
+
+    public List<NameValuePair> build() {
+        return params;
+    }
 }

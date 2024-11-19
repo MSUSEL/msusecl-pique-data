@@ -1,108 +1,67 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2024 Montana State University Software Engineering and Cybersecurity Laboratory
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package persistence.postgreSQL;
 
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import common.Constants;
+import businessObjects.cve.Cve;
+import businessObjects.cve.Vulnerability;
 import exceptions.DataAccessException;
+import handlers.IJsonSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import businessObjects.cve.Cve;
-import handlers.IJsonMarshaller;
 import persistence.IDao;
 import persistence.IDataSource;
 
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
-// TODO move functionality to stored procedures
+import static persistence.postgreSQL.StoredProcedureCalls.*;
+
 public final class PostgresCveDao implements IDao<Cve> {
     private final Connection conn;
-    private final IJsonMarshaller<Cve> cveDetailsMarshaller;
-    private static final Logger LOGGER = LoggerFactory.getLogger(PostgresCveDao.class);
+    private final IJsonSerializer jsonSerializer;
 
-    public PostgresCveDao(IDataSource<Connection> dataSource, IJsonMarshaller<Cve> cveMarshaller) {
-        this.cveDetailsMarshaller = cveMarshaller;
+    public PostgresCveDao(IDataSource<Connection> dataSource, IJsonSerializer jsonSerializer) {
+        this.jsonSerializer = jsonSerializer;
         this.conn = dataSource.getConnection();
+    }
+
+    private static class CveInsertParams {
+        static String[] cveIds;
+        static Object[] cve;
     }
 
     @Override
     public List<Cve> fetch(List<String> ids) throws DataAccessException {
-        List<Cve> result;
-
-        if(ids.size() > 1) {
-            result = performBulkFetch(ids);
-        } else {
-            result = performFetch(ids.get(0));
-        }
-
-        return result;
-    }
-
-    @Override
-    public void insert(List<Cve> cves) throws DataAccessException {
-        if (cves.size() > 1) {
-            performBulkInsert(cves);
-        } else {
-            performInsert(cves);
-        }
-    }
-
-    @Override
-    public void update(List<Cve> cves) throws DataAccessException {
-        if (cves.size() > 1) {
-            performBulkUpdate(cves);
-        } else {
-            performUpdate(cves);
-        }
-    }
-
-    @Override
-    public void delete(List<String> cveIds) throws DataAccessException {
-
-        if (cveIds.size() > 1) {
-            performDelete(cveIds);
-        } else {
-            performBulkDelete(cveIds);
-        }
-    }
-
-    private void performInsert(List<Cve> cves) throws DataAccessException {
-        String sql = "INSERT INTO nvd.cve (cve_id, details) VALUES (?, CAST(? AS jsonb));";
-        try {
-            PreparedStatement statement = conn.prepareStatement(sql);
-            statement.setString(1, cves.get(0).getId());
-            statement.setString(2, cveDetailsMarshaller.marshalJson(cves.get(0)));
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new DataAccessException(Constants.DB_QUERY_FAILED, e);
-        }
-    }
-
-    private void performBulkInsert(List<Cve> cves) throws DataAccessException {
-        for (Cve cve : cves) {
-            String sql = "INSERT INTO nvd.cve (cve_id, details) VALUES (?, CAST(? AS jsonb));";
-            try {
-                PreparedStatement statement = conn.prepareStatement(sql);
-                statement.setString(1, cve.getId());
-                statement.setString(2, cveDetailsMarshaller.marshalJson(cve));
-                statement.executeUpdate();
-            } catch(SQLException e) {
-                throw new DataAccessException("Insert statement failed", e);
-            }
-        }
-    }
-
-    private List<Cve> performBulkFetch(List<String> ids) throws DataAccessException {
-        String base = "SELECT details FROM nvd.cve WHERE cve_id IN (";
+        String base = "SELECT vulnerability FROM nvd.cve WHERE cve_id IN (";
         String sql = formatBulkFetchSQL(ids, base);
         try {
             PreparedStatement statement = conn.prepareStatement(sql);
             ResultSet rs = statement.executeQuery();
             List<Cve> result = new ArrayList<>();
             while (rs.next()) {
-                result.add(cveDetailsMarshaller.unmarshalJson(rs.getString("details")));
+                result.add(jsonSerializer.deserialize(rs.getString("vulnerability"), Vulnerability.class).getCve());
             }
 
             return result;
@@ -112,23 +71,48 @@ public final class PostgresCveDao implements IDao<Cve> {
         }
     }
 
-    private List<Cve> performFetch(String id) throws DataAccessException {
-        try {
-            String sql = "SELECT details FROM nvd.cve WHERE cve_id = ?;";
-            PreparedStatement statement = conn.prepareStatement(sql);
-            statement.setString(1, id);
-            ResultSet rs = statement.executeQuery();
+    @Override
+    public void upsert(List<Cve> cves) throws DataAccessException {
+        formatCveInsertParams(cves);
+        executePGBulkInsertCall();
+    }
 
-            if (rs.next()) {
-                String result = rs.getString("details");
-                return Collections.singletonList((Cve) cveDetailsMarshaller.unmarshalJson(result));
-            } else {
-                LOGGER.info(Constants.DB_QUERY_NO_RESULTS);
-                throw new DataAccessException(Constants.DB_QUERY_NO_RESULTS);
-            }
+    @Override
+    public void delete(List<String> ids) throws DataAccessException {
+        try {
+            CallableStatement statement = conn.prepareCall(DELETE_CVE);
+            statement.setArray(1, conn.createArrayOf("text", ids.toArray()));
+            statement.setString(2, "nvd.cve");
+            statement.setString(3, "cve_id");
+            statement.execute();
         } catch (SQLException e) {
-            LOGGER.error(Constants.DB_QUERY_FAILED, e);
-            throw new DataAccessException(Constants.DB_QUERY_FAILED, e);
+            throw new DataAccessException(e);
+        }
+    }
+
+    private void formatCveInsertParams(List<Cve> cves) {
+        int size = cves.size();
+        String[] cve_ids = new String[size];
+        String[] cve = new String[size];
+
+        for (int i = 0; i < cves.size(); i++) {
+            cve_ids[i] = cves.get(i).getId();
+            cve[i] = jsonSerializer.serialize(cves.get(i));
+        }
+        Object[] jsonbFormattedCve = formatJsonbArray(cve);
+
+        CveInsertParams.cveIds = cve_ids;
+        CveInsertParams.cve = jsonbFormattedCve;
+    }
+
+    private void executePGBulkInsertCall() throws DataAccessException {
+        try {
+            CallableStatement statement = conn.prepareCall(UPSERT_BATCH_VULNERABILITIES);
+            statement.setArray(1, conn.createArrayOf("TEXT", CveInsertParams.cveIds));
+            statement.setArray(2, conn.createArrayOf("JSONB", CveInsertParams.cve));
+            statement.execute();
+        } catch (SQLException e) {
+            throw new DataAccessException(e);
         }
     }
 
@@ -147,40 +131,21 @@ public final class PostgresCveDao implements IDao<Cve> {
         return baseSQL + idList;
     }
 
-    // FixMe
-    private void performBulkDelete(List<String> cveIds) throws DataAccessException {
-        for (String id : cveIds) {
-            performDelete(cveIds);
-        }
-    }
+//    private void performUpdate(Cve cves) throws DataAccessException {
+//        try {
+//            CallableStatement callableStatement = conn.prepareCall(UPSERT_BATCH_VULNERABILITIES);
+//            callableStatement.setString(1, cves.getId());
+//            callableStatement.setString(2, jsonSerializer.serialize(cves));
+//            callableStatement.execute();
+//        } catch (SQLException e) {
+//            throw new DataAccessException(e);
+//        }
+//    }
 
-    private void performDelete(List<String> cveId) throws DataAccessException {
-        String sql = "DELETE FROM nvd.cve WHERE cve_id = ? RETURNING cve_id;";
+    private Object[] formatJsonbArray(String[] details) {
+        Object[] jsonbArray = new Object[details.length];
+        System.arraycopy(details, 0, jsonbArray, 0, details.length);
 
-        try {
-            PreparedStatement statement = conn.prepareStatement(sql);
-            statement.setString(1, cveId.get(0));
-            statement.executeQuery();
-        } catch (SQLException e) {
-            throw new DataAccessException("Query failed. ", e);
-        }
-    }
-
-    // FixMe
-    private void performBulkUpdate(List<Cve> cves) throws DataAccessException {
-        for (Cve cve : cves) {
-            performUpdate(cves);
-        }
-    }
-
-    private void performUpdate(List<Cve> cves) throws DataAccessException {
-        try {
-            CallableStatement callableStatement = conn.prepareCall("{call update_cve_details(?, ?)}");
-            callableStatement.setString(1, cves.get(0).getId());
-            callableStatement.setString(2, cveDetailsMarshaller.marshalJson(cves.get(0)));
-            callableStatement.execute();
-        } catch (SQLException e) {
-            throw new DataAccessException(e);
-        }
+        return jsonbArray;
     }
 }

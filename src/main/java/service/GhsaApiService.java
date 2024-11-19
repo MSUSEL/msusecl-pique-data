@@ -1,3 +1,26 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2024 Montana State University Software Engineering and Cybersecurity Laboratory
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package service;
 
 import businessObjects.GHSARequest;
@@ -6,7 +29,8 @@ import businessObjects.GraphQlQueries;
 import businessObjects.HTTPMethod;
 import businessObjects.ghsa.SecurityAdvisory;
 import common.Constants;
-import handlers.IJsonMarshaller;
+import handlers.JsonResponseHandler;
+import handlers.SecurityAdvisoryMarshaller;
 import persistence.HeaderBuilder;
 import exceptions.ApiCallException;
 import org.json.JSONException;
@@ -19,11 +43,13 @@ import java.util.List;
 public class GhsaApiService {
     private static final Logger LOGGER = LoggerFactory.getLogger(GhsaApiService.class);
     private final GhsaResponseProcessor ghsaResponseProcessor;
-    private final IJsonMarshaller<SecurityAdvisory> marshaller;
+    private final SecurityAdvisoryMarshaller marshaller;
+    private final JsonResponseHandler responseHandler;
 
-    public GhsaApiService(GhsaResponseProcessor ghsaResponseProcessor, IJsonMarshaller<SecurityAdvisory> marshaller) {
+    public GhsaApiService(GhsaResponseProcessor ghsaResponseProcessor, SecurityAdvisoryMarshaller marshaller, JsonResponseHandler responseHandler) {
         this.ghsaResponseProcessor = ghsaResponseProcessor;
         this.marshaller = marshaller;
+        this.responseHandler = responseHandler;
     }
 
     public SecurityAdvisory handleGetEntity(String ghsaId) throws ApiCallException {
@@ -39,7 +65,8 @@ public class GhsaApiService {
                         .addHeader(AUTHORIZATION, String.format("Bearer %s", System.getenv("GITHUB_PAT")))
                         .build(),
                 formatQueryBody(ghsaId),
-                marshaller);
+                marshaller,
+                responseHandler);
         GHSAResponse ghsaResponse = ghsaRequest.executeRequest();
 
         int status = ghsaResponse.getStatus();

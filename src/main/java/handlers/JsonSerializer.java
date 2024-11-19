@@ -21,21 +21,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package businessObjects.baseClasses;
+package handlers;
 
-import lombok.Getter;
-import lombok.Setter;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/**
- * Base class for any HTTP Response Objects
- */
-@Getter
-@Setter
-public abstract class BaseResponse {
-    protected int status;
-    protected String contentType;
-    protected int contentLength;
-    protected String auth;
-    protected String date;
-    protected BaseEntity entity;
+import static common.Constants.MALFORMED_JSON_SYNTAX_MESSAGE;
+
+public class JsonSerializer implements IJsonSerializer {
+    private static final Logger LOGGER = LoggerFactory.getLogger(JsonSerializer.class);
+    private final Gson gson;
+
+    public JsonSerializer(Gson gson) {
+        this.gson = gson;
+    }
+
+    public <T> String serialize(T pojo) {
+        try {
+            return gson.toJson(pojo);
+        } catch (JsonSyntaxException e) {
+            LOGGER.error(MALFORMED_JSON_SYNTAX_MESSAGE, e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public <T> T deserialize(String json, Class<T> clazz) {
+        try {
+            return gson.fromJson(json, clazz);
+        } catch (JsonSyntaxException e) {
+            LOGGER.error(MALFORMED_JSON_SYNTAX_MESSAGE, e);
+            throw new RuntimeException(e);
+        }
+    }
+
 }

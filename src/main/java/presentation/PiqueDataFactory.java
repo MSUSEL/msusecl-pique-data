@@ -1,127 +1,92 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2024 Montana State University Software Engineering and Cybersecurity Laboratory
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package presentation;
 
-import businessObjects.NvdRequestBuilder;
-import businessObjects.cve.Cve;
-import businessObjects.cve.CveEntity;
-import businessObjects.ghsa.SecurityAdvisory;
-import com.mongodb.client.MongoClient;
-import common.Constants;
-import handlers.IJsonMarshaller;
-import handlers.JsonMarshallerFactory;
+import com.google.gson.Gson;
+import handlers.IJsonSerializer;
 import handlers.JsonResponseHandler;
+import handlers.JsonSerializer;
+import handlers.SecurityAdvisoryMarshaller;
 import persistence.IDataSource;
-import persistence.mongo.MongoConnectionManager;
-import persistence.mongo.MongoCveDao;
-import persistence.mongo.MongoMetaDataDao;
+import persistence.postgreSQL.Migration;
 import persistence.postgreSQL.PostgresConnectionManager;
 import persistence.postgreSQL.PostgresCveDao;
-import persistence.postgreSQL.PostgresMetaDataDao;
+import persistence.postgreSQL.PostgresMetadataDao;
 import service.*;
 
 import java.sql.Connection;
 
 public class PiqueDataFactory {
-    private final JsonMarshallerFactory jsonMarshallerFactory = new JsonMarshallerFactory();
-    private final IJsonMarshaller<Cve> cveMarshaller = jsonMarshallerFactory.getCveMarshaller();
-    private final IJsonMarshaller<CveEntity> cveEntityMarshaller = jsonMarshallerFactory.getCveEntityMarshaller();
-    private final IJsonMarshaller<SecurityAdvisory> securityAdvisoryMarshaller = jsonMarshallerFactory.getSecurityAdvisoryMarshaller();
     private final JsonResponseHandler jsonResponseHandler = new JsonResponseHandler();
-    private final NvdApiService nvdApiService = new NvdApiService(jsonResponseHandler, cveEntityMarshaller);
-    private final GhsaApiService ghsaApiService = new GhsaApiService(new GhsaResponseProcessor(), securityAdvisoryMarshaller);
+    private final IJsonSerializer jsonSerializer = new JsonSerializer(new Gson());
+    private final GhsaApiService ghsaApiService = new GhsaApiService(new GhsaResponseProcessor(), new SecurityAdvisoryMarshaller(), jsonResponseHandler);
     private final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
-    private final String dbContext;
-    private IDataSource<Connection> pgDataSource;
-    private IDataSource<MongoClient> mongoDataSource;
+    private final IDataSource<Connection> pgDataSource;
 
     public PiqueDataFactory() {
-        CredentialService credentialService = new CredentialService();
-        this.dbContext = credentialService.getDbContext();
-
-        if (dbContext.equals(Constants.DB_CONTEXT_PERSISTENT)) {
-            this.pgDataSource = new PostgresConnectionManager(new CredentialService());
-        } else if (dbContext.equals(Constants.DB_CONTEXT_LOCAL)) {
-            this.mongoDataSource = new MongoConnectionManager();
-        }
+        this.pgDataSource = new PostgresConnectionManager(new CredentialService());
     }
 
-    public PiqueDataFactory(String credentialsFilePath){
-        CredentialService credentialService = new CredentialService(credentialsFilePath);
-        this.dbContext = credentialService.getDbContext();
-
-        if (dbContext.equals(Constants.DB_CONTEXT_PERSISTENT)) {
-            this.pgDataSource = new PostgresConnectionManager(credentialService);
-        } else if (dbContext.equals(Constants.DB_CONTEXT_LOCAL)) {
-            this.mongoDataSource = new MongoConnectionManager();
-        }
+    public PiqueDataFactory(String credentialsFilePath) {
+        this.pgDataSource = new PostgresConnectionManager(new CredentialService(credentialsFilePath));
     }
 
     public PiqueData getPiqueData() {
-        PiqueData piqueData;
-        if (dbContext.equals(Constants.DB_CONTEXT_PERSISTENT)) {
-            piqueData =  new PiqueData(
-                    nvdApiService,
-                    ghsaApiService,
-                    instantiatePgMirrorService(),
-                    cveResponseProcessor);
-        } else if (dbContext.equals(Constants.DB_CONTEXT_LOCAL)) {
-            piqueData = new PiqueData(
-                    nvdApiService,
-                    ghsaApiService,
-                    instantiateMongoMirrorService(),
-                    cveResponseProcessor);
-        } else {
-            throw new IllegalArgumentException(Constants.DB_CONTEXT_ENV_VAR_ERROR_MESSAGE);
-        }
-
-        return piqueData;
+        return new PiqueData(
+                new NvdApiService(jsonResponseHandler, jsonSerializer),
+                ghsaApiService,
+                instantiatePgMirrorService(),
+                cveResponseProcessor);
     }
 
     public NvdMirror getNvdMirror() {
-        NvdMirror nvdMirror;
-        if (dbContext.equals(Constants.DB_CONTEXT_PERSISTENT)) {
-            nvdMirror = new NvdMirror(instantiatePgMirrorService(), instantiatePgNvdMirrorManager());
-        } else if (dbContext.equals(Constants.DB_CONTEXT_LOCAL)) {
-            nvdMirror = new NvdMirror(instantiateMongoMirrorService(), instantiateMongoNvdMirrorManager());
-        } else {
-            throw new IllegalArgumentException(Constants.DB_CONTEXT_ENV_VAR_ERROR_MESSAGE);
-        }
+        NvdMirrorManager manager = instantiatePgNvdMirrorManager();
+        INvdMirrorService nvdMirrorService = instantiatePgMirrorService();
 
-        return nvdMirror;
+        return new NvdMirror(
+                nvdMirrorService,
+                manager,
+                new Migration(pgDataSource, manager, nvdMirrorService));
     }
 
     public NvdRequestBuilder getNvdRequestBuilder() {
-        return new NvdRequestBuilder(jsonResponseHandler, cveEntityMarshaller);
+        return new NvdRequestBuilder(jsonResponseHandler, jsonSerializer);
     }
 
     private NvdMirrorManager instantiatePgNvdMirrorManager() {
         return new NvdMirrorManager(
                 cveResponseProcessor,
                 jsonResponseHandler,
-                cveEntityMarshaller,
-                new PostgresCveDao(pgDataSource, cveMarshaller),
-                new PostgresMetaDataDao(pgDataSource));
-    }
-
-    private NvdMirrorManager instantiateMongoNvdMirrorManager() {
-        return new NvdMirrorManager(
-                cveResponseProcessor,
-                jsonResponseHandler,
-                cveEntityMarshaller,
-                new MongoCveDao(mongoDataSource, cveMarshaller),
-                new MongoMetaDataDao(mongoDataSource));
+                jsonSerializer,
+                new PostgresCveDao(pgDataSource, jsonSerializer),
+                new PostgresMetadataDao(pgDataSource));
     }
 
     private MirrorService instantiatePgMirrorService() {
         return new MirrorService(
                 cveResponseProcessor,
-                new PostgresCveDao(pgDataSource, cveMarshaller),
-                new PostgresMetaDataDao(pgDataSource));
-    }
-
-    private MirrorService instantiateMongoMirrorService() {
-        return new MirrorService(
-                cveResponseProcessor,
-                new MongoCveDao(mongoDataSource, cveMarshaller),
-                new MongoMetaDataDao(mongoDataSource));
+                new PostgresCveDao(pgDataSource, jsonSerializer),
+                new PostgresMetadataDao(pgDataSource));
     }
 }

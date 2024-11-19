@@ -21,21 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package businessObjects.baseClasses;
+package handlers;
 
-import lombok.Getter;
-import lombok.Setter;
-
-/**
- * Base class for any HTTP Response Objects
- */
-@Getter
-@Setter
-public abstract class BaseResponse {
-    protected int status;
-    protected String contentType;
-    protected int contentLength;
-    protected String auth;
-    protected String date;
-    protected BaseEntity entity;
+public interface IJsonSerializer {
+    <T> String serialize(T pojo);
+    <T> T deserialize(String json, Class<T> clazz);
 }

@@ -21,21 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package businessObjects.baseClasses;
+package persistence.postgreSQL;
 
-import lombok.Getter;
-import lombok.Setter;
-
-/**
- * Base class for any HTTP Response Objects
- */
-@Getter
-@Setter
-public abstract class BaseResponse {
-    protected int status;
-    protected String contentType;
-    protected int contentLength;
-    protected String auth;
-    protected String date;
-    protected BaseEntity entity;
+public final class StoredProcedureCalls {
+    public static final String UPSERT_BATCH_VULNERABILITIES = "CALL nvd.upsert_batch_vulnerabilities(?, ?)";
+    public static final String UPSERT_VULNERABILITY = "CALL nvd.upsert_vulnerability(?, ?)";
+    public static final String UPSERT_METADATA = "CALL nvd.upsert_metadata(?, ?, ?, ?)";
+    public static final String DELETE_CVE = "CALL nvd.delete_cve(?, ?, ?)";
 }
+
