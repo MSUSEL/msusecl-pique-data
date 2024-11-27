@@ -51,11 +51,16 @@ BEGIN
 END;
 $$;
 
--- fetch a list of CVE's from a list of CVE_ID's
---CREATE OR REPLACE FUNCTION nvd.fetch_cves(p_ids TEXT[])
---LANGUAGE plpgsql
---AS &&
---BEGIN
---    EXECUTE format('SELECT vulnerability FROM nvd.cve WHERE cve_id LIKE ANY(p_ids)', p_ids);
---END;
---$$;
+-- retrieves a json array of cves
+CREATE OR REPLACE FUNCTION nvd.get_cves_by_id(p_cve_ids TEXT[])
+LANGUAGE plpgsql
+RETURNS jsonb AS $$
+BEGIN
+    RETURN (
+        SELECT jsonb_agg(vulnerability)
+        FROM nvd.cve
+        WHERE cve_id = ANY(p_cve_ids)
+    );
+END;
+$$;
+

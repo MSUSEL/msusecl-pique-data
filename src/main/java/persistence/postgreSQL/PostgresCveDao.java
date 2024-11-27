@@ -63,7 +63,8 @@ public final class PostgresCveDao implements IDao<Cve> {
             while (rs.next()) {
                 result.add(jsonSerializer.deserialize(rs.getString("vulnerability"), Vulnerability.class).getCve());
             }
-
+            if (result.isEmpty())
+                throw new DataAccessException("This doesn't work");
             return result;
 
         } catch (SQLException e) {

@@ -54,7 +54,7 @@ public class Migration {
     public void migrate() {
         executeScript(MIGRATION_SCRIPT_PATH, SQL);
         executeScript(PG_STORED_PROCEDURES_PATH, PLPGSQL);
-        hydrate();
+        //hydrate();
     }
 
     private void executeScript(String filepath, String scriptType) {
