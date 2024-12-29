@@ -23,12 +23,17 @@
  */
 import businessObjects.cve.*;
 import businessObjects.ghsa.SecurityAdvisory;
+import com.google.gson.Gson;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
+import handlers.JsonSerializer;
 import org.junit.Test;
+import persistence.postgreSQL.PostgresConnectionManager;
+import persistence.postgreSQL.PostgresCveDao;
 import presentation.NvdMirror;
 import presentation.PiqueData;
 import presentation.PiqueDataFactory;
+import service.CredentialService;
 
 import java.util.*;
 
@@ -145,5 +150,20 @@ public class PiqueDataIntegrationTests {
         assertNotEquals(null, metadata.getLastTimestamp());
         assertNotEquals(null, metadata.getApiVersion());
         assertNotEquals(null, metadata.getCvesModified());
+    }
+
+    @Test
+    public void testPostgresCveDaoFetch() {
+        List<String> cveIds = Arrays.asList(TestConstants.CVE_A, TestConstants.CVE_B);
+        List<String> badCveIds = Arrays.asList("skjfhsdkjhfjskdh", TestConstants.CVE_B);
+        PostgresCveDao postgresCveDao = new PostgresCveDao(
+                new PostgresConnectionManager(new CredentialService(DEFAULT_CREDENTIALS_FILE_PATH)),
+                new JsonSerializer(new Gson()));
+
+        List<Cve> result = postgresCveDao.fetch(cveIds);
+        List<Cve> badResult = postgresCveDao.fetch(badCveIds);
+
+        assertEquals(TestConstants.CVE_A, result.get(0).getId());
+        assertEquals(TestConstants.CVE_B, result.get(1).getId());
     }
 }
