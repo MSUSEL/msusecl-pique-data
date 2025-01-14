@@ -39,14 +39,22 @@ public final class PostgresConnectionManager implements IDataSource<Connection> 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresConnectionManager.class);
 
     public PostgresConnectionManager(CredentialService credentialService) {
+        setConnectionPoolUrl(credentialService);
+        // For peer authentication to postgres, username and password
+        // will be inferred from the OS. In such cases, do not set usernames and passwords
+        if (credentialService.getUsername() != null) {
+            connectionPool.setUsername(credentialService.getUsername());
+            connectionPool.setPassword(credentialService.getPassword());
+        }
+    }
+
+    private void setConnectionPoolUrl(CredentialService credentialService) {
         connectionPool.setUrl(
                 buildConnectionString(
                         credentialService.getDriver(),
                         credentialService.getHostname(),
                         credentialService.getPort(),
                         credentialService.getDbname()));
-        connectionPool.setUsername(credentialService.getUsername());
-        connectionPool.setPassword(credentialService.getPassword());
     }
 
     @Override
