@@ -36,7 +36,7 @@
     </parent>
 
     <artifactId>msusecl-pique-data</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <url>https://msusel.github.io</url>
 
     <properties>
