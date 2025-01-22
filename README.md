@@ -23,7 +23,7 @@ git repository and compile from source using java language level 11.
 <dependency>
     <groupId>edu.montana.gsoc.msusel</groupId>
     <artifactId>msusecl-pique-data</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
@@ -63,8 +63,8 @@ export PG_PASS=<your password>
 Default values for a containerized nvd mirror follow as an example. These can be customized to suit your needs.
 ```bash
 PG_DRIVER=jdbc:postgresql
-PG_HOSTNAME=localhost
-PG_PORT=5432
+PG_HOSTNAME=nvd_mirror
+PG_PORT=5433
 PG_DBNAME=nvd_mirror
 PG_USERNAME=postgres
 PG_PASS=postgres
@@ -92,29 +92,43 @@ __*Important:*__ To work properly, the file must be named `configuration.json`. 
 The NVD Mirror created by this library uses postgres. The user will need to set up postgres on their hardware with one of two methods.
 
 1. __Docker Container Installation__ (Recommended)
+
     1. Be sure docker is installed on your system and the docker daemon is running
-    2. Download this [docker compose](https://raw.githubusercontent.com/MSUSEL/msusecl-data-utility/refs/heads/remove-mongo-and-improve-postgres/src/main/resources/docker-compose.yml) file or run the following command in bash
+    2. Download this [docker compose](https://github.com/MSUSEL/msusecl-pique-data/blob/master/src/main/resources/docker-compose.yml) file or run the following command in your shell
         ```bash
-        curl -o https://raw.githubusercontent.com/MSUSEL/msusecl-data-utility/refs/heads/remove-mongo-and-improve-postgres/src/main/resources/docker-compose.yml
+        curl -o docker-compose.yml https://raw.githubusercontent.com/MSUSEL/msusecl-pique-data/refs/heads/master/src/main/resources/docker-compose.yml
         ``````
     3. Download and configure a postgres instance in a docker container:
         ```bash
         docker-compose up -d
         ```
-    4. This docker compose file bundles Adminer, a simple, graphical database management tool which will run containerized over localhost. To start it, naviagate to the following url in a browser.  *Note that the port number can be customized in the docker-compose.yml file.*
+
+2. __Interacting With The NVD Mirror__
+
+    1. This docker compose file bundles Adminer, a simple, graphical database management tool which will run containerized over localhost. To start it, naviagate to the following url in a browser.  *Note that the port number can be customized in the docker-compose.yml file.*
         ```bash
         localhost:8080
         ```
+    2. Log in to Adminer with the following credentials
+        ```
+        System: PostgreSQL
+        Server: nvd_mirror
+        Username: postgres
+        Password: postgres
+        Database: nvd_mirror
+        ```
 
-2. __Bare Metal Installation__
+    3. Once logged in, you may need to navigate to the "nvd" Schema using the Schema drop-down menu.
+
+
+2. __Bare Metal Installation__ (Not recommended unless there's a very good reason)
     1. Follow instructions on the postgres [website](https://www.postgresql.org/) to install and configure postgres on your system.
     2. Configure a DBMS of your choice.
     3. Add your database username and password to your configuration file or environment variables.
     <br><br>
 3. __Build Relations and Hydrate Tables__
-    1. To build table relations and hydrate the data __programmatically__, call `buildAndHydrateMirror()` on an object of the NvdMirror class.
-    2. To table relations and hydrate the data __interactively__, clone this repo and run the `testBuildAndHydrateMirror()` test from the NvdMirrorIntegrationTests class.
-    3. To update the mirror with the latest from the NVD use the `updateNvdMirror()` and `testUpdateNvdMirror()` methods from the same classes respectively.
+    1. To build table relations and hydrate the data, clone this repository, set up your credentials, and call testBuildAndHydrateMirror().
+    2. To update the mirror with the latest from the NVD use the `updateNvdMirror()` method in your project or `testUpdateNvdMirror()` natively in PiqueData.
     <br><br>
 
 -----------------
