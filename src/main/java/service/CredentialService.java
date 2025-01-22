@@ -26,10 +26,13 @@ package service;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import common.HelperFunctions;
+import handlers.IJsonNullStringHandler;
+import handlers.JsonNullStringHandler;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.nio.file.Paths;
+import java.util.Optional;
 
 @Getter
 @Setter
@@ -38,16 +41,16 @@ public class CredentialService {
     private String hostname;
     private String port;
     private String dbname;
-    private String username;
-    private String password;
+    private Optional<String> username;
+    private Optional<String> password;
 
     public CredentialService() {
         this.driver = System.getenv("PG_DRIVER");
         this.hostname = System.getenv("PG_HOSTNAME");
         this.port = System.getenv("PG_PORT");
         this.dbname = System.getenv("PG_DBNAME");
-        this.username = System.getenv("PG_USERNAME");
-        this.password = System.getenv("PG_PASS");
+        this.username = Optional.ofNullable(System.getenv("PG_USERNAME"));
+        this.password = Optional.ofNullable(System.getenv("PG_PASS"));
     }
 
     public CredentialService(String filepath) {
@@ -61,13 +64,15 @@ public class CredentialService {
     }
 
     private void processJsonFile(String filepath) {
+        IJsonNullStringHandler nullHandler = new JsonNullStringHandler();
         JsonObject creds = JsonParser.parseString(HelperFunctions.readJsonFile(Paths.get(filepath))).getAsJsonObject();
 
         this.driver= creds.get("driver").getAsString();
         this.hostname = creds.get("hostname").getAsString();
         this.port = creds.get("port").getAsString();
         this.dbname = creds.get("dbname").getAsString();
-        this.username = creds.get("username").getAsString();
-        this.password = creds.get("password").getAsString();
+        this.username = nullHandler.getString(creds, "username");
+        this.password= nullHandler.getString(creds, "password");
+//        this.password = creds.get("password").getAsString();
     }
 }
