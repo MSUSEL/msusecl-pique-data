@@ -25,6 +25,7 @@ package persistence.postgreSQL;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Optional;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 
@@ -40,22 +41,16 @@ public final class PostgresConnectionManager implements IDataSource<Connection> 
 
     public PostgresConnectionManager(CredentialService credentialService) {
         setConnectionPoolUrl(credentialService);
-        // For peer authentication to postgres, username and password
-        // will be inferred from the OS. In such cases, do not set usernames and passwords
-        if (credentialService.getUsername() != null) {
-            connectionPool.setUsername(credentialService.getUsername());
-            connectionPool.setPassword(credentialService.getPassword());
+        Optional<String> username = credentialService.getUsername();
+        Optional<String> password = credentialService.getPassword();
+        // For peer authentication to postgres, username and password will be inferred from the OS.
+        // When peer authentication is not used, explicitly set username and password.
+        if (credentialService.getUsername().isPresent() && credentialService.getPassword().isPresent()) {
+            connectionPool.setUsername(username.get());
+            connectionPool.setPassword(password.get());
         }
     }
 
-    private void setConnectionPoolUrl(CredentialService credentialService) {
-        connectionPool.setUrl(
-                buildConnectionString(
-                        credentialService.getDriver(),
-                        credentialService.getHostname(),
-                        credentialService.getPort(),
-                        credentialService.getDbname()));
-    }
 
     @Override
     public Connection getConnection() {
@@ -69,5 +64,14 @@ public final class PostgresConnectionManager implements IDataSource<Connection> 
 
     private static String buildConnectionString(String driver, String hostname, String port, String dbname) {
         return String.format("%s://%s:%s/%s", driver, hostname, port, dbname);
+    }
+
+    private void setConnectionPoolUrl(CredentialService credentialService) {
+        connectionPool.setUrl(
+                buildConnectionString(
+                        credentialService.getDriver(),
+                        credentialService.getHostname(),
+                        credentialService.getPort(),
+                        credentialService.getDbname()));
     }
 }
