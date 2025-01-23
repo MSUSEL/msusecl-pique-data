@@ -23,7 +23,7 @@ git repository and compile from source using java language level 11.
 <dependency>
     <groupId>edu.montana.gsoc.msusel</groupId>
     <artifactId>msusecl-pique-data</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
@@ -43,6 +43,12 @@ rate limits from interrupting calls. Additionally API calls to GitHub Security A
 Token from [GitHub](https://docs.GitHub.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
 No scope needs to be assigned to this token, but it must exist on the user's GitHub profile. To use these tokens with Pique Data,
 create the following environment variables:
+
+
+*NOTE: If you are using a pre-built docker image or connecting to the on-prem mirror at the SECL, you don't need an NVD API key. If you make any calls to the CVE2.0 API,
+you WILL want to set up a key first.*
+
+
 
 ```bash
 export NVD_KEY=<your key>
@@ -64,7 +70,7 @@ Default values for a containerized nvd mirror follow as an example. These can be
 ```bash
 PG_DRIVER=jdbc:postgresql
 PG_HOSTNAME=localhost
-PG_PORT=5432
+PG_PORT=5433
 PG_DBNAME=nvd_mirror
 PG_USERNAME=postgres
 PG_PASS=postgres
@@ -92,29 +98,43 @@ __*Important:*__ To work properly, the file must be named `configuration.json`. 
 The NVD Mirror created by this library uses postgres. The user will need to set up postgres on their hardware with one of two methods.
 
 1. __Docker Container Installation__ (Recommended)
+
     1. Be sure docker is installed on your system and the docker daemon is running
-    2. Download this [docker compose](https://raw.githubusercontent.com/MSUSEL/msusecl-data-utility/refs/heads/remove-mongo-and-improve-postgres/src/main/resources/docker-compose.yml) file or run the following command in bash
+    2. Download this [docker compose](https://github.com/MSUSEL/msusecl-pique-data/blob/master/src/main/resources/docker-compose.yml) file or run the following command in your shell
         ```bash
-        curl -o https://raw.githubusercontent.com/MSUSEL/msusecl-data-utility/refs/heads/remove-mongo-and-improve-postgres/src/main/resources/docker-compose.yml
+        curl -o docker-compose.yml https://raw.githubusercontent.com/MSUSEL/msusecl-pique-data/refs/heads/master/src/main/resources/docker-compose.yml
         ``````
     3. Download and configure a postgres instance in a docker container:
         ```bash
         docker-compose up -d
         ```
-    4. This docker compose file bundles Adminer, a simple, graphical database management tool which will run containerized over localhost. To start it, naviagate to the following url in a browser.  *Note that the port number can be customized in the docker-compose.yml file.*
+
+2. __Interacting With The NVD Mirror__
+
+    1. This docker compose file bundles Adminer, a simple, graphical database management tool which will run containerized over localhost. To start it, naviagate to the following url in a browser.  *Note that the port number can be customized in the docker-compose.yml file.*
         ```bash
         localhost:8080
         ```
+    2. Log in to Adminer with the following credentials
+        ```
+        System: PostgreSQL
+        Server: nvd_mirror
+        Username: postgres
+        Password: postgres
+        Database: nvd_mirror
+        ```
 
-2. __Bare Metal Installation__
+    3. Once logged in, you may need to navigate to the "nvd" Schema using the Schema drop-down menu.
+
+
+2. __Bare Metal Installation__ (Not recommended unless there's a very good reason)
     1. Follow instructions on the postgres [website](https://www.postgresql.org/) to install and configure postgres on your system.
     2. Configure a DBMS of your choice.
     3. Add your database username and password to your configuration file or environment variables.
     <br><br>
 3. __Build Relations and Hydrate Tables__
-    1. To build table relations and hydrate the data __programmatically__, call `buildAndHydrateMirror()` on an object of the NvdMirror class.
-    2. To table relations and hydrate the data __interactively__, clone this repo and run the `testBuildAndHydrateMirror()` test from the NvdMirrorIntegrationTests class.
-    3. To update the mirror with the latest from the NVD use the `updateNvdMirror()` and `testUpdateNvdMirror()` methods from the same classes respectively.
+    1. To build table relations and hydrate the data, clone this repository, set up your credentials, and call testBuildAndHydrateMirror().
+    2. To update the mirror with the latest from the NVD use the `updateNvdMirror()` method in your project or `testUpdateNvdMirror()` natively in PiqueData.
     <br><br>
 
 -----------------
@@ -124,8 +144,9 @@ The NVD Mirror created by this library uses postgres. The user will need to set 
 Two classes offer the user-facing functionality of this library.
 * __PiqueDataFactory__ provides methods to create instances of PiqueData, NvdMirror, and NvdRequestBuilder.
 * __PiqueData__ provides methods for interacting with third-party data. This includes methods to interact with
-on-prem/ephemeral databases as well as third-party sources like the NVD.
-* __NvdMirror__ provides methods to manage a permanent mirror of the NVD
+on-prem/ephemeral databases as well as third-party sources like the NVD. This is probably the right class to instantiate for most needs.
+* __NvdMirror__ provides methods to manage a mirror of the NVD. With the options of the lab nvd mirror or portable dockerized nvd mirrors,
+this class is not needed for most use cases.
 
 
 *Note: Other classes can be used, extended, implemented, or overridden. More documentation on advanced usage
@@ -207,6 +228,32 @@ class ExampleClass {
    }
 }
 ```
+
+### Working with the NVD CVE2.0 API
+The NVD API offers features not covered in PiqueData. The advantage of the SECL NVD Mirror is that you can customize how you query the database easily with SQL.
+However, if you want to work with the NVD directly or use any of their parameters, PiqueData makes it easy. This is the purpose of the NvdRequestBuilder class in
+the presentation package. You can use this class to call the NVD with any parameter offered by the CVE2.0 API. A builder pattern is used and
+so you can simply add as many parameters as you like by instantiating the NvdRequestBuilder class from the PiqueDataFactory class, then include parameters using "
+.withParamName(paramValue)." As of January 2025, all legal CVE2.0 paramaeters are included in the NvdRequestBuilder. An example follows.
+
+```java
+class ExampleCallWithParams {
+    PiqueDataFactory piqueDataFactory = new PiqueDataFactory(<optional_path_to_credentials_file>);
+
+    try {
+        CveEntity entity = piqueDataFactory.getNvdRequestBuilder()
+            .withApiKey(System.getenv("NVD_KEY"))
+            .withCpeName("cpe:2.3:a:eric_allman:sendmail:5.58:*:*:*:*:*:*:*")
+            .build().executeRequest().getEntity();
+    } catch (ApiCallException e) {
+        // Log error
+        throw new RuntimeException(e);
+    }
+}
+```
+
+A list of parameters can be found [here](https://nvd.nist.gov/developers/vulnerabilities).
+
 
 -----------------
 
