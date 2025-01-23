@@ -44,6 +44,12 @@ Token from [GitHub](https://docs.GitHub.com/en/authentication/keeping-your-accou
 No scope needs to be assigned to this token, but it must exist on the user's GitHub profile. To use these tokens with Pique Data,
 create the following environment variables:
 
+
+*NOTE: If you are using a pre-built docker image or connecting to the on-prem mirror at the SECL, you don't need an NVD API key. If you make any calls to the CVE2.0 API,
+you WILL want to set up a key first.*
+
+
+
 ```bash
 export NVD_KEY=<your key>
 export GITHUB_PAT=<your personal access token>
@@ -138,8 +144,9 @@ The NVD Mirror created by this library uses postgres. The user will need to set 
 Two classes offer the user-facing functionality of this library.
 * __PiqueDataFactory__ provides methods to create instances of PiqueData, NvdMirror, and NvdRequestBuilder.
 * __PiqueData__ provides methods for interacting with third-party data. This includes methods to interact with
-on-prem/ephemeral databases as well as third-party sources like the NVD.
-* __NvdMirror__ provides methods to manage a permanent mirror of the NVD
+on-prem/ephemeral databases as well as third-party sources like the NVD. This is probably the right class to instantiate for most needs.
+* __NvdMirror__ provides methods to manage a mirror of the NVD. With the options of the lab nvd mirror or portable dockerized nvd mirrors,
+this class is not needed for most use cases.
 
 
 *Note: Other classes can be used, extended, implemented, or overridden. More documentation on advanced usage
@@ -221,6 +228,32 @@ class ExampleClass {
    }
 }
 ```
+
+### Working with the NVD CVE2.0 API
+The NVD API offers features not covered in PiqueData. The advantage of the SECL NVD Mirror is that you can customize how you query the database easily with SQL.
+However, if you want to work with the NVD directly or use any of their parameters, PiqueData makes it easy. This is the purpose of the NvdRequestBuilder class in
+the presentation package. You can use this class to call the NVD with any parameter offered by the CVE2.0 API. A builder pattern is used and
+so you can simply add as many parameters as you like by instantiating the NvdRequestBuilder class from the PiqueDataFactory class, then include parameters using "
+.withParamName(paramValue)." As of January 2025, all legal CVE2.0 paramaeters are included in the NvdRequestBuilder. An example follows.
+
+```java
+class ExampleCallWithParams {
+    PiqueDataFactory piqueDataFactory = new PiqueDataFactory(<optional_path_to_credentials_file>);
+
+    try {
+        CveEntity entity = piqueDataFactory.getNvdRequestBuilder()
+            .withApiKey(System.getenv("NVD_KEY"))
+            .withCpeName("cpe:2.3:a:eric_allman:sendmail:5.58:*:*:*:*:*:*:*")
+            .build().executeRequest().getEntity();
+    } catch (ApiCallException e) {
+        // Log error
+        throw new RuntimeException(e);
+    }
+}
+```
+
+A list of parameters can be found [here](https://nvd.nist.gov/developers/vulnerabilities).
+
 
 -----------------
 
