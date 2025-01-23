@@ -63,7 +63,7 @@ export PG_PASS=<your password>
 Default values for a containerized nvd mirror follow as an example. These can be customized to suit your needs.
 ```bash
 PG_DRIVER=jdbc:postgresql
-PG_HOSTNAME=nvd_mirror
+PG_HOSTNAME=localhost
 PG_PORT=5433
 PG_DBNAME=nvd_mirror
 PG_USERNAME=postgres
