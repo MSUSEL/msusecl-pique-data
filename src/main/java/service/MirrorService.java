@@ -26,6 +26,8 @@ package service;
 import businessObjects.cve.Cve;
 import businessObjects.cve.Metrics;
 import businessObjects.cve.NvdMirrorMetaData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import persistence.IDao;
 import exceptions.DataAccessException;
 import persistence.postgreSQL.PostgresMetadataDao;
@@ -33,11 +35,15 @@ import persistence.postgreSQL.PostgresMetadataDao;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
+import static common.Constants.DB_QUERY_NO_RESULTS;
 
 public final class MirrorService implements INvdMirrorService{
     private final CveResponseProcessor cveResponseProcessor;
     private final IDao<Cve> cveDao;
     private final PostgresMetadataDao metadataDao;
+    private static final Logger LOGGER = LoggerFactory.getLogger(MirrorService.class);
 
     public MirrorService(CveResponseProcessor cveResponseProcessor, IDao<Cve> cveDao, PostgresMetadataDao metadataDao) {
         this.cveResponseProcessor = cveResponseProcessor;
@@ -47,12 +53,13 @@ public final class MirrorService implements INvdMirrorService{
 
     @Override
     public Cve handleGetCveById(String cveId) throws DataAccessException {
-        return cveDao.fetch(Collections.singletonList(cveId)).get(0);
+        return fetchOptionalResult(Collections.singletonList(cveId)).get(0);
     }
 
     @Override
     public List<Cve> handleGetCveById(List<String> cveIds) throws DataAccessException {
-        return cveDao.fetch(cveIds);
+        return fetchOptionalResult(cveIds);
+
     }
 
     @Override
@@ -60,7 +67,6 @@ public final class MirrorService implements INvdMirrorService{
         return cveResponseProcessor.extractCweDescriptions(handleGetCveById(cveId));
     }
 
-    // FIXME: fetch metadata by something other than auto-generated id number
     @Override
     public NvdMirrorMetaData handleGetCurrentMetaData() throws DataAccessException {
         return metadataDao.fetch().get(0);
@@ -80,5 +86,14 @@ public final class MirrorService implements INvdMirrorService{
     public Map<String, Metrics> handleGetCvssMetrics(List<String> cveIds) throws DataAccessException {
         List<Cve> cves = handleGetCveById(cveIds);
         return cveResponseProcessor.extractCvssScores(cves);
+    }
+
+    private List<Cve> fetchOptionalResult(List<String> cveIds) {
+        return Optional.of(cveDao.fetch(cveIds))
+                .filter(r -> !r.isEmpty())
+                .orElseThrow(() -> {
+                    LOGGER.info(DB_QUERY_NO_RESULTS);
+                    return new DataAccessException(DB_QUERY_NO_RESULTS);
+                });
     }
 }

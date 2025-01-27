@@ -25,16 +25,14 @@ import businessObjects.cve.*;
 import businessObjects.ghsa.SecurityAdvisory;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import presentation.NvdMirror;
 import presentation.PiqueData;
 import presentation.PiqueDataFactory;
 
 import java.util.*;
 
-import static common.Constants.DEFAULT_CREDENTIALS_FILE_PATH;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Integration tests covering PiqueData in the presentation layer
@@ -43,63 +41,70 @@ import static org.junit.Assert.assertNotEquals;
 // TODO test edge cases and create more robust asserts
 // TODO Create Mocked databases rather than hitting "production"
 public class PiqueDataIntegrationTests {
-    private final PiqueDataFactory piqueDataFactory = new PiqueDataFactory(DEFAULT_CREDENTIALS_FILE_PATH);
+    private final PiqueDataFactory piqueDataFactory = new PiqueDataFactory();
     private final PiqueData piqueData = piqueDataFactory.getPiqueData();
     private final NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
 
     @Test
-    public void testLocalGetCve() throws DataAccessException {
-        Cve result = piqueData.getCve(TestConstants.CVE_A);
-        assertEquals(TestConstants.CVE_A, result.getId());
+    public void testGetCve() {
+        // Happy path
+        assertEquals(TestConstants.CVE_A, piqueData.getCve(TestConstants.CVE_A).getId());
+        assertEquals(TestConstants.CVE_B, piqueData.getCve(TestConstants.CVE_B).getId());
+
+        // Bad id with good format
+        assertThrows(DataAccessException.class, () -> {
+            piqueData.getCve(TestConstants.BAD_CVE_A);
+        });
+
+        // Bad input format
+        assertThrows(DataAccessException.class, () -> {
+            piqueData.getCve(TestConstants.BAD_FORMAT);
+        });
     }
 
     @Test
-    public void testPersistentGetCve() throws DataAccessException {
-        Cve cve = piqueData.getCve(TestConstants.CVE_B);
-        Optional<List<Weakness>> optionalCweList = Optional.of(cve.getWeaknesses().orElse(new ArrayList<>()));
-        List<Weakness> cweList = optionalCweList.get();
-
-        assertEquals(TestConstants.CVE_B, cve.getId());
-        assertEquals(TestConstants.CVE_B_CWE_ORACLE, cweList.get(0).getDescription().get(0).getValue());
-    }
-
-    @Test
-    public void testGetLocalCvesById() throws DataAccessException {
+    public void testGetCves() throws DataAccessException {
         List<String> cveIds = Arrays.asList(TestConstants.CVE_A, TestConstants.CVE_B);
-        List<Cve> result = piqueData.getCve(cveIds);
 
-        assertEquals(TestConstants.CVE_A, result.get(0).getId());
-        assertEquals(TestConstants.CVE_B, result.get(1).getId());
+        // Happy path
+        assertEquals(TestConstants.CVE_A, piqueData.getCve(cveIds).get(0).getId());
+        assertEquals(TestConstants.CVE_B, piqueData.getCve(cveIds).get(1).getId());
+
+        // Single bad id in list
+        assertEquals(TestConstants.CVE_B, piqueData.getCve(
+                Arrays.asList(TestConstants.BAD_CVE_A, TestConstants.CVE_B)).get(0).getId());
+
+        // All bad ids in list
+        assertThrows(DataAccessException.class, () -> piqueData.getCve(
+                Arrays.asList(TestConstants.BAD_CVE_A, TestConstants.BAD_CVE_B)));
+
+        // Bad cveId format in one Cve
+        assertEquals(TestConstants.CVE_A,
+                piqueData.getCve(Arrays.asList(TestConstants.BAD_FORMAT, TestConstants.CVE_A))
+                .get(0).getId());
     }
 
     @Test
-    public void testGetPersistentCvesById() throws DataAccessException {
-        List<String> cveIds = Arrays.asList(TestConstants.CVE_A, TestConstants.CVE_B);
-        List<Cve> result = piqueData.getCve(cveIds);
-
-        assertEquals(TestConstants.CVE_A, result.get(0).getId());
-        assertEquals(TestConstants.CVE_B, result.get(1).getId());
-    }
-
-    @Test
-    public void testGetLocalCwes() throws DataAccessException {
-       List<String> cwes = piqueData.getCweName(TestConstants.CVE_B);
-
-       assertEquals(TestConstants.CVE_B_CWE_ORACLE, cwes.get(0));
-    }
-
-    @Test
-    public void testGetPersistentCwes() throws DataAccessException {
+    public void testGetCwes() throws DataAccessException {
         List<String> cwes = piqueData.getCweName(TestConstants.CVE_B);
 
+        // Happy path
         assertEquals(TestConstants.CVE_B_CWE_ORACLE, cwes.get(0));
+
+        // TODO Find cve without cwe and ensure that the resulting object is empty
     }
 
     @Test
     public void testGetCveFromNvd() throws ApiCallException {
-        Cve result = piqueData.getCveFromNvd(TestConstants.CVE_A);
+        // Happy path
+        assertEquals(TestConstants.CVE_A, piqueData.getCveFromNvd(TestConstants.CVE_A).getId());
 
-        assertEquals(TestConstants.CVE_A, result.getId());
+        // FIXME Index Out of Bounds exception
+        // Bad cve id
+        assertThrows(DataAccessException.class, () -> piqueData.getCveFromNvd(TestConstants.BAD_CVE_A));
+
+        // Bad format
+        assertThrows(DataAccessException.class, () -> piqueData.getCveFromNvd(TestConstants.BAD_FORMAT));
     }
 
     @Test
@@ -113,6 +118,7 @@ public class PiqueDataIntegrationTests {
 
     @Test
     public void testPersistentDeleteCve() throws DataAccessException {
+        // TODO set up test database to avoid mutating real copy of mirror
         nvdMirror.deleteSingleCve(TestConstants.CVE_A);
     }
 
@@ -129,13 +135,16 @@ public class PiqueDataIntegrationTests {
                 .withCpeName("cpe:2.3:a:eric_allman:sendmail:5.58:*:*:*:*:*:*:*")
                 .build().executeRequest().getEntity();
 
+        // Happy path
         assertEquals(TestConstants.CVE_A, entity.getVulnerabilities().get(0).getCve().getId());
     }
 
     @Test
     public void testGetCvssScores() throws DataAccessException {
+        // Happy path
         List<String> cveIds = Arrays.asList(TestConstants.CVE_A, TestConstants.CVE_B);
         Map<String, Metrics> data = piqueData.getCvssMetrics(cveIds);
+        // TODO assertion?!
     }
 
     @Test

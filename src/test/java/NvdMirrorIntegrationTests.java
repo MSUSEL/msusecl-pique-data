@@ -29,7 +29,7 @@ import exceptions.DataAccessException;
 import handlers.IJsonSerializer;
 import handlers.JsonResponseHandler;
 import handlers.JsonSerializer;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import persistence.IDao;
 import persistence.IDataSource;
 import persistence.postgreSQL.Migration;
@@ -44,8 +44,8 @@ import service.*;
 import java.sql.Connection;
 import java.util.Collections;
 
-import static org.junit.Assert.assertEquals;
 import static common.Constants.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * IMPORTANT!
