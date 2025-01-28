@@ -32,6 +32,7 @@ import presentation.PiqueDataFactory;
 
 import java.util.*;
 
+import static common.Constants.DEFAULT_CREDENTIALS_FILE_PATH;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -41,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.*;
 // TODO test edge cases and create more robust asserts
 // TODO Create Mocked databases rather than hitting "production"
 public class PiqueDataIntegrationTests {
-    private final PiqueDataFactory piqueDataFactory = new PiqueDataFactory();
+    private final PiqueDataFactory piqueDataFactory = new PiqueDataFactory(DEFAULT_CREDENTIALS_FILE_PATH);
     private final PiqueData piqueData = piqueDataFactory.getPiqueData();
     private final NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
 
@@ -99,12 +100,11 @@ public class PiqueDataIntegrationTests {
         // Happy path
         assertEquals(TestConstants.CVE_A, piqueData.getCveFromNvd(TestConstants.CVE_A).getId());
 
-        // FIXME Index Out of Bounds exception
         // Bad cve id
-        assertThrows(DataAccessException.class, () -> piqueData.getCveFromNvd(TestConstants.BAD_CVE_A));
+        assertThrows(ApiCallException.class, () -> piqueData.getCveFromNvd(TestConstants.BAD_CVE_A));
 
         // Bad format
-        assertThrows(DataAccessException.class, () -> piqueData.getCveFromNvd(TestConstants.BAD_FORMAT));
+        assertThrows(ApiCallException.class, () -> piqueData.getCveFromNvd(TestConstants.BAD_FORMAT));
     }
 
     @Test
@@ -114,12 +114,6 @@ public class PiqueDataIntegrationTests {
 
         assertEquals(TestConstants.GHSA_ID_A, result1.getGhsaId());
         assertEquals(TestConstants.GHSA_ID_B, result2.getGhsaId());
-    }
-
-    @Test
-    public void testPersistentDeleteCve() throws DataAccessException {
-        // TODO set up test database to avoid mutating real copy of mirror
-        nvdMirror.deleteSingleCve(TestConstants.CVE_A);
     }
 
     @Test
@@ -144,7 +138,17 @@ public class PiqueDataIntegrationTests {
         // Happy path
         List<String> cveIds = Arrays.asList(TestConstants.CVE_A, TestConstants.CVE_B);
         Map<String, Metrics> data = piqueData.getCvssMetrics(cveIds);
-        // TODO assertion?!
+
+        assertEquals("nvd@nist.gov", data.get(TestConstants.CVE_A).getCvssMetricV2().get(0).getSource());
+
+        // Bad cve id
+        assertThrows(DataAccessException.class, () -> piqueData.getCvssMetrics(
+                Collections.singletonList(TestConstants.BAD_CVE_A)));
+
+        // Bad cve id format
+        assertThrows(DataAccessException.class, () -> piqueData.getCvssMetrics(
+                Collections.singletonList(TestConstants.BAD_FORMAT)));
+
     }
 
     @Test
