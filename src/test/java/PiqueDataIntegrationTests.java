@@ -25,6 +25,7 @@ import businessObjects.cve.*;
 import businessObjects.ghsa.SecurityAdvisory;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import presentation.NvdMirror;
 import presentation.PiqueData;
@@ -39,13 +40,13 @@ import static org.junit.jupiter.api.Assertions.*;
  * Integration tests covering PiqueData in the presentation layer
  */
 
-// TODO test edge cases and create more robust asserts
 // TODO Create Mocked databases rather than hitting "production"
 public class PiqueDataIntegrationTests {
     private final PiqueDataFactory piqueDataFactory = new PiqueDataFactory(DEFAULT_CREDENTIALS_FILE_PATH);
     private final PiqueData piqueData = piqueDataFactory.getPiqueData();
     private final NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
 
+    @Tag("regression")
     @Test
     public void testGetCve() {
         // Happy path
@@ -63,6 +64,7 @@ public class PiqueDataIntegrationTests {
         });
     }
 
+    @Tag("regression")
     @Test
     public void testGetCves() throws DataAccessException {
         List<String> cveIds = Arrays.asList(TestConstants.CVE_A, TestConstants.CVE_B);
@@ -85,6 +87,7 @@ public class PiqueDataIntegrationTests {
                 .get(0).getId());
     }
 
+    @Tag("regression")
     @Test
     public void testGetCwes() throws DataAccessException {
         List<String> cwes = piqueData.getCweName(TestConstants.CVE_B);
@@ -133,6 +136,7 @@ public class PiqueDataIntegrationTests {
         assertEquals(TestConstants.CVE_A, entity.getVulnerabilities().get(0).getCve().getId());
     }
 
+    @Tag("regression")
     @Test
     public void testGetCvssScores() throws DataAccessException {
         // Happy path
@@ -151,6 +155,7 @@ public class PiqueDataIntegrationTests {
 
     }
 
+    @Tag("regression")
     @Test
     public void testMarshalMetadataToJson() throws DataAccessException {
         NvdMirrorMetaData metadata = nvdMirror.getMetaData();
