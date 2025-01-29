@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 import businessObjects.cve.*;
-import businessObjects.ghsa.SecurityAdvisory;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
 import org.junit.jupiter.api.Tag;
@@ -41,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 
 // TODO Create Mocked databases rather than hitting "production"
-public class PiqueDataIntegrationTests {
+public class PiqueDataTests {
     private final PiqueDataFactory piqueDataFactory = new PiqueDataFactory(DEFAULT_CREDENTIALS_FILE_PATH);
     private final PiqueData piqueData = piqueDataFactory.getPiqueData();
     private final NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
@@ -74,15 +73,18 @@ public class PiqueDataIntegrationTests {
         assertEquals(TestConstants.CVE_B, piqueData.getCve(cveIds).get(1).getId());
 
         // Single bad id in list
-        assertEquals(TestConstants.CVE_B, piqueData.getCve(
+        assertEquals(
+                TestConstants.CVE_B, piqueData.getCve(
                 Arrays.asList(TestConstants.BAD_CVE_A, TestConstants.CVE_B)).get(0).getId());
 
         // All bad ids in list
-        assertThrows(DataAccessException.class, () -> piqueData.getCve(
+        assertThrows(
+                DataAccessException.class, () -> piqueData.getCve(
                 Arrays.asList(TestConstants.BAD_CVE_A, TestConstants.BAD_CVE_B)));
 
         // Bad cveId format in one Cve
-        assertEquals(TestConstants.CVE_A,
+        assertEquals(
+                TestConstants.CVE_A,
                 piqueData.getCve(Arrays.asList(TestConstants.BAD_FORMAT, TestConstants.CVE_A))
                 .get(0).getId());
     }
@@ -90,41 +92,52 @@ public class PiqueDataIntegrationTests {
     @Tag("regression")
     @Test
     public void testGetCwes() throws DataAccessException {
-        List<String> cwes = piqueData.getCweName(TestConstants.CVE_B);
-
         // Happy path
-        assertEquals(TestConstants.CVE_B_CWE_ORACLE, cwes.get(0));
+        assertEquals(
+                TestConstants.CVE_B_CWE_ORACLE,
+                piqueData.getCweName(TestConstants.CVE_B).get(0));
 
         // TODO Find cve without cwe and ensure that the resulting object is empty
     }
 
+    @Tag("api")
     @Test
     public void testGetCveFromNvd() throws ApiCallException {
         // Happy path
         assertEquals(TestConstants.CVE_A, piqueData.getCveFromNvd(TestConstants.CVE_A).getId());
 
         // Bad cve id
-        assertThrows(ApiCallException.class, () -> piqueData.getCveFromNvd(TestConstants.BAD_CVE_A));
+        assertThrows(
+                ApiCallException.class,
+                () -> piqueData.getCveFromNvd(TestConstants.BAD_CVE_A));
 
         // Bad format
-        assertThrows(ApiCallException.class, () -> piqueData.getCveFromNvd(TestConstants.BAD_FORMAT));
+        assertThrows(
+                ApiCallException.class,
+                () -> piqueData.getCveFromNvd(TestConstants.BAD_FORMAT));
     }
 
+    @Tag("api")
     @Test
     public void testGetGHSA() throws ApiCallException {
-        SecurityAdvisory result1 = piqueData.getGhsa(TestConstants.GHSA_ID_A);
-        SecurityAdvisory result2 = piqueData.getGhsa(TestConstants.GHSA_ID_B);
+        assertEquals(
+                TestConstants.GHSA_ID_A,
+                piqueData.getGhsa(TestConstants.GHSA_ID_A).getGhsaId());
 
-        assertEquals(TestConstants.GHSA_ID_A, result1.getGhsaId());
-        assertEquals(TestConstants.GHSA_ID_B, result2.getGhsaId());
+        assertEquals(
+                TestConstants.GHSA_ID_B,
+                piqueData.getGhsa(TestConstants.GHSA_ID_B).getGhsaId());
     }
 
+    @Tag("api")
     @Test
     public void testGetCweIdsFromGhsa() throws ApiCallException {
-        List<String> cweIds = piqueData.getCweIdsFromGhsa(TestConstants.GHSA_ID_A);
-        assertEquals(TestConstants.GHSA_CWE_A_ORACLE, cweIds.get(0));
+        assertEquals(
+                TestConstants.GHSA_CWE_A_ORACLE,
+                piqueData.getCweIdsFromGhsa(TestConstants.GHSA_ID_A).get(0));
     }
 
+    @Tag("api")
     @Test
     public void testCustomRequestBuilder() throws ApiCallException {
         CveEntity entity = piqueDataFactory.getNvdRequestBuilder()
@@ -133,24 +146,31 @@ public class PiqueDataIntegrationTests {
                 .build().executeRequest().getEntity();
 
         // Happy path
-        assertEquals(TestConstants.CVE_A, entity.getVulnerabilities().get(0).getCve().getId());
+        assertEquals(
+                TestConstants.CVE_A,
+                entity.getVulnerabilities().get(0).getCve().getId());
     }
 
     @Tag("regression")
     @Test
     public void testGetCvssScores() throws DataAccessException {
         // Happy path
-        List<String> cveIds = Arrays.asList(TestConstants.CVE_A, TestConstants.CVE_B);
-        Map<String, Metrics> data = piqueData.getCvssMetrics(cveIds);
-
-        assertEquals("nvd@nist.gov", data.get(TestConstants.CVE_A).getCvssMetricV2().get(0).getSource());
+        assertEquals(
+                "nvd@nist.gov",
+                piqueData.getCvssMetrics(
+                        Arrays.asList(TestConstants.CVE_A, TestConstants.CVE_B))
+                        .get(TestConstants.CVE_A)
+                        .getCvssMetricV2()
+                        .get(0).getSource());
 
         // Bad cve id
-        assertThrows(DataAccessException.class, () -> piqueData.getCvssMetrics(
+        assertThrows(
+                DataAccessException.class, () -> piqueData.getCvssMetrics(
                 Collections.singletonList(TestConstants.BAD_CVE_A)));
 
         // Bad cve id format
-        assertThrows(DataAccessException.class, () -> piqueData.getCvssMetrics(
+        assertThrows(
+                DataAccessException.class, () -> piqueData.getCvssMetrics(
                 Collections.singletonList(TestConstants.BAD_FORMAT)));
 
     }

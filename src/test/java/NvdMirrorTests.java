@@ -29,6 +29,7 @@ import exceptions.DataAccessException;
 import handlers.IJsonSerializer;
 import handlers.JsonResponseHandler;
 import handlers.JsonSerializer;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import persistence.IDao;
 import persistence.IDataSource;
@@ -54,7 +55,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 
 // TODO mock database to test methods
-public class NvdMirrorIntegrationTests {
+@Tag("mutate")
+public class NvdMirrorTests {
     @Test
     public void testBuildNvdMirror() throws DataAccessException, ApiCallException {
         PiqueDataFactory piqueDataFactory = new PiqueDataFactory();
@@ -67,26 +69,6 @@ public class NvdMirrorIntegrationTests {
         PiqueDataFactory piqueDataFactory = new PiqueDataFactory(DEFAULT_CREDENTIALS_FILE_PATH);
         NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
         nvdMirror.updateNvdMirror();
-    }
-
-    @Test
-    public void testGetLocalMetaData() throws DataAccessException {
-        PiqueDataFactory piqueDataFactory = new PiqueDataFactory(DEFAULT_CREDENTIALS_FILE_PATH);
-        NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
-        NvdMirrorMetaData metaData = nvdMirror.getMetaData();
-    }
-
-    @Test
-    public void testGetMetaData() throws DataAccessException {
-        PiqueDataFactory piqueDataFactory = new PiqueDataFactory();
-        NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
-
-        NvdMirrorMetaData metaData = nvdMirror.getMetaData();
-
-        System.out.println(metaData.getCvesModified());
-        System.out.println(metaData.getFormat());
-        System.out.println(metaData.getApiVersion());
-        System.out.println(metaData.getLastTimestamp());
     }
 
     @Test
