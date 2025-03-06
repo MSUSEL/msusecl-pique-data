@@ -49,8 +49,20 @@ public class PiqueDataTests {
     @Test
     public void testGetCve() {
         // Happy path
-        assertEquals(TestConstants.CVE_A, piqueData.getCve(TestConstants.CVE_A).getId());
-        assertEquals(TestConstants.CVE_B, piqueData.getCve(TestConstants.CVE_B).getId());
+        Optional<Cve> cveA = piqueData.getCve(TestConstants.CVE_A);
+        Optional<Cve> cveB = piqueData.getCve(TestConstants.CVE_B);
+
+        if (cveA.isPresent()) {
+            assertEquals(TestConstants.CVE_A, cveA.get().getId());
+        } else {
+            fail();
+        }
+
+        if (cveB.isPresent()) {
+            assertEquals(TestConstants.CVE_B, cveB.get().getId());
+        } else {
+            fail();
+        }
 
         // Bad id with good format
         assertThrows(DataAccessException.class, () -> {
@@ -98,6 +110,15 @@ public class PiqueDataTests {
                 piqueData.getCweName(TestConstants.CVE_B).get(0));
 
         // TODO Find cve without cwe and ensure that the resulting object is empty
+
+
+        Optional<Cve> cveResult = piqueData.getCve(TestConstants.BAD_CVE_A);
+        System.out.println(cveResult.isPresent() ? cveResult.get() : "No result returned from database");
+
+//        List<String> result = piqueData.getCweName(TestConstants.BAD_FORMAT);
+//        for(String str : result) {
+//            System.out.println(str);
+//        }
     }
 
     @Tag("api")

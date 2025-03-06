@@ -44,9 +44,11 @@ import service.*;
 
 import java.sql.Connection;
 import java.util.Collections;
+import java.util.Optional;
 
 import static common.Constants.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * IMPORTANT!
@@ -86,8 +88,8 @@ public class NvdMirrorTests {
         PiqueDataFactory piqueDataFactory = new PiqueDataFactory();
         PiqueData piqueData = piqueDataFactory.getPiqueData();
 
-        Cve cve = piqueData.getCve(TestConstants.CVE_A);
-        System.out.println(cve.getId());
+        Optional<Cve> cve = piqueData.getCve(TestConstants.CVE_A);
+        String id = cve.map(Cve::getId).orElse("");
     }
 
     @Test
@@ -108,8 +110,12 @@ public class NvdMirrorTests {
         PiqueDataFactory piqueDataFactoryWithCreds = new PiqueDataFactory(DEFAULT_CREDENTIALS_FILE_PATH);
         PiqueData piqueDataWithCreds = piqueDataFactoryWithCreds.getPiqueData();
 
-        Cve cve = piqueDataWithCreds.getCve(TestConstants.CVE_A);
-        assertEquals(TestConstants.CVE_A, cve.getId());
+        Optional<Cve> cve = piqueDataWithCreds.getCve(TestConstants.CVE_A);
+        if (cve.isPresent()) {
+            assertEquals(TestConstants.CVE_A, cve.get().getId());
+        } else {
+            fail();
+        }
    }
 
     @Test

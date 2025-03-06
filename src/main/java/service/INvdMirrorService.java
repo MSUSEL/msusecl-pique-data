@@ -30,9 +30,10 @@ import exceptions.DataAccessException;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public interface INvdMirrorService {
-    Cve handleGetCveById(String cveId) throws DataAccessException;
+    Optional<Cve> handleGetCveById(String cveId) throws DataAccessException;
     List<Cve> handleGetCveById(List<String> cveIds) throws DataAccessException;
     List<String> handleGetNvdCweName(String cveId) throws DataAccessException;
     NvdMirrorMetaData handleGetCurrentMetaData() throws DataAccessException;

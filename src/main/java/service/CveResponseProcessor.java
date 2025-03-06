@@ -30,8 +30,7 @@ import java.util.*;
 public class CveResponseProcessor {
 
     public List<String> extractCweDescriptions(Cve cve) {
-        Optional<List<Weakness>> optionalCweList = Optional.of(cve.getWeaknesses().orElse(new ArrayList<>()));
-        List<Weakness> cweList = optionalCweList.get();
+        List<Weakness> cweList = Optional.of(cve.getWeaknesses().orElse(new ArrayList<>())).get();
         List<String> cwes = new ArrayList<>();
 
         for (Weakness weakness : cweList) {
