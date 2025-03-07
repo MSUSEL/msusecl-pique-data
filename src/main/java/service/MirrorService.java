@@ -26,18 +26,19 @@ package service;
 import businessObjects.cve.Cve;
 import businessObjects.cve.Metrics;
 import businessObjects.cve.NvdMirrorMetaData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import persistence.IDao;
 import exceptions.DataAccessException;
 import persistence.postgreSQL.PostgresMetadataDao;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public final class MirrorService implements INvdMirrorService{
     private final CveResponseProcessor cveResponseProcessor;
     private final IDao<Cve> cveDao;
     private final PostgresMetadataDao metadataDao;
+    private static final Logger LOGGER = LoggerFactory.getLogger(MirrorService.class);
 
     public MirrorService(CveResponseProcessor cveResponseProcessor, IDao<Cve> cveDao, PostgresMetadataDao metadataDao) {
         this.cveResponseProcessor = cveResponseProcessor;
@@ -46,21 +47,27 @@ public final class MirrorService implements INvdMirrorService{
     }
 
     @Override
-    public Cve handleGetCveById(String cveId) throws DataAccessException {
-        return cveDao.fetch(Collections.singletonList(cveId)).get(0);
+    public Optional<Cve> handleGetCveById(String cveId) throws DataAccessException {
+        List<Cve> result = cveDao.fetch(Collections.singletonList(cveId));
+
+        return result.isEmpty() ? Optional.empty() : Optional.of(result.get(0));
     }
 
     @Override
     public List<Cve> handleGetCveById(List<String> cveIds) throws DataAccessException {
         return cveDao.fetch(cveIds);
+
     }
 
     @Override
     public List<String> handleGetNvdCweName(String cveId) throws DataAccessException {
-        return cveResponseProcessor.extractCweDescriptions(handleGetCveById(cveId));
+        Optional<Cve> cve = handleGetCveById(cveId);
+
+        return cve.isPresent()
+                ? cveResponseProcessor.extractCweDescriptions(cve.get())
+                : new ArrayList<>();
     }
 
-    // FIXME: fetch metadata by something other than auto-generated id number
     @Override
     public NvdMirrorMetaData handleGetCurrentMetaData() throws DataAccessException {
         return metadataDao.fetch().get(0);
