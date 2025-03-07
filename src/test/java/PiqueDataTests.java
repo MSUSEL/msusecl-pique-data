@@ -65,14 +65,12 @@ public class PiqueDataTests {
         }
 
         // Bad id with good format
-        assertThrows(DataAccessException.class, () -> {
-            piqueData.getCve(TestConstants.BAD_CVE_A);
-        });
+        Optional<Cve> badId = piqueData.getCve(TestConstants.BAD_CVE_A);
+        assertEquals(Optional.empty(), badId);
 
         // Bad input format
-        assertThrows(DataAccessException.class, () -> {
-            piqueData.getCve(TestConstants.BAD_FORMAT);
-        });
+        Optional<Cve> badFormat = piqueData.getCve(TestConstants.BAD_FORMAT);
+        assertEquals(Optional.empty(), badFormat);
     }
 
     @Tag("regression")
@@ -86,19 +84,19 @@ public class PiqueDataTests {
 
         // Single bad id in list
         assertEquals(
-                TestConstants.CVE_B, piqueData.getCve(
-                Arrays.asList(TestConstants.BAD_CVE_A, TestConstants.CVE_B)).get(0).getId());
+                TestConstants.CVE_B,
+                piqueData.getCve(Arrays.asList(TestConstants.BAD_CVE_A, TestConstants.CVE_B)).get(0).getId());
 
         // All bad ids in list
-        assertThrows(
-                DataAccessException.class, () -> piqueData.getCve(
-                Arrays.asList(TestConstants.BAD_CVE_A, TestConstants.BAD_CVE_B)));
+        assertEquals(
+                new ArrayList<>(),
+                piqueData.getCve(Arrays.asList(TestConstants.BAD_CVE_A, TestConstants.BAD_CVE_B)));
+
 
         // Bad cveId format in one Cve
         assertEquals(
                 TestConstants.CVE_A,
-                piqueData.getCve(Arrays.asList(TestConstants.BAD_FORMAT, TestConstants.CVE_A))
-                .get(0).getId());
+                piqueData.getCve(Arrays.asList(TestConstants.BAD_FORMAT, TestConstants.CVE_A)).get(0).getId());
     }
 
     @Tag("regression")
@@ -111,19 +109,15 @@ public class PiqueDataTests {
 
         // TODO Find cve without cwe and ensure that the resulting object is empty
 
-
-        Optional<Cve> cveResult = piqueData.getCve(TestConstants.BAD_CVE_A);
-        System.out.println(cveResult.isPresent() ? cveResult.get() : "No result returned from database");
-
-//        List<String> result = piqueData.getCweName(TestConstants.BAD_FORMAT);
-//        for(String str : result) {
-//            System.out.println(str);
-//        }
+        // Cases in which no result is returned from database
+        assertEquals(new ArrayList<>(), piqueData.getCweName(TestConstants.BAD_FORMAT));
+        assertEquals(new ArrayList<>(), piqueData.getCweName(TestConstants.BAD_CVE_A));
     }
 
     @Tag("api")
     @Test
     public void testGetCveFromNvd() throws ApiCallException {
+        //TODO Update this to cover consistent behavior between mirror and API for no results
         // Happy path
         assertEquals(TestConstants.CVE_A, piqueData.getCveFromNvd(TestConstants.CVE_A).getId());
 
@@ -185,14 +179,10 @@ public class PiqueDataTests {
                         .get(0).getSource());
 
         // Bad cve id
-        assertThrows(
-                DataAccessException.class, () -> piqueData.getCvssMetrics(
-                Collections.singletonList(TestConstants.BAD_CVE_A)));
+        assertEquals(Collections.EMPTY_MAP, piqueData.getCvssMetrics(Collections.singletonList(TestConstants.BAD_CVE_A)));
 
         // Bad cve id format
-        assertThrows(
-                DataAccessException.class, () -> piqueData.getCvssMetrics(
-                Collections.singletonList(TestConstants.BAD_FORMAT)));
+        assertEquals(Collections.EMPTY_MAP, piqueData.getCvssMetrics(Collections.singletonList(TestConstants.BAD_FORMAT)));
 
     }
 
