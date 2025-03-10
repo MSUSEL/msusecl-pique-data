@@ -23,7 +23,7 @@ git repository and compile from source using java language level 11.
 <dependency>
     <groupId>edu.montana.gsoc.msusel</groupId>
     <artifactId>msusecl-pique-data</artifactId>
-    <version>1.1.0</version>
+    <version>2.0.0</version>
 </dependency>
 ```
 
@@ -171,9 +171,15 @@ class ExampleClass {
    PiqueData piqueData = piqueDataFactory.getPiqueData();
 
    // Gets a cve object
-   public Cve exampleGetCveMethod() {
+   public Optional<Cve> exampleGetCveMethod() {
        try {
-           return piqueData.getCveById(cveId);
+           Optional<Cve> result = piqueData.getCveById(cveId);
+           if (result.isPresent()) {
+               return result.get();
+           } else {
+               // handle any logical implications of no result from db
+               return result // returns Optional.empty() object
+           }
        } catch (DataAccessException e) {
            // Log error
            throw new RuntimeException(e);
@@ -181,9 +187,15 @@ class ExampleClass {
    }
 
    // Gets a list of CWE's associated with a particular CVE
-   public String[] exampleGetCweMethod() {
+   public List<String> exampleGetCweMethod() {
       try {
-          return piqueData.getCwes(cveId);
+          List<String> result = piqueData.getCwes(cveId);
+          if (result.isEmpty) {
+              // handle any logical implications of no result from db
+              // beware of Out of Bounds exceptions on empty lists
+          }
+          return result
+
       } catch (DataAccessException e) {
           throw new RuntimeException(e);
       }
@@ -259,16 +271,13 @@ A list of parameters can be found [here](https://nvd.nist.gov/developers/vulnera
 
 ### Exception Handling
 
-The PiqueData library uses two custom exceptions.
-`DataAccessException` is thrown when there is an error interacting with a database or when a query returns no results. This may seem unintutitive, but the reasoning is that
-there are times when getting no result should cause the program to halt and times when it should cause the program to continue. Which one, is entirely up to the pique model
-designer. The best practice with this library is to wrap each call in try-catch blocks. If you want execution to continue, simply catch the DataAccessException, and log the
-message. If you wish for the program to halt you can avoid using try-catch blocks or use them, log the exception message, and throw a RuntimeException.
+The PiqueData library uses two custom exceptions. It is recommended to wrap calls in a try-catch block and properly log exceptions in your pique models.
 
+`DataAccessException` is thrown when there is an error interacting with a database.
 
 `ApiCallException` is thrown when there is an error interacting with a third-party API. It is probably best to allow this exception to halt program execution. (Though there
-may be reasons not to halt) Again the simple approach is to use try-catch blocks with logging. Note that queries to the NVD or GHSA database which return no results will throw
-a DataAccessException. ApiCallException is used to indicate a problem with the API call rather than a problem with the returned data.
+may be reasons not to halt) Again the simple approach is to use try-catch blocks with logging. ApiCallException is used to indicate a problem with the API call rather
+than a problem with the returned data.
 
 Note that both of these extend the java RuntimeException class. As such, no try-catch blocks are necessary, but they are not caught, these will halt program execution if thrown.
 
