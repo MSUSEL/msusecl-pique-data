@@ -23,7 +23,7 @@
  */
 package exceptions;
 
-public class DataAccessException extends RuntimeException{
+public class DataAccessException extends RuntimeException {
     public DataAccessException(Exception e) {
         super(e);
     }

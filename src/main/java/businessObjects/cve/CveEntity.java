@@ -24,10 +24,17 @@
 package businessObjects.cve;
 
 import businessObjects.baseClasses.BaseEntity;
+import exceptions.ApiCallException;
+import exceptions.DataAccessException;
 import lombok.Getter;
 import lombok.Setter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import static common.Constants.DB_QUERY_NO_RESULTS;
 
 /**
  * This represents the root object for NVD response data.
@@ -37,11 +44,22 @@ import java.util.ArrayList;
 @Getter
 @Setter
 public final class CveEntity extends BaseEntity {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CveEntity.class);
+
     private int resultsPerPage;
     private int startIndex;
     private int totalResults;
     private String format;
     private String version;
     private String timestamp;
-    private ArrayList<Vulnerability> vulnerabilities;
+    private List<Vulnerability> vulnerabilities;
+
+    public List<Vulnerability> getVulnerabilities() {
+         return Optional.of(vulnerabilities)
+                .filter(r -> !r.isEmpty())
+                .orElseThrow(() -> {
+                    LOGGER.info(DB_QUERY_NO_RESULTS);
+                    return new ApiCallException(DB_QUERY_NO_RESULTS);
+                });
+    }
 }
