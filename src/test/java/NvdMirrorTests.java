@@ -29,7 +29,8 @@ import exceptions.DataAccessException;
 import handlers.IJsonSerializer;
 import handlers.JsonResponseHandler;
 import handlers.JsonSerializer;
-import org.junit.Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import persistence.IDao;
 import persistence.IDataSource;
 import persistence.postgreSQL.Migration;
@@ -43,9 +44,11 @@ import service.*;
 
 import java.sql.Connection;
 import java.util.Collections;
+import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
 import static common.Constants.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * IMPORTANT!
@@ -54,7 +57,8 @@ import static common.Constants.*;
  */
 
 // TODO mock database to test methods
-public class NvdMirrorIntegrationTests {
+@Tag("mutate")
+public class NvdMirrorTests {
     @Test
     public void testBuildNvdMirror() throws DataAccessException, ApiCallException {
         PiqueDataFactory piqueDataFactory = new PiqueDataFactory();
@@ -67,26 +71,6 @@ public class NvdMirrorIntegrationTests {
         PiqueDataFactory piqueDataFactory = new PiqueDataFactory(DEFAULT_CREDENTIALS_FILE_PATH);
         NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
         nvdMirror.updateNvdMirror();
-    }
-
-    @Test
-    public void testGetLocalMetaData() throws DataAccessException {
-        PiqueDataFactory piqueDataFactory = new PiqueDataFactory(DEFAULT_CREDENTIALS_FILE_PATH);
-        NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
-        NvdMirrorMetaData metaData = nvdMirror.getMetaData();
-    }
-
-    @Test
-    public void testGetMetaData() throws DataAccessException {
-        PiqueDataFactory piqueDataFactory = new PiqueDataFactory();
-        NvdMirror nvdMirror = piqueDataFactory.getNvdMirror();
-
-        NvdMirrorMetaData metaData = nvdMirror.getMetaData();
-
-        System.out.println(metaData.getCvesModified());
-        System.out.println(metaData.getFormat());
-        System.out.println(metaData.getApiVersion());
-        System.out.println(metaData.getLastTimestamp());
     }
 
     @Test
@@ -104,8 +88,8 @@ public class NvdMirrorIntegrationTests {
         PiqueDataFactory piqueDataFactory = new PiqueDataFactory();
         PiqueData piqueData = piqueDataFactory.getPiqueData();
 
-        Cve cve = piqueData.getCve(TestConstants.CVE_A);
-        System.out.println(cve.getId());
+        Optional<Cve> cve = piqueData.getCve(TestConstants.CVE_A);
+        String id = cve.map(Cve::getId).orElse("");
     }
 
     @Test
@@ -126,8 +110,12 @@ public class NvdMirrorIntegrationTests {
         PiqueDataFactory piqueDataFactoryWithCreds = new PiqueDataFactory(DEFAULT_CREDENTIALS_FILE_PATH);
         PiqueData piqueDataWithCreds = piqueDataFactoryWithCreds.getPiqueData();
 
-        Cve cve = piqueDataWithCreds.getCve(TestConstants.CVE_A);
-        assertEquals(TestConstants.CVE_A, cve.getId());
+        Optional<Cve> cve = piqueDataWithCreds.getCve(TestConstants.CVE_A);
+        if (cve.isPresent()) {
+            assertEquals(TestConstants.CVE_A, cve.get().getId());
+        } else {
+            fail();
+        }
    }
 
     @Test

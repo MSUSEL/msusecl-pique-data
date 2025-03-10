@@ -32,6 +32,7 @@ import service.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * PiqueData serves as the primary class for interacting with this library. It provides methods to work
@@ -63,7 +64,7 @@ public class PiqueData {
      * @return Returns a Cve object corresponding to the provided cveId
      * @throws DataAccessException
      */
-    public Cve getCve(String cveId) throws DataAccessException {
+    public Optional<Cve> getCve(String cveId) throws DataAccessException {
         return mirrorService.handleGetCveById(cveId);
     }
 
@@ -94,7 +95,7 @@ public class PiqueData {
      * @param cveId This is the official cveId from the NVD
      * @return Requested Cve object
      */
-    public Cve getCveFromNvd(String cveId) throws ApiCallException {
+    public Cve getCveFromNvd(String cveId) throws ApiCallException, DataAccessException {
         return cveResponseProcessor.extractSingleCve(nvdApiService.handleGetEntity(cveId));
     }
 

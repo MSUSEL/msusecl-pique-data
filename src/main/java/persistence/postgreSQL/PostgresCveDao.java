@@ -31,16 +31,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import persistence.IDao;
 import persistence.IDataSource;
+import service.MirrorService;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import static common.Constants.DB_QUERY_NO_RESULTS;
 import static persistence.postgreSQL.StoredProcedureCalls.*;
 
 public final class PostgresCveDao implements IDao<Cve> {
     private final Connection conn;
     private final IJsonSerializer jsonSerializer;
+    private static final Logger LOGGER = LoggerFactory.getLogger(PostgresCveDao.class);
 
     public PostgresCveDao(IDataSource<Connection> dataSource, IJsonSerializer jsonSerializer) {
         this.jsonSerializer = jsonSerializer;
@@ -60,6 +64,7 @@ public final class PostgresCveDao implements IDao<Cve> {
             PreparedStatement statement = conn.prepareStatement(sql);
             ResultSet rs = statement.executeQuery();
             List<Cve> result = new ArrayList<>();
+
             while (rs.next()) {
                 result.add(jsonSerializer.deserialize(rs.getString("vulnerability"), Vulnerability.class).getCve());
             }

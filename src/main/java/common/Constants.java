@@ -27,8 +27,7 @@ package common;
  * These are general constants used throughout the project
  */
 public final class Constants {
-    public static final String DB_QUERY_FAILED = "Query Failed. ";
-    public static final String DB_QUERY_NO_RESULTS = "Query returned no results. ";
+    public static final String DB_QUERY_NO_RESULTS = "At least one query returned no results. ";
     public static final int DEFAULT_NVD_REQUEST_SLEEP = 0;
     public static final int DEFAULT_START_INDEX = 0;
     public static final String GHSA_URI = "https://api.github.com/graphql";

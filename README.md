@@ -1,6 +1,6 @@
 # Pique Data (msusecl-pique-data)
 
-Pique Data is a java library, intended for users of [PIQUE](https://GitHub.com/MSUSEL/msusel-pique), that provides features related to accessing
+Pique Data is a java library, intended for creators of [PIQUE](https://GitHub.com/MSUSEL/msusel-pique) models, that provides features related to accessing
 public repositories of cyber vulnerabilities. In particular, it provides methods to access the the [National Vulnerability
 Database](https://nvd.nist.gov/developers/api-workflows) (NVD) CVE 2.0 API and the [GitHub Security Advisory Database](https://GitHub.com/advisories).
 The NVD has a limited feature set and recommends that heavy users of its API's create a mirror of the database. As such, this library provides
@@ -257,11 +257,20 @@ A list of parameters can be found [here](https://nvd.nist.gov/developers/vulnera
 
 -----------------
 
-### A Note on Exception Handling
+### Exception Handling
 
 The PiqueData library uses two custom exceptions.
-`DataAccessException` is thrown when there is an error interacting with a database.  `ApiCallException` is thrown when there is an error
-interacting with a third-party API.
+`DataAccessException` is thrown when there is an error interacting with a database or when a query returns no results. This may seem unintutitive, but the reasoning is that
+there are times when getting no result should cause the program to halt and times when it should cause the program to continue. Which one, is entirely up to the pique model
+designer. The best practice with this library is to wrap each call in try-catch blocks. If you want execution to continue, simply catch the DataAccessException, and log the
+message. If you wish for the program to halt you can avoid using try-catch blocks or use them, log the exception message, and throw a RuntimeException.
+
+
+`ApiCallException` is thrown when there is an error interacting with a third-party API. It is probably best to allow this exception to halt program execution. (Though there
+may be reasons not to halt) Again the simple approach is to use try-catch blocks with logging. Note that queries to the NVD or GHSA database which return no results will throw
+a DataAccessException. ApiCallException is used to indicate a problem with the API call rather than a problem with the returned data.
+
+Note that both of these extend the java RuntimeException class. As such, no try-catch blocks are necessary, but they are not caught, these will halt program execution if thrown.
 
 -----------------
 
