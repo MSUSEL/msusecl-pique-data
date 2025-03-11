@@ -189,7 +189,7 @@ class ExampleClass {
    // Gets a list of CWE's associated with a particular CVE
    public List<String> exampleGetCweMethod() {
       try {
-          List<String> result = piqueData.getCwes(cveId);
+          List<String> result = piqueData.getCweName(cveId);
           if (result.isEmpty) {
               // handle any logical implications of no result from db
               // beware of Out of Bounds exceptions on empty lists
