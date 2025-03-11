@@ -26,8 +26,9 @@ package businessObjects;
 import businessObjects.baseClasses.BaseRequest;
 import businessObjects.ghsa.SecurityAdvisory;
 import exceptions.ApiCallException;
+import handlers.IGhsaSerializer;
 import handlers.JsonResponseHandler;
-import handlers.SecurityAdvisoryMarshaller;
+import handlers.GhsaSerializer;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -50,12 +51,12 @@ public final class GHSARequest extends BaseRequest implements IRequest {
     private static final Logger LOGGER = LoggerFactory.getLogger(GHSARequest.class);
     private final JsonResponseHandler handler;
     private final String query;
-    private final SecurityAdvisoryMarshaller marshaller;
+    private final IGhsaSerializer<SecurityAdvisory> serializer;
 
-    public GHSARequest(String httpMethod, String baseURI, Header[] headers, String query, SecurityAdvisoryMarshaller marshaller, JsonResponseHandler jsonResponseHandler) {
+    public GHSARequest(String httpMethod, String baseURI, Header[] headers, String query, IGhsaSerializer<SecurityAdvisory> serializer, JsonResponseHandler jsonResponseHandler) {
         super(httpMethod, baseURI, headers);
         this.query = query;
-        this.marshaller = marshaller;
+        this.serializer = serializer;
         this.handler = jsonResponseHandler;
     }
 
@@ -92,7 +93,7 @@ public final class GHSARequest extends BaseRequest implements IRequest {
         int status = response.getStatusLine().getStatusCode();
         if (status >= 200 && status < 300) {
             return new GHSAResponse(
-                    marshaller.unmarshalJson(handler.handleResponse(response)),
+                    serializer.deserialize(handler.handleResponse(response)),
                     status);
         } else {
             LOGGER.info(RESPONSE_STATUS_MESSAGE, status);

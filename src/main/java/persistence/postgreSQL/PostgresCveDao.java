@@ -26,27 +26,24 @@ package persistence.postgreSQL;
 import businessObjects.cve.Cve;
 import businessObjects.cve.Vulnerability;
 import exceptions.DataAccessException;
-import handlers.IJsonSerializer;
+import handlers.INvdSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import persistence.IDao;
 import persistence.IDataSource;
-import service.MirrorService;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-import static common.Constants.DB_QUERY_NO_RESULTS;
 import static persistence.postgreSQL.StoredProcedureCalls.*;
 
 public final class PostgresCveDao implements IDao<Cve> {
     private final Connection conn;
-    private final IJsonSerializer jsonSerializer;
+    private final INvdSerializer jsonSerializer;
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresCveDao.class);
 
-    public PostgresCveDao(IDataSource<Connection> dataSource, IJsonSerializer jsonSerializer) {
+    public PostgresCveDao(IDataSource<Connection> dataSource, INvdSerializer jsonSerializer) {
         this.jsonSerializer = jsonSerializer;
         this.conn = dataSource.getConnection();
     }

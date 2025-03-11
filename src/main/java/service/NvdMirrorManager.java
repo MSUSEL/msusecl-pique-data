@@ -23,12 +23,11 @@
  */
 package service;
 
-import handlers.IJsonSerializer;
+import handlers.INvdSerializer;
 import persistence.postgreSQL.PostgresMetadataDao;
 import presentation.NvdRequestBuilder;
 import businessObjects.cve.CveEntity;
 import businessObjects.cve.Cve;
-import common.HelperFunctions;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
 import org.apache.http.client.ResponseHandler;
@@ -36,22 +35,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import persistence.IDao;
 
-import java.nio.file.Path;
-import java.util.Collections;
-
 import static common.Constants.*;
 
 public class NvdMirrorManager {
     private final CveResponseProcessor cveResponseProcessor;
     private final ResponseHandler<String> jsonResponseHandler;
-    private final IJsonSerializer jsonSerializer;
+    private final INvdSerializer jsonSerializer;
     private final IDao<Cve> cveDao;
     private final PostgresMetadataDao metadataDao;
     private static final Logger LOGGER = LoggerFactory.getLogger(NvdMirrorManager.class);
 
     public NvdMirrorManager(CveResponseProcessor cveResponseProcessor,
                             ResponseHandler<String> jsonResponseHandler,
-                            IJsonSerializer jsonSerializer,
+                            INvdSerializer jsonSerializer,
                             IDao<Cve> cveDao,
                             PostgresMetadataDao metadataDao) {
         this.cveResponseProcessor = cveResponseProcessor;
@@ -95,23 +91,6 @@ public class NvdMirrorManager {
         persistCveDetails(response);
     }
 
-//    /**
-//     * Handles building a full or partial NVD mirror from a json file.
-//     * The file must be structured in exactly the same format as a CveResponse
-//     *                  NVD Mirror or local containerized mongodb instance)
-//     * @param filepath Path to the json file formatted as a CveResponse
-//     * @throws DataAccessException
-//     */
-//    public void handleBuildMirrorFromJsonFile(Path filepath) throws DataAccessException {
-//        CveEntity fileContents = processFile(filepath);
-//        persistMetadata(fileContents);
-//        persistCveDetails(fileContents);
-//    }
-//
-//    public void handleDumpNvdToFile(String filepath) throws DataAccessException {
-//            cveDao.dumpToFile(filepath);
-//    }
-
     private int resetCveCount(int cveCount, CveEntity response) {
         return cveCount == 1
                 ? cveResponseProcessor.extractTotalResults(response)
@@ -130,7 +109,7 @@ public class NvdMirrorManager {
     }
 
     public void persistMetadata(CveEntity response) throws DataAccessException {
-        metadataDao.upsert(Collections.singletonList(cveResponseProcessor.formatNvdMetaData(response)));
+        metadataDao.upsert(cveResponseProcessor.formatNvdMetaData(response));
     }
 
     private void handleSleep(int startIndex, int cveCount) {
@@ -143,8 +122,4 @@ public class NvdMirrorManager {
             throw new RuntimeException(e);
         }
     }
-
-    private CveEntity processFile(Path filepath) {
-        return jsonSerializer.deserialize(HelperFunctions.readJsonFile(filepath), CveEntity.class);
-    }
-    }
+}

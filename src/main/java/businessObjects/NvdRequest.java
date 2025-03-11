@@ -28,7 +28,7 @@ import businessObjects.cve.CveEntity;
 import common.Constants;
 import exceptions.ApiCallException;
 
-import handlers.IJsonSerializer;
+import handlers.INvdSerializer;
 import org.apache.http.Header;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ResponseHandler;
@@ -52,14 +52,14 @@ import java.util.List;
 public final class NvdRequest extends BaseRequest {
     private static final Logger LOGGER = LoggerFactory.getLogger(NvdRequest.class);
     private final ResponseHandler<String> jsonResponseHandler;
-    private final IJsonSerializer serializer;
+    private final INvdSerializer serializer;
 
     public NvdRequest(String httpMethod,
                       String baseUri,
                       Header[] headers,
                       List<NameValuePair> params,
                       ResponseHandler<String> jsonResponseHandler,
-                      IJsonSerializer serializer) {
+                      INvdSerializer serializer) {
         super(httpMethod, baseUri, headers, params);
         this.jsonResponseHandler = jsonResponseHandler;
         this.serializer = serializer;

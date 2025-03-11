@@ -29,8 +29,8 @@ import businessObjects.GraphQlQueries;
 import businessObjects.HTTPMethod;
 import businessObjects.ghsa.SecurityAdvisory;
 import common.Constants;
+import handlers.IGhsaSerializer;
 import handlers.JsonResponseHandler;
-import handlers.SecurityAdvisoryMarshaller;
 import persistence.HeaderBuilder;
 import exceptions.ApiCallException;
 import org.json.JSONException;
@@ -43,12 +43,12 @@ import java.util.List;
 public class GhsaApiService {
     private static final Logger LOGGER = LoggerFactory.getLogger(GhsaApiService.class);
     private final GhsaResponseProcessor ghsaResponseProcessor;
-    private final SecurityAdvisoryMarshaller marshaller;
+    private final IGhsaSerializer<SecurityAdvisory> serializer;
     private final JsonResponseHandler responseHandler;
 
-    public GhsaApiService(GhsaResponseProcessor ghsaResponseProcessor, SecurityAdvisoryMarshaller marshaller, JsonResponseHandler responseHandler) {
+    public GhsaApiService(GhsaResponseProcessor ghsaResponseProcessor, IGhsaSerializer<SecurityAdvisory> serializer, JsonResponseHandler responseHandler) {
         this.ghsaResponseProcessor = ghsaResponseProcessor;
-        this.marshaller = marshaller;
+        this.serializer = serializer;
         this.responseHandler = responseHandler;
     }
 
@@ -65,7 +65,7 @@ public class GhsaApiService {
                         .addHeader(AUTHORIZATION, String.format("Bearer %s", System.getenv("GITHUB_PAT")))
                         .build(),
                 formatQueryBody(ghsaId),
-                marshaller,
+                serializer,
                 responseHandler);
         GHSAResponse ghsaResponse = ghsaRequest.executeRequest();
 

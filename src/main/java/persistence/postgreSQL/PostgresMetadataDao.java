@@ -25,7 +25,6 @@ package persistence.postgreSQL;
 
 import businessObjects.cve.NvdMirrorMetaData;
 import exceptions.DataAccessException;
-import persistence.IDao;
 import persistence.IDataSource;
 
 import java.sql.*;
@@ -41,7 +40,7 @@ public final class PostgresMetadataDao {
         this.conn = dataSource.getConnection();
     }
 
-    public List<NvdMirrorMetaData> fetch() throws DataAccessException {
+    public NvdMirrorMetaData fetch() throws DataAccessException {
         try {
             String sql = "SELECT * FROM nvd.metadata;";
             PreparedStatement statement = conn.prepareStatement(sql);
@@ -55,19 +54,14 @@ public final class PostgresMetadataDao {
                 metaData.setLastTimestamp(rs.getString("last_timestamp"));
             }
 
-            return Collections.singletonList(metaData);
+            return metaData;
 
         } catch (SQLException e) {
             throw new DataAccessException(e);
         }
     }
 
-    public void upsert(List<NvdMirrorMetaData> metadata) throws DataAccessException {
-        insertMetadata(metadata.get(0));
-    }
-
-
-    private void insertMetadata(NvdMirrorMetaData metadata) {
+    public void upsert(NvdMirrorMetaData metadata) throws DataAccessException {
         try {
             CallableStatement statement = conn.prepareCall(UPSERT_METADATA);
             statement.setInt(1, Integer.parseInt(metadata.getCvesModified()));

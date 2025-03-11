@@ -23,8 +23,7 @@
  */
 package service;
 
-import handlers.IJsonSerializer;
-import handlers.JsonSerializer;
+import handlers.INvdSerializer;
 import presentation.NvdRequestBuilder;
 import businessObjects.cve.CveEntity;
 import common.*;
@@ -33,9 +32,9 @@ import org.apache.http.client.ResponseHandler;
 
 public final class NvdApiService {
     private final ResponseHandler<String> jsonResponseHandler;
-    private final IJsonSerializer serializer;
+    private final INvdSerializer serializer;
 
-    public NvdApiService(ResponseHandler<String> jsonResponseHandler, IJsonSerializer serializer) {
+    public NvdApiService(ResponseHandler<String> jsonResponseHandler, INvdSerializer serializer) {
         this.jsonResponseHandler = jsonResponseHandler;
         this.serializer = serializer;
     }

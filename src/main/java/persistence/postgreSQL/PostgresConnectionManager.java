@@ -51,7 +51,6 @@ public final class PostgresConnectionManager implements IDataSource<Connection> 
         }
     }
 
-
     @Override
     public Connection getConnection() {
         try {

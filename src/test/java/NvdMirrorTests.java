@@ -26,9 +26,9 @@ import businessObjects.cve.NvdMirrorMetaData;
 import com.google.gson.Gson;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
-import handlers.IJsonSerializer;
+import handlers.INvdSerializer;
 import handlers.JsonResponseHandler;
-import handlers.JsonSerializer;
+import handlers.NvdSerializer;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import persistence.IDao;
@@ -43,7 +43,6 @@ import presentation.PiqueDataFactory;
 import service.*;
 
 import java.sql.Connection;
-import java.util.Collections;
 import java.util.Optional;
 
 import static common.Constants.*;
@@ -102,7 +101,7 @@ public class NvdMirrorTests {
         metaData.setCvesModified("255980");
         metaData.setFormat("NVD_CVE");
 
-        dao.upsert(Collections.singletonList(metaData));
+        dao.upsert(metaData);
     }
 
    @Test
@@ -120,7 +119,7 @@ public class NvdMirrorTests {
 
     @Test
     public void testDBSetup() {
-        IJsonSerializer serializer = new JsonSerializer(new Gson());
+        INvdSerializer serializer = new NvdSerializer(new Gson());
         IDataSource<Connection> dataSource = new PostgresConnectionManager(
                         new CredentialService(DEFAULT_CREDENTIALS_FILE_PATH));
         IDao<Cve> postgresCveDao = new PostgresCveDao(dataSource, serializer);

@@ -26,7 +26,7 @@ package presentation;
 import businessObjects.HTTPMethod;
 import businessObjects.NvdRequest;
 import common.Constants;
-import handlers.IJsonSerializer;
+import handlers.INvdSerializer;
 import persistence.HeaderBuilder;
 import common.NvdConstants;
 import persistence.NvdParameterBuilder;
@@ -40,9 +40,9 @@ public class NvdRequestBuilder {
     private final NvdParameterBuilder nvdParameterBuilder = new NvdParameterBuilder();
     private final HeaderBuilder headerBuilder = new HeaderBuilder();
     private final ResponseHandler<String> jsonResponseHandler;
-    private final IJsonSerializer serializer;
+    private final INvdSerializer serializer;
 
-    public NvdRequestBuilder(ResponseHandler<String> jsonResponseHandler, IJsonSerializer serializer) {
+    public NvdRequestBuilder(ResponseHandler<String> jsonResponseHandler, INvdSerializer serializer) {
         this.jsonResponseHandler = jsonResponseHandler;
         this.serializer = serializer;
     }
