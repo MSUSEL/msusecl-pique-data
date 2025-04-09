@@ -59,7 +59,7 @@ public class CveResponseProcessor implements IResponseProcessor {
     }
 
     @Override
-    public NvdMirrorMetaData extractFormattedNvdMetaData(CveEntity response) {
+    public NvdMirrorMetaData extractNvdMetaData(CveEntity response) {
         NvdMirrorMetaData metaData = new NvdMirrorMetaData();
 
         metaData.setCvesModified(Integer.toString(response.getTotalResults()));

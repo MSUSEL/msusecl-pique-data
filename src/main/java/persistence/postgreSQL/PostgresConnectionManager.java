@@ -23,16 +23,15 @@
  */
 package persistence.postgreSQL;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Optional;
-
 import org.apache.commons.dbcp2.BasicDataSource;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import persistence.IDataSource;
 import service.CredentialService;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Optional;
 
 
 public final class PostgresConnectionManager implements IDataSource<Connection> {

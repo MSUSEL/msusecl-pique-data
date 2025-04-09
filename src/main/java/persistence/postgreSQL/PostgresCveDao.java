@@ -36,7 +36,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static persistence.postgreSQL.StoredProcedureCalls.*;
+import static persistence.postgreSQL.StoredProcedureCalls.UPSERT_BATCH_VULNERABILITIES;
 
 public final class PostgresCveDao implements IDao<Cve> {
     private final Connection conn;

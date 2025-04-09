@@ -23,19 +23,19 @@
  */
 package service;
 
-import businessObjects.cve.NvdMirrorMetaData;
-import handlers.INvdSerializer;
-import persistence.IDataSource;
-import persistence.IMetaDataDao;
-import presentation.NvdRequestBuilder;
-import businessObjects.cve.CveEntity;
 import businessObjects.cve.Cve;
+import businessObjects.cve.CveEntity;
+import businessObjects.cve.NvdMirrorMetaData;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
+import handlers.INvdSerializer;
 import org.apache.http.client.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import persistence.IDao;
+import persistence.IDataSource;
+import persistence.IMetaDataDao;
+import presentation.NvdRequestBuilder;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -180,6 +180,7 @@ public class NvdMirrorManager {
 
     private void persistPaginatedData(CveEntity response, int loopIndex, int cveCount) throws DataAccessException {
         persistCveDetails(response);
+        //FIXME This is likely creating excess writes. Fix the math
         if (loopIndex >= cveCount - NVD_MAX_PAGE_SIZE) {
             persistMetadata(response);
         }
@@ -190,7 +191,7 @@ public class NvdMirrorManager {
     }
 
     private void persistMetadata(CveEntity response) throws DataAccessException {
-        metadataDao.upsert(cveResponseProcessor.extractFormattedNvdMetaData(response));
+        metadataDao.upsert(cveResponseProcessor.extractNvdMetaData(response));
     }
 
     private void handleSleep(int startIndex, int cveCount) {

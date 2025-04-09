@@ -24,10 +24,10 @@
 package presentation;
 
 import com.google.gson.Gson;
+import handlers.GhsaSerializer;
 import handlers.INvdSerializer;
 import handlers.JsonResponseHandler;
 import handlers.NvdSerializer;
-import handlers.GhsaSerializer;
 import org.apache.http.client.ResponseHandler;
 import persistence.IDataSource;
 import persistence.postgreSQL.PostgresConnectionManager;

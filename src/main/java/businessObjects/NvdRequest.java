@@ -27,7 +27,6 @@ import businessObjects.baseClasses.BaseRequest;
 import businessObjects.cve.CveEntity;
 import common.Constants;
 import exceptions.ApiCallException;
-
 import handlers.INvdSerializer;
 import org.apache.http.Header;
 import org.apache.http.NameValuePair;

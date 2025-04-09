@@ -12,5 +12,5 @@ public interface IResponseProcessor {
     List<Vulnerability> extractVulnerabilities(CveEntity cveEntity);
     List<Cve> extractAllCves(CveEntity cveEntity);
     Map<String, Metrics> extractCvssScores(List<Cve> cves);
-    NvdMirrorMetaData extractFormattedNvdMetaData(CveEntity response);
+    NvdMirrorMetaData extractNvdMetaData(CveEntity response);
 }

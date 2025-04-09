@@ -29,7 +29,10 @@ import businessObjects.cve.Metrics;
 import businessObjects.ghsa.SecurityAdvisory;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
-import service.*;
+import service.IApiService;
+import service.IGhsaApiService;
+import service.INvdMirrorService;
+import service.IResponseProcessor;
 
 import java.util.List;
 import java.util.Map;

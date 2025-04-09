@@ -26,8 +26,8 @@ package service;
 import businessObjects.cve.Cve;
 import businessObjects.cve.Metrics;
 import businessObjects.cve.NvdMirrorMetaData;
-import persistence.IDao;
 import exceptions.DataAccessException;
+import persistence.IDao;
 import persistence.IMetaDataDao;
 
 import java.util.*;
@@ -54,7 +54,6 @@ public final class MirrorService implements INvdMirrorService{
     @Override
     public List<Cve> handleGetCveById(List<String> cveIds) throws DataAccessException {
         return cveDao.fetch(cveIds);
-
     }
 
     @Override

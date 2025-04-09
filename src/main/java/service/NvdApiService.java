@@ -23,12 +23,12 @@
  */
 package service;
 
-import handlers.INvdSerializer;
-import presentation.NvdRequestBuilder;
 import businessObjects.cve.CveEntity;
-import common.*;
+import common.Constants;
 import exceptions.ApiCallException;
+import handlers.INvdSerializer;
 import org.apache.http.client.ResponseHandler;
+import presentation.NvdRequestBuilder;
 
 public final class NvdApiService implements IApiService<CveEntity> {
     private final ResponseHandler<String> jsonResponseHandler;

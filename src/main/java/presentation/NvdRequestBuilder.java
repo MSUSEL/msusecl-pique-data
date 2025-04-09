@@ -26,13 +26,13 @@ package presentation;
 import businessObjects.HTTPMethod;
 import businessObjects.NvdRequest;
 import common.Constants;
-import handlers.INvdSerializer;
-import persistence.HeaderBuilder;
 import common.NvdConstants;
-import persistence.NvdParameterBuilder;
+import handlers.INvdSerializer;
 import org.apache.http.Header;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ResponseHandler;
+import persistence.HeaderBuilder;
+import persistence.NvdParameterBuilder;
 
 import java.util.List;
 

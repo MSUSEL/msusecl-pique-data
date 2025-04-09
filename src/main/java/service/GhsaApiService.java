@@ -29,14 +29,14 @@ import businessObjects.GraphQlQueries;
 import businessObjects.HTTPMethod;
 import businessObjects.ghsa.SecurityAdvisory;
 import common.Constants;
+import exceptions.ApiCallException;
 import handlers.IGhsaSerializer;
 import org.apache.http.client.ResponseHandler;
-import persistence.HeaderBuilder;
-import exceptions.ApiCallException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import persistence.HeaderBuilder;
 
 import java.util.List;
 
@@ -81,10 +81,11 @@ public class GhsaApiService implements IGhsaApiService {
     @Override
     public List<String> handleGetCweIds(String ghsaId) throws ApiCallException {
         SecurityAdvisory advisory = handleGetEntity(ghsaId);
+
         return ghsaResponseProcessor.extractCweIds(advisory);
     }
 
-    // TODO replace the following methods with dedicated GraphQL library
+    // TODO replace the following with a dedicated GraphQL library
     private String formatQueryBody(String ghsaId) {
         JSONObject jsonBody = new JSONObject();
         try {

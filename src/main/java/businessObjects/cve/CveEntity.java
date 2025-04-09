@@ -25,7 +25,6 @@ package businessObjects.cve;
 
 import businessObjects.baseClasses.BaseEntity;
 import exceptions.ApiCallException;
-import exceptions.DataAccessException;
 import lombok.Getter;
 import lombok.Setter;
 import org.slf4j.Logger;
