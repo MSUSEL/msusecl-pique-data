@@ -30,7 +30,7 @@ import businessObjects.HTTPMethod;
 import businessObjects.ghsa.SecurityAdvisory;
 import common.Constants;
 import handlers.IGhsaSerializer;
-import handlers.JsonResponseHandler;
+import org.apache.http.client.ResponseHandler;
 import persistence.HeaderBuilder;
 import exceptions.ApiCallException;
 import org.json.JSONException;
@@ -40,19 +40,20 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-public class GhsaApiService {
+public class GhsaApiService implements IGhsaApiService {
     private static final Logger LOGGER = LoggerFactory.getLogger(GhsaApiService.class);
-    private final GhsaResponseProcessor ghsaResponseProcessor;
+    private final ISbomGhsaResponseProcessor ghsaResponseProcessor;
     private final IGhsaSerializer<SecurityAdvisory> serializer;
-    private final JsonResponseHandler responseHandler;
+    private final ResponseHandler<String> responseHandler;
 
-    public GhsaApiService(GhsaResponseProcessor ghsaResponseProcessor, IGhsaSerializer<SecurityAdvisory> serializer, JsonResponseHandler responseHandler) {
+    public GhsaApiService(ISbomGhsaResponseProcessor ghsaResponseProcessor, IGhsaSerializer<SecurityAdvisory> serializer, ResponseHandler<String> responseHandler) {
         this.ghsaResponseProcessor = ghsaResponseProcessor;
         this.serializer = serializer;
         this.responseHandler = responseHandler;
     }
 
-    public SecurityAdvisory handleGetEntity(String ghsaId) throws ApiCallException {
+    @Override
+    public SecurityAdvisory handleGetEntity(String id) throws ApiCallException {
         String CONTENT_TYPE = "Content-Type";
         String APP_JSON = "application/json";
         String AUTHORIZATION = "Authorization";
@@ -64,7 +65,7 @@ public class GhsaApiService {
                         .addHeader(CONTENT_TYPE, APP_JSON)
                         .addHeader(AUTHORIZATION, String.format("Bearer %s", System.getenv("GITHUB_PAT")))
                         .build(),
-                formatQueryBody(ghsaId),
+                formatQueryBody(id),
                 serializer,
                 responseHandler);
         GHSAResponse ghsaResponse = ghsaRequest.executeRequest();
@@ -77,7 +78,8 @@ public class GhsaApiService {
         }
     }
 
-    public List<String> handleGetCweIdsFromGhsa(String ghsaId) throws ApiCallException {
+    @Override
+    public List<String> handleGetCweIds(String ghsaId) throws ApiCallException {
         SecurityAdvisory advisory = handleGetEntity(ghsaId);
         return ghsaResponseProcessor.extractCweIds(advisory);
     }

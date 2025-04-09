@@ -26,20 +26,20 @@ package persistence.postgreSQL;
 import businessObjects.cve.NvdMirrorMetaData;
 import exceptions.DataAccessException;
 import persistence.IDataSource;
+import persistence.IMetaDataDao;
 
 import java.sql.*;
-import java.util.Collections;
-import java.util.List;
 
 import static persistence.postgreSQL.StoredProcedureCalls.UPSERT_METADATA;
 
-public final class PostgresMetadataDao {
+public final class PostgresMetadataDao implements IMetaDataDao<NvdMirrorMetaData> {
     private final Connection conn;
 
     public PostgresMetadataDao(IDataSource<Connection> dataSource) {
         this.conn = dataSource.getConnection();
     }
 
+    @Override
     public NvdMirrorMetaData fetch() throws DataAccessException {
         try {
             String sql = "SELECT * FROM nvd.metadata;";
@@ -61,6 +61,7 @@ public final class PostgresMetadataDao {
         }
     }
 
+    @Override
     public void upsert(NvdMirrorMetaData metadata) throws DataAccessException {
         try {
             CallableStatement statement = conn.prepareCall(UPSERT_METADATA);

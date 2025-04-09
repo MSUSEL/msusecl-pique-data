@@ -30,7 +30,7 @@ import common.*;
 import exceptions.ApiCallException;
 import org.apache.http.client.ResponseHandler;
 
-public final class NvdApiService {
+public final class NvdApiService implements IApiService<CveEntity> {
     private final ResponseHandler<String> jsonResponseHandler;
     private final INvdSerializer serializer;
 
@@ -44,6 +44,7 @@ public final class NvdApiService {
      * @param id the cveId of the CVE in question
      * @return Cve object from NVD response
      */
+    @Override
     public CveEntity handleGetEntity(String id) throws ApiCallException {
         return new NvdRequestBuilder(jsonResponseHandler, serializer)
                 .withApiKey(Constants.NVD_API_KEY)

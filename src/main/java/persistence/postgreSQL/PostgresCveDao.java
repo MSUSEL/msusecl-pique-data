@@ -79,19 +79,6 @@ public final class PostgresCveDao implements IDao<Cve> {
         executePGBulkInsertCall();
     }
 
-    @Override
-    public void delete(List<String> ids) throws DataAccessException {
-        try {
-            CallableStatement statement = conn.prepareCall(DELETE_CVE);
-            statement.setArray(1, conn.createArrayOf("text", ids.toArray()));
-            statement.setString(2, "nvd.cve");
-            statement.setString(3, "cve_id");
-            statement.execute();
-        } catch (SQLException e) {
-            throw new DataAccessException(e);
-        }
-    }
-
     private void formatCveInsertParams(List<Cve> cves) {
         int size = cves.size();
         String[] cve_ids = new String[size];

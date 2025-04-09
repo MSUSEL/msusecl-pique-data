@@ -27,8 +27,9 @@ import businessObjects.cve.*;
 
 import java.util.*;
 
-public class CveResponseProcessor {
+public class CveResponseProcessor implements IResponseProcessor {
 
+    @Override
     public List<String> extractCweDescriptions(Cve cve) {
         List<Weakness> cweList = Optional.of(cve.getWeaknesses().orElse(new ArrayList<>())).get();
         List<String> cwes = new ArrayList<>();
@@ -42,19 +43,23 @@ public class CveResponseProcessor {
         return cwes;
     }
 
+    @Override
     public Cve extractSingleCve(CveEntity cveEntity) {
         return cveEntity.getVulnerabilities().get(0).getCve();
     }
 
+    @Override
     public int extractTotalResults(CveEntity cveEntity) {
         return cveEntity.getTotalResults();
     }
 
+    @Override
     public List<Vulnerability> extractVulnerabilities(CveEntity cveEntity) {
         return cveEntity.getVulnerabilities();
     }
 
-    public NvdMirrorMetaData formatNvdMetaData(CveEntity response) {
+    @Override
+    public NvdMirrorMetaData extractFormattedNvdMetaData(CveEntity response) {
         NvdMirrorMetaData metaData = new NvdMirrorMetaData();
 
         metaData.setCvesModified(Integer.toString(response.getTotalResults()));
@@ -65,6 +70,7 @@ public class CveResponseProcessor {
         return metaData;
     }
 
+    @Override
     public List<Cve> extractAllCves(CveEntity cveEntity) {
         List<Vulnerability> vulnerabilities = extractVulnerabilities(cveEntity);
         List<Cve> cves = new ArrayList<>();
@@ -76,6 +82,7 @@ public class CveResponseProcessor {
         return cves;
     }
 
+    @Override
     public Map<String, Metrics> extractCvssScores(List<Cve> cves) {
         Map<String, Metrics> processedMetrics = new HashMap<>();
         for (Cve cve : cves) {

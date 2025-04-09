@@ -26,7 +26,6 @@ package handlers;
 import businessObjects.ghsa.Cwes;
 import businessObjects.ghsa.Nodes;
 import businessObjects.ghsa.SecurityAdvisory;
-import com.google.gson.Gson;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,11 +59,6 @@ public class GhsaSerializer implements IGhsaSerializer<SecurityAdvisory> {
         }
 
         return securityAdvisory;
-    }
-
-    @Override
-    public String serialize(SecurityAdvisory ghsaSubgraph) {
-        return new Gson().toJson(ghsaSubgraph);
     }
 
     private List<Nodes> getNodesFromJson(JSONObject response) {

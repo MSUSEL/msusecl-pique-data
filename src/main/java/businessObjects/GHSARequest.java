@@ -27,10 +27,9 @@ import businessObjects.baseClasses.BaseRequest;
 import businessObjects.ghsa.SecurityAdvisory;
 import exceptions.ApiCallException;
 import handlers.IGhsaSerializer;
-import handlers.JsonResponseHandler;
-import handlers.GhsaSerializer;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
@@ -49,11 +48,11 @@ import static common.Constants.*;
 
 public final class GHSARequest extends BaseRequest implements IRequest {
     private static final Logger LOGGER = LoggerFactory.getLogger(GHSARequest.class);
-    private final JsonResponseHandler handler;
+    private final ResponseHandler<String> handler;
     private final String query;
     private final IGhsaSerializer<SecurityAdvisory> serializer;
 
-    public GHSARequest(String httpMethod, String baseURI, Header[] headers, String query, IGhsaSerializer<SecurityAdvisory> serializer, JsonResponseHandler jsonResponseHandler) {
+    public GHSARequest(String httpMethod, String baseURI, Header[] headers, String query, IGhsaSerializer<SecurityAdvisory> serializer, ResponseHandler<String> jsonResponseHandler) {
         super(httpMethod, baseURI, headers);
         this.query = query;
         this.serializer = serializer;

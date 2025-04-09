@@ -24,6 +24,7 @@
 package presentation;
 
 import businessObjects.cve.Cve;
+import businessObjects.cve.CveEntity;
 import businessObjects.cve.Metrics;
 import businessObjects.ghsa.SecurityAdvisory;
 import exceptions.ApiCallException;
@@ -46,12 +47,12 @@ import java.util.Optional;
  * functionality will be added as needed.
  */
 public class PiqueData {
-    protected final NvdApiService nvdApiService;
-    protected final GhsaApiService ghsaApiService;
+    protected final IApiService<CveEntity> nvdApiService;
+    protected final IGhsaApiService ghsaApiService;
     protected final INvdMirrorService mirrorService;
-    protected final CveResponseProcessor cveResponseProcessor;
+    protected final IResponseProcessor cveResponseProcessor;
 
-    public PiqueData(NvdApiService nvdApiService, GhsaApiService ghsaApiService, INvdMirrorService mirrorService, CveResponseProcessor cveResponseProcessor) {
+    public PiqueData(IApiService<CveEntity> nvdApiService, IGhsaApiService ghsaApiService, INvdMirrorService mirrorService, IResponseProcessor cveResponseProcessor) {
         this.nvdApiService = nvdApiService;
         this.ghsaApiService = ghsaApiService;
         this.mirrorService = mirrorService;
@@ -115,11 +116,11 @@ public class PiqueData {
      * Calls GitHub's Security Advisory database and returns a formatted List of CWE names as Strings.
      *
      * @param ghsaId
-     * @return
+     * @return List of CWEs associated with the given GHSA id
      * @throws ApiCallException
      */
     public List<String> getCweIdsFromGhsa(String ghsaId) throws ApiCallException {
-        return ghsaApiService.handleGetCweIdsFromGhsa(ghsaId);
+        return ghsaApiService.handleGetCweIds(ghsaId);
     }
 
     /**
@@ -129,7 +130,7 @@ public class PiqueData {
      * use any contained values accordingly.
      *
      * @param cveIds
-     * @return
+     * @return Map of CVE id to CVSS vectors
      * @throws DataAccessException
      */
     public Map<String, Metrics> getCvssMetrics(List<String> cveIds) throws DataAccessException {

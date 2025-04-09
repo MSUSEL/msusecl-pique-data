@@ -44,7 +44,8 @@ public final class PostgresConnectionManager implements IDataSource<Connection> 
         Optional<String> username = credentialService.getUsername();
         Optional<String> password = credentialService.getPassword();
         // For peer authentication to postgres, username and password will be inferred from the OS.
-        // When peer authentication is not used, explicitly set username and password.
+        // This is a rare use case and really only applies to client programs running locally
+        // on our CI server. When peer authentication is not used, explicitly set username and password.
         if (credentialService.getUsername().isPresent() && credentialService.getPassword().isPresent()) {
             connectionPool.setUsername(username.get());
             connectionPool.setPassword(password.get());
