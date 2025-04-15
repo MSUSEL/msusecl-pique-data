@@ -88,17 +88,7 @@ public class NvdMirrorManager {
      * Gets CVEs in bulk from the NVD and stores them in the initialized mirror
      */
     public void handleBuildMirror() throws DataAccessException, ApiCallException {
-        int cveCount = 1;
-
-        for (int i = DEFAULT_START_INDEX; i < cveCount; i += NVD_MAX_PAGE_SIZE) {
-            CveEntity response = new NvdRequestBuilder(jsonResponseHandler, jsonSerializer)
-                    .withFullMirrorDefaults(Integer.toString(i))
-                    .build()
-                    .executeRequest().getEntity();
-            cveCount = resetCveCount(cveCount, response);
-            persistPaginatedData(response, i, cveCount);
-            handleSleep(i, cveCount);   // avoids hitting NVD rate limits
-        }
+        performPaginatedRequest(new NvdRequestBuilder(jsonResponseHandler, jsonSerializer));
     }
 
     /**
@@ -108,16 +98,24 @@ public class NvdMirrorManager {
      *                       from which to pull updates
      */
     public void handleUpdateNvdMirror(String lastModStartDate, String lastModEndDate) throws DataAccessException, ApiCallException {
-        CveEntity response = new NvdRequestBuilder(jsonResponseHandler, jsonSerializer)
-                        .withApiKey(NVD_API_KEY)
-                        .withLastModStartEndDates(lastModStartDate, lastModEndDate)
-                        .build()
-                .executeRequest().getEntity();
-
-        persistMetadata(response);
-        persistCveDetails(response);
+        performPaginatedRequest(new NvdRequestBuilder(jsonResponseHandler, jsonSerializer)
+                .withLastModStartEndDates(lastModStartDate, lastModEndDate));
     }
 
+    private void performPaginatedRequest(NvdRequestBuilder requestTemplate) {
+        int cveCount = 1;
+
+        for (int i = DEFAULT_START_INDEX; i < cveCount; i+= NVD_MAX_PAGE_SIZE) {
+            CveEntity response = requestTemplate
+                    .withPaginatedDefaults(Integer.toString(i))
+                    .build()
+                    .executeRequest().getEntity();
+
+            cveCount = resetCveCount(cveCount, response);
+            processResponse(response, i, cveCount);
+        }
+
+    }
 
     private void executeScript(String filepath, String scriptType) {
         String line;
@@ -176,6 +174,11 @@ public class NvdMirrorManager {
         return cveCount == 1
                 ? cveResponseProcessor.extractTotalResults(response)
                 : cveCount;
+    }
+
+    private void processResponse(CveEntity response, int index, int cveCount) {
+        persistPaginatedData(response, index, cveCount);
+        handleSleep(index, cveCount);   // avoids hitting NVD rate limits
     }
 
     private void persistPaginatedData(CveEntity response, int loopIndex, int cveCount) throws DataAccessException {

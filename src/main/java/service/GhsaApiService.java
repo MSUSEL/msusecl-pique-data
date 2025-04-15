@@ -54,11 +54,23 @@ public class GhsaApiService implements IGhsaApiService {
 
     @Override
     public SecurityAdvisory handleGetEntity(String id) throws ApiCallException {
+        return handleResponse(buildGhsaRequest(id).executeRequest());
+    }
+
+
+    @Override
+    public List<String> handleGetCweIds(String ghsaId) throws ApiCallException {
+        SecurityAdvisory advisory = handleGetEntity(ghsaId);
+
+        return ghsaResponseProcessor.extractCweIds(advisory);
+    }
+
+    private GHSARequest buildGhsaRequest(String id) {
         String CONTENT_TYPE = "Content-Type";
         String APP_JSON = "application/json";
         String AUTHORIZATION = "Authorization";
 
-        GHSARequest ghsaRequest = new GHSARequest(
+        return new GHSARequest(
                 HTTPMethod.POST,
                 Constants.GHSA_URI,
                 new HeaderBuilder()
@@ -68,21 +80,16 @@ public class GhsaApiService implements IGhsaApiService {
                 formatQueryBody(id),
                 serializer,
                 responseHandler);
-        GHSAResponse ghsaResponse = ghsaRequest.executeRequest();
+    }
 
-        int status = ghsaResponse.getStatus();
+    private SecurityAdvisory handleResponse(GHSAResponse response) {
+        int status = response.getStatus();
+
         if (status >= 200 && status < 300) {
-            return ghsaResponse.getEntity();
+            return response.getEntity();
         } else {
             throw new ApiCallException(status);
         }
-    }
-
-    @Override
-    public List<String> handleGetCweIds(String ghsaId) throws ApiCallException {
-        SecurityAdvisory advisory = handleGetEntity(ghsaId);
-
-        return ghsaResponseProcessor.extractCweIds(advisory);
     }
 
     // TODO replace the following with a dedicated GraphQL library

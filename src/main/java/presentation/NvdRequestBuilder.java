@@ -184,7 +184,7 @@ public class NvdRequestBuilder {
         return this;
     }
 
-    public NvdRequestBuilder withFullMirrorDefaults(String startIndex) {
+    public NvdRequestBuilder withPaginatedDefaults(String startIndex) {
         nvdParameterBuilder.addParameter(NvdConstants.START_INDEX, startIndex)
                 .addParameter(NvdConstants.RESULTS_PER_PAGE, Integer.toString(Constants.NVD_MAX_PAGE_SIZE));
         headerBuilder.addHeader(NvdConstants.API_KEY, System.getenv("NVD_KEY"));
