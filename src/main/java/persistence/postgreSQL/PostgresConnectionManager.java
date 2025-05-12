@@ -23,16 +23,15 @@
  */
 package persistence.postgreSQL;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Optional;
-
 import org.apache.commons.dbcp2.BasicDataSource;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import persistence.IDataSource;
 import service.CredentialService;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Optional;
 
 
 public final class PostgresConnectionManager implements IDataSource<Connection> {
@@ -44,13 +43,13 @@ public final class PostgresConnectionManager implements IDataSource<Connection> 
         Optional<String> username = credentialService.getUsername();
         Optional<String> password = credentialService.getPassword();
         // For peer authentication to postgres, username and password will be inferred from the OS.
-        // When peer authentication is not used, explicitly set username and password.
+        // This is a rare use case and really only applies to client programs running locally
+        // on our CI server. When peer authentication is not used, explicitly set username and password.
         if (credentialService.getUsername().isPresent() && credentialService.getPassword().isPresent()) {
             connectionPool.setUsername(username.get());
             connectionPool.setPassword(password.get());
         }
     }
-
 
     @Override
     public Connection getConnection() {

@@ -23,19 +23,18 @@
  */
 package service;
 
-import handlers.IJsonSerializer;
-import handlers.JsonSerializer;
-import presentation.NvdRequestBuilder;
 import businessObjects.cve.CveEntity;
-import common.*;
+import common.Constants;
 import exceptions.ApiCallException;
+import handlers.INvdSerializer;
 import org.apache.http.client.ResponseHandler;
+import presentation.NvdRequestBuilder;
 
-public final class NvdApiService {
+public final class NvdApiService implements IApiService<CveEntity> {
     private final ResponseHandler<String> jsonResponseHandler;
-    private final IJsonSerializer serializer;
+    private final INvdSerializer serializer;
 
-    public NvdApiService(ResponseHandler<String> jsonResponseHandler, IJsonSerializer serializer) {
+    public NvdApiService(ResponseHandler<String> jsonResponseHandler, INvdSerializer serializer) {
         this.jsonResponseHandler = jsonResponseHandler;
         this.serializer = serializer;
     }
@@ -45,6 +44,7 @@ public final class NvdApiService {
      * @param id the cveId of the CVE in question
      * @return Cve object from NVD response
      */
+    @Override
     public CveEntity handleGetEntity(String id) throws ApiCallException {
         return new NvdRequestBuilder(jsonResponseHandler, serializer)
                 .withApiKey(Constants.NVD_API_KEY)

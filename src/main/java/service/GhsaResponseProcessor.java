@@ -30,7 +30,7 @@ import businessObjects.ghsa.SecurityAdvisory;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class GhsaResponseProcessor {
+public final class GhsaResponseProcessor implements ISbomGhsaResponseProcessor {
     // Methods to handle raw GHSA Response object
     public List<Nodes> extractCweNodes(GHSAResponse ghsaResponse) {
         return ghsaResponse.getEntity().getCwes().getNodes();

@@ -36,5 +36,4 @@ import java.util.List;
 public interface IDao<T> {
     List<T> fetch(List<String> ids) throws DataAccessException;
     void upsert(List<T> t) throws DataAccessException;
-    void delete(List<String> ids) throws DataAccessException;
 }

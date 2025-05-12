@@ -26,13 +26,13 @@ package presentation;
 import businessObjects.HTTPMethod;
 import businessObjects.NvdRequest;
 import common.Constants;
-import handlers.IJsonSerializer;
-import persistence.HeaderBuilder;
 import common.NvdConstants;
-import persistence.NvdParameterBuilder;
+import handlers.INvdSerializer;
 import org.apache.http.Header;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ResponseHandler;
+import persistence.HeaderBuilder;
+import persistence.NvdParameterBuilder;
 
 import java.util.List;
 
@@ -40,9 +40,9 @@ public class NvdRequestBuilder {
     private final NvdParameterBuilder nvdParameterBuilder = new NvdParameterBuilder();
     private final HeaderBuilder headerBuilder = new HeaderBuilder();
     private final ResponseHandler<String> jsonResponseHandler;
-    private final IJsonSerializer serializer;
+    private final INvdSerializer serializer;
 
-    public NvdRequestBuilder(ResponseHandler<String> jsonResponseHandler, IJsonSerializer serializer) {
+    public NvdRequestBuilder(ResponseHandler<String> jsonResponseHandler, INvdSerializer serializer) {
         this.jsonResponseHandler = jsonResponseHandler;
         this.serializer = serializer;
     }

@@ -38,6 +38,5 @@ public interface INvdMirrorService {
     List<String> handleGetNvdCweName(String cveId) throws DataAccessException;
     NvdMirrorMetaData handleGetCurrentMetaData() throws DataAccessException;
     void handleInsertSingleCve(Cve cve) throws DataAccessException;
-    void handleDeleteSingleCve(String cveId) throws DataAccessException;
     Map<String, Metrics> handleGetCvssMetrics(List<String> cveIds) throws DataAccessException;
 }
