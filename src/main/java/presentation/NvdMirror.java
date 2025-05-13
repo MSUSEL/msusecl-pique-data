@@ -25,15 +25,11 @@ package presentation;
 
 import businessObjects.cve.Cve;
 import businessObjects.cve.NvdMirrorMetaData;
-import com.sun.jdi.Mirror;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
-import persistence.IDataSource;
-import persistence.postgreSQL.Migration;
 import service.INvdMirrorService;
 import service.NvdMirrorManager;
 
-import java.sql.Connection;
 import java.time.Instant;
 
 /**
@@ -42,12 +38,10 @@ import java.time.Instant;
 public final class NvdMirror {
     private final INvdMirrorService mirrorService;
     private final NvdMirrorManager nvdMirrorManager;
-    private final Migration migration;
 
-    public NvdMirror(INvdMirrorService mirrorService, NvdMirrorManager nvdMirrorManager, Migration migration) {
+    public NvdMirror(INvdMirrorService mirrorService, NvdMirrorManager nvdMirrorManager) {
         this.mirrorService = mirrorService;
         this.nvdMirrorManager = nvdMirrorManager;
-        this.migration = migration;
     }
 
     /**
@@ -59,7 +53,7 @@ public final class NvdMirror {
      * @throws ApiCallException
      */
     public void buildAndHydrateMirror() throws DataAccessException, ApiCallException {
-        migration.migrate();
+        nvdMirrorManager.handleInitializeMirror();
     }
 
     /**
@@ -84,19 +78,21 @@ public final class NvdMirror {
                 Instant.now().toString());
     }
 
+    /**
+     * Fetches Metadata from an NVD Mirror
+     * @return Populated NvdMirrorMetaData object
+     * @throws DataAccessException
+     */
     public NvdMirrorMetaData getMetaData() throws DataAccessException {
         return mirrorService.handleGetCurrentMetaData();
     }
 
+    /**
+     * Inserts a Cve into an NVD Mirror Instance
+     * @param cve Cve Object
+     * @throws DataAccessException
+     */
     public void insertSingleCve(Cve cve) throws DataAccessException {
         mirrorService.handleInsertSingleCve(cve);
     }
-
-    public void deleteSingleCve(String cveId) throws DataAccessException {
-        mirrorService.handleDeleteSingleCve(cveId);
-    }
-
-//    public void buildMirrorFromJsonFile(Path filepath) throws DataAccessException {
-//        nvdMirrorManager.handleBuildMirrorFromJsonFile(filepath);
-//    }
 }

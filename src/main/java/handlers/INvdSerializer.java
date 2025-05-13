@@ -23,10 +23,7 @@
  */
 package handlers;
 
-import com.google.gson.JsonObject;
-
-import java.util.Optional;
-
-public interface IJsonNullStringHandler {
-    Optional<String> getString(JsonObject json, String key);
+public interface INvdSerializer {
+    <T> String serialize(T pojo);
+    <T> T deserialize(String json, Class<T> clazz);
 }

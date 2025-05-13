@@ -23,19 +23,12 @@
  */
 import businessObjects.cve.Cve;
 import businessObjects.cve.NvdMirrorMetaData;
-import com.google.gson.Gson;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
-import handlers.IJsonSerializer;
-import handlers.JsonResponseHandler;
-import handlers.JsonSerializer;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import persistence.IDao;
 import persistence.IDataSource;
-import persistence.postgreSQL.Migration;
 import persistence.postgreSQL.PostgresConnectionManager;
-import persistence.postgreSQL.PostgresCveDao;
 import persistence.postgreSQL.PostgresMetadataDao;
 import presentation.NvdMirror;
 import presentation.PiqueData;
@@ -43,7 +36,6 @@ import presentation.PiqueDataFactory;
 import service.*;
 
 import java.sql.Connection;
-import java.util.Collections;
 import java.util.Optional;
 
 import static common.Constants.*;
@@ -52,8 +44,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * IMPORTANT!
- * Some of these currently mutate the production database
- * Only run these if you know exactly what you're doing!
+ * Some of these tests are capable of mutating the on-prem database
+ * given the right set of credentials. Only run these if you know
+ * exactly what you're doing!
  */
 
 // TODO mock database to test methods
@@ -102,7 +95,7 @@ public class NvdMirrorTests {
         metaData.setCvesModified("255980");
         metaData.setFormat("NVD_CVE");
 
-        dao.upsert(Collections.singletonList(metaData));
+        dao.upsert(metaData);
     }
 
    @Test
@@ -117,29 +110,6 @@ public class NvdMirrorTests {
             fail();
         }
    }
-
-    @Test
-    public void testDBSetup() {
-        IJsonSerializer serializer = new JsonSerializer(new Gson());
-        IDataSource<Connection> dataSource = new PostgresConnectionManager(
-                        new CredentialService(DEFAULT_CREDENTIALS_FILE_PATH));
-        IDao<Cve> postgresCveDao = new PostgresCveDao(dataSource, serializer);
-        CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
-        PostgresMetadataDao postgresMetaDataDao = new PostgresMetadataDao(dataSource);
-        INvdMirrorService mirrorService = new MirrorService(cveResponseProcessor, postgresCveDao, postgresMetaDataDao);
-
-        Migration migration = new Migration(
-                dataSource,
-                new NvdMirrorManager(
-                        cveResponseProcessor,
-                        new JsonResponseHandler(),
-                        serializer,
-                        postgresCveDao,
-                        postgresMetaDataDao),
-                mirrorService);
-
-        migration.migrate();
-    }
 
     @Test
     public void testBuildAndHydrateMirror() throws DataAccessException, ApiCallException {

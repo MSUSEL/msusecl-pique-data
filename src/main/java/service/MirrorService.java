@@ -26,21 +26,20 @@ package service;
 import businessObjects.cve.Cve;
 import businessObjects.cve.Metrics;
 import businessObjects.cve.NvdMirrorMetaData;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import persistence.IDao;
 import exceptions.DataAccessException;
-import persistence.postgreSQL.PostgresMetadataDao;
+import handlers.ICveResponseProcessor;
+import persistence.IDao;
+import persistence.IMetaDataDao;
 
 import java.util.*;
 
-public final class MirrorService implements INvdMirrorService{
-    private final CveResponseProcessor cveResponseProcessor;
-    private final IDao<Cve> cveDao;
-    private final PostgresMetadataDao metadataDao;
-    private static final Logger LOGGER = LoggerFactory.getLogger(MirrorService.class);
 
-    public MirrorService(CveResponseProcessor cveResponseProcessor, IDao<Cve> cveDao, PostgresMetadataDao metadataDao) {
+public final class MirrorService implements INvdMirrorService{
+    private final ICveResponseProcessor cveResponseProcessor;
+    private final IDao<Cve> cveDao;
+    private final IMetaDataDao<NvdMirrorMetaData> metadataDao;
+
+    public MirrorService(ICveResponseProcessor cveResponseProcessor, IDao<Cve> cveDao, IMetaDataDao<NvdMirrorMetaData> metadataDao) {
         this.cveResponseProcessor = cveResponseProcessor;
         this.cveDao = cveDao;
         this.metadataDao = metadataDao;
@@ -56,7 +55,6 @@ public final class MirrorService implements INvdMirrorService{
     @Override
     public List<Cve> handleGetCveById(List<String> cveIds) throws DataAccessException {
         return cveDao.fetch(cveIds);
-
     }
 
     @Override
@@ -70,17 +68,12 @@ public final class MirrorService implements INvdMirrorService{
 
     @Override
     public NvdMirrorMetaData handleGetCurrentMetaData() throws DataAccessException {
-        return metadataDao.fetch().get(0);
+        return metadataDao.fetch();
     }
 
     @Override
     public void handleInsertSingleCve(Cve cve) throws DataAccessException {
         cveDao.upsert(Collections.singletonList(cve));
-    }
-
-    @Override
-    public void handleDeleteSingleCve(String cveId) throws DataAccessException {
-        cveDao.delete(Collections.singletonList(cveId));
     }
 
     @Override

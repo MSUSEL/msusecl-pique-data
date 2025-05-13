@@ -23,16 +23,21 @@
  */
 package service;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import common.HelperFunctions;
-import handlers.IJsonNullStringHandler;
-import handlers.JsonNullStringHandler;
 import lombok.Getter;
 import lombok.Setter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Getter
 @Setter
@@ -43,6 +48,7 @@ public class CredentialService {
     private String dbname;
     private Optional<String> username;
     private Optional<String> password;
+    private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
 
     public CredentialService() {
         this.driver = System.getenv("PG_DRIVER");
@@ -59,20 +65,37 @@ public class CredentialService {
         } else {
             String message = "Please format your credential file using credentialsTemplate.json in the " +
                     "resources directory or set the appropriate environment variables on your system";
-            System.out.println(message);
+            LOGGER.info(message);
         }
     }
 
     private void processJsonFile(String filepath) {
-        IJsonNullStringHandler nullHandler = new JsonNullStringHandler();
-        JsonObject creds = JsonParser.parseString(HelperFunctions.readJsonFile(Paths.get(filepath))).getAsJsonObject();
+        JsonObject creds = JsonParser.parseString(readJsonFile(Paths.get(filepath))).getAsJsonObject();
 
         this.driver= creds.get("driver").getAsString();
         this.hostname = creds.get("hostname").getAsString();
         this.port = creds.get("port").getAsString();
         this.dbname = creds.get("dbname").getAsString();
-        this.username = nullHandler.getString(creds, "username");
-        this.password= nullHandler.getString(creds, "password");
-//        this.password = creds.get("password").getAsString();
+        this.username = getOptionalString(creds, "username");
+        this.password= getOptionalString(creds, "password");
+    }
+
+    private Optional<String> getOptionalString(JsonObject json, String key) {
+        return Optional.ofNullable(json.get(key))
+                .filter(e -> !e.isJsonNull())
+                .map(JsonElement::getAsString);
+    }
+
+    private String readJsonFile(Path filepath) {
+        StringBuilder builder = new StringBuilder();
+
+        try(Stream<String> stream = Files.lines(filepath, StandardCharsets.UTF_8)) {
+            stream.forEach(s -> builder.append(s).append("\n"));
+
+            return builder.toString();
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

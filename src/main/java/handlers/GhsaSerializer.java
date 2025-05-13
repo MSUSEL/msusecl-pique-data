@@ -26,7 +26,6 @@ package handlers;
 import businessObjects.ghsa.Cwes;
 import businessObjects.ghsa.Nodes;
 import businessObjects.ghsa.SecurityAdvisory;
-import com.google.gson.Gson;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,10 +35,11 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SecurityAdvisoryMarshaller{
-    private static final Logger LOGGER = LoggerFactory.getLogger(SecurityAdvisoryMarshaller.class);
+public class GhsaSerializer implements IGhsaSerializer<SecurityAdvisory> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(GhsaSerializer.class);
 
-    public SecurityAdvisory unmarshalJson(String json) {
+    @Override
+    public SecurityAdvisory deserialize(String json) {
         SecurityAdvisory securityAdvisory = new SecurityAdvisory();
         Cwes cwes = new Cwes();
         try {
@@ -59,10 +59,6 @@ public class SecurityAdvisoryMarshaller{
         }
 
         return securityAdvisory;
-    }
-
-    public String marshalJson(SecurityAdvisory advisory) {
-        return new Gson().toJson(advisory);
     }
 
     private List<Nodes> getNodesFromJson(JSONObject response) {

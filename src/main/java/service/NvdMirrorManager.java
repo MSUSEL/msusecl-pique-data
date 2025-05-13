@@ -23,59 +23,73 @@
  */
 package service;
 
-import handlers.IJsonSerializer;
-import persistence.postgreSQL.PostgresMetadataDao;
-import presentation.NvdRequestBuilder;
-import businessObjects.cve.CveEntity;
 import businessObjects.cve.Cve;
-import common.HelperFunctions;
+import businessObjects.cve.CveEntity;
+import businessObjects.cve.NvdMirrorMetaData;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
+import handlers.ICveResponseProcessor;
+import handlers.INvdSerializer;
 import org.apache.http.client.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import persistence.IDao;
+import persistence.IDataSource;
+import persistence.IMetaDataDao;
+import presentation.NvdRequestBuilder;
 
-import java.nio.file.Path;
-import java.util.Collections;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.time.Instant;
 
 import static common.Constants.*;
 
 public class NvdMirrorManager {
-    private final CveResponseProcessor cveResponseProcessor;
+    private final ICveResponseProcessor cveResponseProcessor;
     private final ResponseHandler<String> jsonResponseHandler;
-    private final IJsonSerializer jsonSerializer;
+    private final INvdSerializer jsonSerializer;
     private final IDao<Cve> cveDao;
-    private final PostgresMetadataDao metadataDao;
+    private final IMetaDataDao<NvdMirrorMetaData> metadataDao;
+    private final IDataSource<Connection> dataSource;
     private static final Logger LOGGER = LoggerFactory.getLogger(NvdMirrorManager.class);
 
-    public NvdMirrorManager(CveResponseProcessor cveResponseProcessor,
+    private final String SQL = "sql";
+    private final String PLPGSQL = "plpgsql";
+
+    public NvdMirrorManager(ICveResponseProcessor cveResponseProcessor,
                             ResponseHandler<String> jsonResponseHandler,
-                            IJsonSerializer jsonSerializer,
+                            INvdSerializer jsonSerializer,
                             IDao<Cve> cveDao,
-                            PostgresMetadataDao metadataDao) {
+                            IMetaDataDao<NvdMirrorMetaData> metadataDao,
+                            IDataSource<Connection> dataSource) {
         this.cveResponseProcessor = cveResponseProcessor;
         this.jsonResponseHandler = jsonResponseHandler;
         this.jsonSerializer = jsonSerializer;
         this.cveDao = cveDao;
         this.metadataDao = metadataDao;
+        this.dataSource = dataSource;
     }
 
     /**
-     * Gets CVEs in bulk from the NVD and stores them in the configured mirror
+     * Initializes an NVD Mirror on an emtpy postgres instance
+     * Creates schema, procedures, and functions
+     * Builds necessary tables
+     */
+    public void handleInitializeMirror() {
+        executeScript(MIGRATION_SCRIPT_PATH, SQL);
+        executeScript(PG_STORED_PROCEDURES_PATH, PLPGSQL);
+        hydrate();
+    }
+
+    /**
+     * Gets CVEs in bulk from the NVD and stores them in the initialized mirror
      */
     public void handleBuildMirror() throws DataAccessException, ApiCallException {
-        int cveCount = 1;
-
-        for (int i = DEFAULT_START_INDEX; i < cveCount; i += NVD_MAX_PAGE_SIZE) {
-            CveEntity response = new NvdRequestBuilder(jsonResponseHandler, jsonSerializer)
-                    .withFullMirrorDefaults(Integer.toString(i))
-                    .build()
-                   .executeRequest().getEntity();
-            cveCount = resetCveCount(cveCount, response);
-            persistPaginatedData(response, i, cveCount);
-            handleSleep(i, cveCount);   // avoids hitting NVD rate limits
-        }
+        performPaginatedRequest(new NvdRequestBuilder(jsonResponseHandler, jsonSerializer));
     }
 
     /**
@@ -85,32 +99,79 @@ public class NvdMirrorManager {
      *                       from which to pull updates
      */
     public void handleUpdateNvdMirror(String lastModStartDate, String lastModEndDate) throws DataAccessException, ApiCallException {
-        CveEntity response = new NvdRequestBuilder(jsonResponseHandler, jsonSerializer)
-                        .withApiKey(NVD_API_KEY)
-                        .withLastModStartEndDates(lastModStartDate, lastModEndDate)
-                        .build()
-                .executeRequest().getEntity();
-
-        persistMetadata(response);
-        persistCveDetails(response);
+        performPaginatedRequest(
+                new NvdRequestBuilder(jsonResponseHandler, jsonSerializer)
+                        .withLastModStartEndDates(lastModStartDate, lastModEndDate));
     }
 
-//    /**
-//     * Handles building a full or partial NVD mirror from a json file.
-//     * The file must be structured in exactly the same format as a CveResponse
-//     *                  NVD Mirror or local containerized mongodb instance)
-//     * @param filepath Path to the json file formatted as a CveResponse
-//     * @throws DataAccessException
-//     */
-//    public void handleBuildMirrorFromJsonFile(Path filepath) throws DataAccessException {
-//        CveEntity fileContents = processFile(filepath);
-//        persistMetadata(fileContents);
-//        persistCveDetails(fileContents);
-//    }
-//
-//    public void handleDumpNvdToFile(String filepath) throws DataAccessException {
-//            cveDao.dumpToFile(filepath);
-//    }
+    private void performPaginatedRequest(NvdRequestBuilder requestTemplate) {
+        int cveCount = 1;
+
+        for (int i = DEFAULT_START_INDEX; i < cveCount; i+= NVD_MAX_PAGE_SIZE) {
+            CveEntity response = requestTemplate
+                    .withPaginatedDefaults(Integer.toString(i))
+                    .build()
+                    .executeRequest().getEntity();
+
+            cveCount = resetCveCount(cveCount, response);
+            processResponse(response, i, cveCount);
+        }
+    }
+
+    private void executeScript(String filepath, String scriptType) {
+        String line;
+        String lineEnd = determineLineEnd(scriptType);
+        StringBuilder query = new StringBuilder();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(filepath))) {
+            while((line = reader.readLine()) != null) {
+                query.append(line).append("\n");
+                if (line.endsWith(lineEnd)) {
+                    executeQuery(query.toString());
+                    query.setLength(0);
+                }
+            }
+        } catch (IOException | DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String determineLineEnd(String scriptType) {
+        String lineEnd;
+
+        if (scriptType.equals(SQL)) {
+            lineEnd = ";";
+        } else if (scriptType.equals(PLPGSQL)) {
+            lineEnd = "$$;";
+        } else {
+            throw new DataAccessException("Incorrect database script type");
+        }
+
+        return lineEnd;
+    }
+
+    private void executeQuery(String query) throws DataAccessException {
+        Connection conn = dataSource.getConnection();
+
+        try {
+            PreparedStatement statement = conn.prepareStatement(query);
+            int rowsAffected = statement.executeUpdate();
+            LOGGER.info("Query: {}\n", query);
+            LOGGER.info("Rows Affected: {}\n\n", rowsAffected);
+        } catch (SQLException e) {
+            throw new DataAccessException(e);
+        }
+    }
+
+    private void hydrate() {
+        NvdMirrorMetaData metadata = metadataDao.fetch();
+
+        if (metadata.getLastTimestamp() == null) {
+            handleBuildMirror();
+        } else {
+            handleUpdateNvdMirror(metadata.getLastTimestamp(), Instant.now().toString());
+        }
+    }
 
     private int resetCveCount(int cveCount, CveEntity response) {
         return cveCount == 1
@@ -118,8 +179,14 @@ public class NvdMirrorManager {
                 : cveCount;
     }
 
+    private void processResponse(CveEntity response, int index, int cveCount) {
+        persistPaginatedData(response, index, cveCount);
+        handleSleep(index, cveCount);   // avoids hitting NVD rate limits
+    }
+
     private void persistPaginatedData(CveEntity response, int loopIndex, int cveCount) throws DataAccessException {
         persistCveDetails(response);
+        //FIXME This is likely creating excess writes. Fix the math
         if (loopIndex >= cveCount - NVD_MAX_PAGE_SIZE) {
             persistMetadata(response);
         }
@@ -129,8 +196,8 @@ public class NvdMirrorManager {
         cveDao.upsert(cveResponseProcessor.extractAllCves(response));
     }
 
-    public void persistMetadata(CveEntity response) throws DataAccessException {
-        metadataDao.upsert(Collections.singletonList(cveResponseProcessor.formatNvdMetaData(response)));
+    private void persistMetadata(CveEntity response) throws DataAccessException {
+        metadataDao.upsert(cveResponseProcessor.extractNvdMetaData(response));
     }
 
     private void handleSleep(int startIndex, int cveCount) {
@@ -143,8 +210,4 @@ public class NvdMirrorManager {
             throw new RuntimeException(e);
         }
     }
-
-    private CveEntity processFile(Path filepath) {
-        return jsonSerializer.deserialize(HelperFunctions.readJsonFile(filepath), CveEntity.class);
-    }
-    }
+}
