@@ -31,6 +31,7 @@ import businessObjects.ghsa.SecurityAdvisory;
 import common.Constants;
 import exceptions.ApiCallException;
 import handlers.IGhsaSerializer;
+import handlers.ISbomGhsaResponseProcessor;
 import org.apache.http.client.ResponseHandler;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -54,28 +55,7 @@ public class GhsaApiService implements IGhsaApiService {
 
     @Override
     public SecurityAdvisory handleGetEntity(String id) throws ApiCallException {
-        String CONTENT_TYPE = "Content-Type";
-        String APP_JSON = "application/json";
-        String AUTHORIZATION = "Authorization";
-
-        GHSARequest ghsaRequest = new GHSARequest(
-                HTTPMethod.POST,
-                Constants.GHSA_URI,
-                new HeaderBuilder()
-                        .addHeader(CONTENT_TYPE, APP_JSON)
-                        .addHeader(AUTHORIZATION, String.format("Bearer %s", System.getenv("GITHUB_PAT")))
-                        .build(),
-                formatQueryBody(id),
-                serializer,
-                responseHandler);
-        GHSAResponse ghsaResponse = ghsaRequest.executeRequest();
-
-        int status = ghsaResponse.getStatus();
-        if (status >= 200 && status < 300) {
-            return ghsaResponse.getEntity();
-        } else {
-            throw new ApiCallException(status);
-        }
+        return handleResponse(buildGhsaRequest(id).executeRequest());
     }
 
     @Override
@@ -85,13 +65,40 @@ public class GhsaApiService implements IGhsaApiService {
         return ghsaResponseProcessor.extractCweIds(advisory);
     }
 
+    private GHSARequest buildGhsaRequest(String id) {
+        String CONTENT_TYPE = "Content-Type";
+        String APP_JSON = "application/json";
+        String AUTHORIZATION = "Authorization";
+
+        return new GHSARequest(
+                HTTPMethod.POST,
+                Constants.GHSA_URI,
+                new HeaderBuilder()
+                        .addHeader(CONTENT_TYPE, APP_JSON)
+                        .addHeader(AUTHORIZATION, String.format("Bearer %s", System.getenv("GITHUB_PAT")))
+                        .build(),
+                formatQueryBody(id),
+                serializer,
+                responseHandler);
+    }
+
+    private SecurityAdvisory handleResponse(GHSAResponse response) {
+        int status = response.getStatus();
+
+        if (status >= 200 && status < 300) {
+            return response.getEntity();
+        } else {
+            throw new ApiCallException(status);
+        }
+    }
+
     // TODO replace the following with a dedicated GraphQL library
     private String formatQueryBody(String ghsaId) {
-        JSONObject jsonBody = new JSONObject();
         try {
-            jsonBody.put("query", GraphQlQueries.GHSA_SECURITY_ADVISORY_QUERY);
-            String query = jsonBody.toString();
-            return String.format(query, ghsaId);
+            return String.format(
+                    new JSONObject().put("query", GraphQlQueries.GHSA_SECURITY_ADVISORY_QUERY).toString(),
+                    ghsaId);
+
         } catch (JSONException e) {
             LOGGER.error("Improper JSON formatting. Check query format. ", e);
             throw new RuntimeException(e);

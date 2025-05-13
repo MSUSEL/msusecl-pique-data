@@ -28,6 +28,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.Getter;
 import lombok.Setter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -46,6 +48,7 @@ public class CredentialService {
     private String dbname;
     private Optional<String> username;
     private Optional<String> password;
+    private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
 
     public CredentialService() {
         this.driver = System.getenv("PG_DRIVER");
@@ -62,7 +65,7 @@ public class CredentialService {
         } else {
             String message = "Please format your credential file using credentialsTemplate.json in the " +
                     "resources directory or set the appropriate environment variables on your system";
-            System.out.println(message);
+            LOGGER.info(message);
         }
     }
 

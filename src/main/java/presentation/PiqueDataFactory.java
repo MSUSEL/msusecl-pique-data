@@ -24,10 +24,7 @@
 package presentation;
 
 import com.google.gson.Gson;
-import handlers.GhsaSerializer;
-import handlers.INvdSerializer;
-import handlers.JsonResponseHandler;
-import handlers.NvdSerializer;
+import handlers.*;
 import org.apache.http.client.ResponseHandler;
 import persistence.IDataSource;
 import persistence.postgreSQL.PostgresConnectionManager;
@@ -41,7 +38,7 @@ public class PiqueDataFactory {
     private final ResponseHandler<String> jsonResponseHandler = new JsonResponseHandler();
     private final INvdSerializer jsonSerializer = new NvdSerializer(new Gson());
     private final IGhsaApiService ghsaApiService = new GhsaApiService(new GhsaResponseProcessor(), new GhsaSerializer(), jsonResponseHandler);
-    private final IResponseProcessor cveResponseProcessor = new CveResponseProcessor();
+    private final ICveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
     private final IDataSource<Connection> pgDataSource;
 
     public PiqueDataFactory() {

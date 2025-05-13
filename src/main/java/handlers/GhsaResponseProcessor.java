@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package service;
+package handlers;
 
 import businessObjects.GHSAResponse;
 import businessObjects.ghsa.Nodes;

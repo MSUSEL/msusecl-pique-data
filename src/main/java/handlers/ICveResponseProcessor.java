@@ -1,11 +1,11 @@
-package service;
+package handlers;
 
 import businessObjects.cve.*;
 
 import java.util.List;
 import java.util.Map;
 
-public interface IResponseProcessor {
+public interface ICveResponseProcessor {
     List<String> extractCweDescriptions(Cve cve);
     Cve extractSingleCve(CveEntity cveEntity);
     int extractTotalResults(CveEntity cveEntity);

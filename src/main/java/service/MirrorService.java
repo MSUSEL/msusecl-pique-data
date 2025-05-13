@@ -27,6 +27,7 @@ import businessObjects.cve.Cve;
 import businessObjects.cve.Metrics;
 import businessObjects.cve.NvdMirrorMetaData;
 import exceptions.DataAccessException;
+import handlers.ICveResponseProcessor;
 import persistence.IDao;
 import persistence.IMetaDataDao;
 
@@ -34,11 +35,11 @@ import java.util.*;
 
 
 public final class MirrorService implements INvdMirrorService{
-    private final IResponseProcessor cveResponseProcessor;
+    private final ICveResponseProcessor cveResponseProcessor;
     private final IDao<Cve> cveDao;
     private final IMetaDataDao<NvdMirrorMetaData> metadataDao;
 
-    public MirrorService(IResponseProcessor cveResponseProcessor, IDao<Cve> cveDao, IMetaDataDao<NvdMirrorMetaData> metadataDao) {
+    public MirrorService(ICveResponseProcessor cveResponseProcessor, IDao<Cve> cveDao, IMetaDataDao<NvdMirrorMetaData> metadataDao) {
         this.cveResponseProcessor = cveResponseProcessor;
         this.cveDao = cveDao;
         this.metadataDao = metadataDao;
