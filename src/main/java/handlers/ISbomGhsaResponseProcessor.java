@@ -1,4 +1,4 @@
-package service;
+package handlers;
 
 import businessObjects.GHSAResponse;
 import businessObjects.ghsa.Nodes;

@@ -32,7 +32,7 @@ import exceptions.DataAccessException;
 import service.IApiService;
 import service.IGhsaApiService;
 import service.INvdMirrorService;
-import service.IResponseProcessor;
+import handlers.ICveResponseProcessor;
 
 import java.util.List;
 import java.util.Map;
@@ -53,9 +53,9 @@ public class PiqueData {
     protected final IApiService<CveEntity> nvdApiService;
     protected final IGhsaApiService ghsaApiService;
     protected final INvdMirrorService mirrorService;
-    protected final IResponseProcessor cveResponseProcessor;
+    protected final ICveResponseProcessor cveResponseProcessor;
 
-    public PiqueData(IApiService<CveEntity> nvdApiService, IGhsaApiService ghsaApiService, INvdMirrorService mirrorService, IResponseProcessor cveResponseProcessor) {
+    public PiqueData(IApiService<CveEntity> nvdApiService, IGhsaApiService ghsaApiService, INvdMirrorService mirrorService, ICveResponseProcessor cveResponseProcessor) {
         this.nvdApiService = nvdApiService;
         this.ghsaApiService = ghsaApiService;
         this.mirrorService = mirrorService;

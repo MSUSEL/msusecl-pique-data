@@ -28,6 +28,7 @@ import businessObjects.cve.CveEntity;
 import businessObjects.cve.NvdMirrorMetaData;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
+import handlers.ICveResponseProcessor;
 import handlers.INvdSerializer;
 import org.apache.http.client.ResponseHandler;
 import org.slf4j.Logger;
@@ -48,7 +49,7 @@ import java.time.Instant;
 import static common.Constants.*;
 
 public class NvdMirrorManager {
-    private final IResponseProcessor cveResponseProcessor;
+    private final ICveResponseProcessor cveResponseProcessor;
     private final ResponseHandler<String> jsonResponseHandler;
     private final INvdSerializer jsonSerializer;
     private final IDao<Cve> cveDao;
@@ -59,7 +60,7 @@ public class NvdMirrorManager {
     private final String SQL = "sql";
     private final String PLPGSQL = "plpgsql";
 
-    public NvdMirrorManager(IResponseProcessor cveResponseProcessor,
+    public NvdMirrorManager(ICveResponseProcessor cveResponseProcessor,
                             ResponseHandler<String> jsonResponseHandler,
                             INvdSerializer jsonSerializer,
                             IDao<Cve> cveDao,
@@ -98,8 +99,9 @@ public class NvdMirrorManager {
      *                       from which to pull updates
      */
     public void handleUpdateNvdMirror(String lastModStartDate, String lastModEndDate) throws DataAccessException, ApiCallException {
-        performPaginatedRequest(new NvdRequestBuilder(jsonResponseHandler, jsonSerializer)
-                .withLastModStartEndDates(lastModStartDate, lastModEndDate));
+        performPaginatedRequest(
+                new NvdRequestBuilder(jsonResponseHandler, jsonSerializer)
+                        .withLastModStartEndDates(lastModStartDate, lastModEndDate));
     }
 
     private void performPaginatedRequest(NvdRequestBuilder requestTemplate) {
@@ -114,14 +116,12 @@ public class NvdMirrorManager {
             cveCount = resetCveCount(cveCount, response);
             processResponse(response, i, cveCount);
         }
-
     }
 
     private void executeScript(String filepath, String scriptType) {
         String line;
-        StringBuilder query = new StringBuilder();
-
         String lineEnd = determineLineEnd(scriptType);
+        StringBuilder query = new StringBuilder();
 
         try (BufferedReader reader = new BufferedReader(new FileReader(filepath))) {
             while((line = reader.readLine()) != null) {
@@ -138,6 +138,7 @@ public class NvdMirrorManager {
 
     private String determineLineEnd(String scriptType) {
         String lineEnd;
+
         if (scriptType.equals(SQL)) {
             lineEnd = ";";
         } else if (scriptType.equals(PLPGSQL)) {
@@ -145,6 +146,7 @@ public class NvdMirrorManager {
         } else {
             throw new DataAccessException("Incorrect database script type");
         }
+
         return lineEnd;
     }
 
@@ -154,8 +156,8 @@ public class NvdMirrorManager {
         try {
             PreparedStatement statement = conn.prepareStatement(query);
             int rowsAffected = statement.executeUpdate();
-            System.out.printf("Query: %s\n", query);
-            System.out.printf("Rows Affected: %s\n\n", rowsAffected);
+            LOGGER.info("Query: {}\n", query);
+            LOGGER.info("Rows Affected: {}\n\n", rowsAffected);
         } catch (SQLException e) {
             throw new DataAccessException(e);
         }
@@ -163,6 +165,7 @@ public class NvdMirrorManager {
 
     private void hydrate() {
         NvdMirrorMetaData metadata = metadataDao.fetch();
+
         if (metadata.getLastTimestamp() == null) {
             handleBuildMirror();
         } else {

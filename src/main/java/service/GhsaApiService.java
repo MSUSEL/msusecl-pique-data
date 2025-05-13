@@ -31,6 +31,7 @@ import businessObjects.ghsa.SecurityAdvisory;
 import common.Constants;
 import exceptions.ApiCallException;
 import handlers.IGhsaSerializer;
+import handlers.ISbomGhsaResponseProcessor;
 import org.apache.http.client.ResponseHandler;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -56,7 +57,6 @@ public class GhsaApiService implements IGhsaApiService {
     public SecurityAdvisory handleGetEntity(String id) throws ApiCallException {
         return handleResponse(buildGhsaRequest(id).executeRequest());
     }
-
 
     @Override
     public List<String> handleGetCweIds(String ghsaId) throws ApiCallException {
@@ -94,11 +94,11 @@ public class GhsaApiService implements IGhsaApiService {
 
     // TODO replace the following with a dedicated GraphQL library
     private String formatQueryBody(String ghsaId) {
-        JSONObject jsonBody = new JSONObject();
         try {
-            jsonBody.put("query", GraphQlQueries.GHSA_SECURITY_ADVISORY_QUERY);
-            String query = jsonBody.toString();
-            return String.format(query, ghsaId);
+            return String.format(
+                    new JSONObject().put("query", GraphQlQueries.GHSA_SECURITY_ADVISORY_QUERY).toString(),
+                    ghsaId);
+
         } catch (JSONException e) {
             LOGGER.error("Improper JSON formatting. Check query format. ", e);
             throw new RuntimeException(e);
