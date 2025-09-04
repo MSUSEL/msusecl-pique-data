@@ -24,10 +24,7 @@
 package presentation;
 
 import com.google.gson.Gson;
-import handlers.IJsonSerializer;
-import handlers.JsonResponseHandler;
-import handlers.JsonSerializer;
-import handlers.SecurityAdvisoryMarshaller;
+import handlers.*;
 import persistence.IDataSource;
 import persistence.postgreSQL.Migration;
 import persistence.postgreSQL.PostgresConnectionManager;
@@ -42,6 +39,7 @@ public class PiqueDataFactory {
     private final IJsonSerializer jsonSerializer = new JsonSerializer(new Gson());
     private final GhsaApiService ghsaApiService = new GhsaApiService(new GhsaResponseProcessor(), new SecurityAdvisoryMarshaller(), jsonResponseHandler);
     private final CveResponseProcessor cveResponseProcessor = new CveResponseProcessor();
+    private final WebPiqueGhsaApiService webPiqueGhsaApiService = new WebPiqueGhsaApiService(new WebPiqueSecurityAdvisoryMarshaller(), jsonResponseHandler);
     private final IDataSource<Connection> pgDataSource;
 
     public PiqueDataFactory() {
@@ -56,6 +54,7 @@ public class PiqueDataFactory {
         return new PiqueData(
                 new NvdApiService(jsonResponseHandler, jsonSerializer),
                 ghsaApiService,
+                webPiqueGhsaApiService,
                 instantiatePgMirrorService(),
                 cveResponseProcessor);
     }

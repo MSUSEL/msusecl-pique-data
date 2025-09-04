@@ -146,6 +146,18 @@ public class PiqueDataTests {
 
     @Tag("api")
     @Test
+    public void testGetCveFromGhsa() throws ApiCallException {
+
+        //TODO: Figure out how find a GHSA that will never have a CVE alias
+
+        assertEquals(TestConstants.CVE_ID_A,
+                piqueData.getWebPiqueGHSA(TestConstants.GHSA_ID_A).getCve().orElse(null));
+        assertEquals(TestConstants.CVE_ID_B,
+                piqueData.getWebPiqueGHSA(TestConstants.GHSA_ID_B).getCve().orElse(null));
+    }
+
+    @Tag("api")
+    @Test
     public void testGetCweIdsFromGhsa() throws ApiCallException {
         assertEquals(
                 TestConstants.GHSA_CWE_A_ORACLE,
