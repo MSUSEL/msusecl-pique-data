@@ -8,7 +8,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class WebPiqueGHSAResponse extends BaseResponse {
+public final class WebPiqueGHSAResponse extends BaseResponse {
 
     private WebPiqueSecurityAdvisory entity;
 

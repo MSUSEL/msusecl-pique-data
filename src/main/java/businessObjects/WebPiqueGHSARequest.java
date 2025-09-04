@@ -24,7 +24,7 @@ import java.nio.charset.StandardCharsets;
 
 import static common.Constants.*;
 
-public class WebPiqueGHSARequest extends BaseRequest implements IRequest{
+public final class WebPiqueGHSARequest extends BaseRequest implements IRequest{
     private static final Logger LOGGER = LoggerFactory.getLogger(WebPiqueGHSARequest.class);
     private final JsonResponseHandler handler;
     private final String query;

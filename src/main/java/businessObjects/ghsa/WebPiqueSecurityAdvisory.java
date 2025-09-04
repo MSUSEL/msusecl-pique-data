@@ -8,7 +8,7 @@ import java.util.Optional;
 
 @Getter
 @Setter
-public class WebPiqueSecurityAdvisory extends BaseEntity {
+public final class WebPiqueSecurityAdvisory extends BaseEntity {
     private String ghsaId;
     private String summary;
     private Cwes cwes;
