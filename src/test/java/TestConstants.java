@@ -28,7 +28,9 @@ public class TestConstants {
     public static final String BAD_FORMAT = "not-a-cve";
     public static final String CVE_B = "CVE-1999-1302";
     public static final String GHSA_ID_A = "GHSA-vh2m-22xx-q94f";
+    public static final String CVE_ID_A = "CVE-2024-32028";
     public static final String GHSA_ID_B = "GHSA-hx9v-6r9f-w677";
+    public static final String CVE_ID_B = "CVE-2024-41950";
 
 
     public static final String CVE_A_CWE_ORACLE = "NVD-CWE-Other";

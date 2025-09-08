@@ -26,6 +26,7 @@ package presentation;
 import businessObjects.cve.Cve;
 import businessObjects.cve.Metrics;
 import businessObjects.ghsa.SecurityAdvisory;
+import businessObjects.ghsa.WebPiqueSecurityAdvisory;
 import exceptions.ApiCallException;
 import exceptions.DataAccessException;
 import service.*;
@@ -48,15 +49,18 @@ import java.util.Optional;
 public class PiqueData {
     protected final NvdApiService nvdApiService;
     protected final GhsaApiService ghsaApiService;
+    protected final WebPiqueGhsaApiService webPiqueGhsaApiService;
     protected final INvdMirrorService mirrorService;
     protected final CveResponseProcessor cveResponseProcessor;
 
-    public PiqueData(NvdApiService nvdApiService, GhsaApiService ghsaApiService, INvdMirrorService mirrorService, CveResponseProcessor cveResponseProcessor) {
+    public PiqueData(NvdApiService nvdApiService, GhsaApiService ghsaApiService, WebPiqueGhsaApiService webPiqueGhsaApiService, INvdMirrorService mirrorService, CveResponseProcessor cveResponseProcessor) {
         this.nvdApiService = nvdApiService;
         this.ghsaApiService = ghsaApiService;
+        this.webPiqueGhsaApiService = webPiqueGhsaApiService;
         this.mirrorService = mirrorService;
         this.cveResponseProcessor = cveResponseProcessor;
     }
+
 
     /**
      * Gets a cve from the specified database. (switching on dbContext) This does NOT call the NVD
@@ -112,8 +116,29 @@ public class PiqueData {
     }
 
     /**
+     * Calls the GitHub Security Advisory Database. This is currently optimized for Web Pique
+     * @param ghsaId the official GHSA ID of interest as published by GitHub
+     * @return Returns a WebPiqueSecurityAdvisory object optimized for use in the SBOM wrapper
+     * @throws ApiCallException
+*/
+    public WebPiqueSecurityAdvisory getWebPiqueGHSA(String ghsaId) throws ApiCallException{
+        return webPiqueGhsaApiService.handleGetEntity(ghsaId);
+    }
+
+
+    /**
+     *  Calls the GitHub Security Advisory Database. This is currently optimized for Web Pique.
+     *  This will return an Optional that will contain the CVE alias for the queried GHSA if it exists.
+     * @param ghsaId the official GHSA ID of interest as published by GitHub
+     * @return Returns an Optional that will contain the CVE alias of the GHSA if it exists in the GHSA database
+     * @throws ApiCallException
+     */
+    public Optional<String> getCveFromGhsa(String ghsaId) throws ApiCallException{
+        return webPiqueGhsaApiService.handleGetEntity(ghsaId).getCve();
+    }
+
+    /**
      * Calls GitHub's Security Advisory database and returns a formatted List of CWE names as Strings.
-     *
      * @param ghsaId
      * @return
      * @throws ApiCallException
