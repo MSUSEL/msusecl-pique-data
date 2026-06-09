@@ -17,8 +17,7 @@ View the Changelog for information on breaking changes. __Please note there is n
 
 ### Installation
 This project requires java 11+ and only supports the maven build system.
-To install, add the following to your project's pom.xml file. Alternatively, you can clone the
-git repository and compile from source using java language level 11.
+To install, add the following to your project's pom.xml file. Alternatively, you can clone the git repository and compile from source using java language level 11.
 ```
 <dependency>
     <groupId>edu.montana.gsoc.msusel</groupId>
