@@ -79,6 +79,12 @@ public class GhsaApiService {
 
     public List<String> handleGetCweIdsFromGhsa(String ghsaId) throws ApiCallException {
         SecurityAdvisory advisory = handleGetEntity(ghsaId);
+        
+        if (advisory == null || advisory.getCwes() == null) {
+            LOGGER.warn("No CWE data available for GHSA ID: {}", ghsaId);
+            return new ArrayList<>();
+        }
+        
         return ghsaResponseProcessor.extractCweIds(advisory);
     }
 

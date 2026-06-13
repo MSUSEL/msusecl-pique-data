@@ -79,6 +79,17 @@ public class WebPiqueGhsaApiService {
     public List<String> handleGetCweIdsFromGhsa(String ghsaId) throws ApiCallException {
         WebPiqueSecurityAdvisory webPiqueSecurityAdvisory = handleGetEntity(ghsaId);
         List<String> cwes = new ArrayList<>();
+        
+        if (webPiqueSecurityAdvisory == null || webPiqueSecurityAdvisory.getCwes() == null) {
+            LOGGER.warn("No CWE data available for GHSA ID: {}", ghsaId);
+            return cwes;
+        }
+        
+        if (webPiqueSecurityAdvisory.getCwes().getNodes() == null) {
+            LOGGER.warn("CWE nodes are null for GHSA ID: {}", ghsaId);
+            return cwes;
+        }
+        
         for (Nodes node : webPiqueSecurityAdvisory.getCwes().getNodes()){
             cwes.add(node.getCweId());
         }

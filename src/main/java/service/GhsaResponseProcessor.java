@@ -33,24 +33,42 @@ import java.util.List;
 public final class GhsaResponseProcessor {
     // Methods to handle raw GHSA Response object
     public List<Nodes> extractCweNodes(GHSAResponse ghsaResponse) {
+        if (ghsaResponse == null || ghsaResponse.getEntity() == null || 
+            ghsaResponse.getEntity().getCwes() == null || 
+            ghsaResponse.getEntity().getCwes().getNodes() == null) {
+            return new ArrayList<>();
+        }
         return ghsaResponse.getEntity().getCwes().getNodes();
     }
 
     public String extractGhsaId(GHSAResponse ghsaResponse) {
+        if (ghsaResponse == null || ghsaResponse.getEntity() == null) {
+            return null;
+        }
         return ghsaResponse.getEntity().getGhsaId();
     }
 
     public String extractSummary(GHSAResponse ghsaResponse) {
+        if (ghsaResponse == null || ghsaResponse.getEntity() == null) {
+            return null;
+        }
         return ghsaResponse.getEntity().getSummary();
     }
 
     // methods to extract fields from Security Advisories
     public List<String> extractCweIds(SecurityAdvisory advisory) {
-        List<Nodes> nodes = advisory.getCwes().getNodes();
-        List<String> ids = new ArrayList<>();
-        for (Nodes node : nodes) {
-            ids.add(node.getCweId());
+        List<String> cweIds = new ArrayList<>();
+        
+        if (advisory == null || advisory.getCwes() == null || advisory.getCwes().getNodes() == null) {
+            return cweIds;
         }
-        return ids;
+        
+        List<Nodes> nodes = advisory.getCwes().getNodes();
+        for (Nodes node : nodes) {
+            if (node != null && node.getCweId() != null) {
+                cweIds.add(node.getCweId());
+            }
+        }
+        return cweIds;
     }
 }
