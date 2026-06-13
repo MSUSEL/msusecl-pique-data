@@ -69,7 +69,7 @@ Default values for a containerized nvd mirror follow as an example. These can be
 ```bash
 PG_DRIVER=jdbc:postgresql
 PG_HOSTNAME=localhost
-PG_PORT=5433
+PG_PORT=5432
 PG_DBNAME=nvd_mirror
 PG_USERNAME=postgres
 PG_PASS=postgres

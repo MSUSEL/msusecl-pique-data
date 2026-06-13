@@ -25,13 +25,12 @@ class GhsaApiServiceTest {
     private JsonResponseHandler handler;
     
     private GhsaApiService ghsaApiService;
-    private static final String TEST_PAT = "test_github_pat_token";
     private static final String TEST_GHSA_ID = "GHSA-test-1234";
     
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        ghsaApiService = new GhsaApiService(processor, marshaller, handler, TEST_PAT);
+        ghsaApiService = new GhsaApiService(processor, marshaller, handler);
     }
     
     @Test
